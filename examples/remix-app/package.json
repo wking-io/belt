@@ -1,0 +1,19 @@
+{
+  "name": "remix-app-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@repo/adapter-remix": "workspace:*",
+    "@repo/core": "workspace:*",
+    "@repo/renderer-remix": "workspace:*",
+    "@repo/tool-worktrees": "workspace:*",
+    "@repo/tool-worktrees-extension-portless": "workspace:*",
+    "@repo/tool-worktrees-renderer-remix": "workspace:*"
+  },
+  "engines": {
+    "node": ">=24.3.0"
+  }
+}
