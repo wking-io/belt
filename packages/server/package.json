@@ -14,7 +14,8 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/core": "workspace:*"
+    "@repo/core": "workspace:*",
+    "effect": "4.0.0-beta.66"
   },
   "engines": {
     "node": ">=20"

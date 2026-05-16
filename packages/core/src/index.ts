@@ -1,5 +1,7 @@
 export type ToolRouteHandler = (request: Request) => Promise<Response> | Response;
 
+export * from "./effect.js";
+
 export type ToolbarTool = {
   id: string;
   label: string;
