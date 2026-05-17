@@ -1,36 +1,56 @@
 import type { WorktreeUrlResolver } from "@repo/tool-worktrees";
+import { Schema } from "effect";
 
-export type PortlessResolverOptions = {
-  appName: string;
-  tld?: string;
-  mainBranches?: string[];
-};
+const NonEmptyStringSchema = Schema.String.check(Schema.isMinLength(1));
+
+export const PortlessDestinationOptionsSchema = Schema.Struct({
+  id: Schema.optionalKey(NonEmptyStringSchema),
+  label: Schema.optionalKey(NonEmptyStringSchema),
+  appName: NonEmptyStringSchema,
+  tld: Schema.optionalKey(NonEmptyStringSchema),
+  primary: Schema.optionalKey(Schema.Boolean)
+});
+
+export type PortlessDestinationOptions = Schema.Schema.Type<typeof PortlessDestinationOptionsSchema>;
+
+export const PortlessResolverOptionsSchema = Schema.Struct({
+  tld: Schema.optionalKey(NonEmptyStringSchema),
+  mainBranches: Schema.optionalKey(Schema.Array(NonEmptyStringSchema)),
+  destinations: Schema.NonEmptyArray(PortlessDestinationOptionsSchema)
+});
+
+export type PortlessResolverOptions = Schema.Schema.Type<typeof PortlessResolverOptionsSchema>;
 
 export function portlessResolver(options: PortlessResolverOptions): WorktreeUrlResolver {
-  const tld = options.tld ?? "localhost";
-  const mainBranches = new Set(options.mainBranches ?? ["main", "master"]);
+  const config = Schema.decodeUnknownSync(PortlessResolverOptionsSchema)(options);
+  const mainBranches = new Set((config.mainBranches ?? ["main", "master"]).map(normalizeBranch));
 
   return {
     resolve(worktree) {
       const branch = normalizeBranch(worktree.branch);
-      const hostname = mainBranches.has(branch)
-        ? `${options.appName}.${tld}`
-        : `${slugify(branch)}.${options.appName}.${tld}`;
+      const branchSlug = slugify(branch);
+      const isMainBranch = mainBranches.has(branch);
 
-      return [
-        {
-          id: options.appName,
-          label: options.appName,
-          primary: true,
+      return config.destinations.map((destination, index) => {
+        const tld = destination.tld ?? config.tld ?? "localhost";
+        const hostname =
+          isMainBranch || branchSlug.length === 0
+            ? `${destination.appName}.${tld}`
+            : `${branchSlug}.${destination.appName}.${tld}`;
+
+        return {
+          id: destination.id ?? destination.appName,
+          label: destination.label ?? destination.appName,
+          primary: destination.primary ?? index === 0,
           url: `https://${hostname}`
-        }
-      ];
+        };
+      });
     }
   };
 }
 
 function normalizeBranch(branch: string): string {
-  return branch.replace(/^refs\/heads\//, "");
+  return branch.replace(/^refs\/heads\//, "").toLowerCase();
 }
 
 function slugify(value: string): string {
