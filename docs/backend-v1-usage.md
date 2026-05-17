@@ -1,0 +1,194 @@
+# Backend v1 Usage
+
+Backend v1 covers the server-side Toolbar API, explicit Tool Registration, framework mounting, and the Worktree Switcher backend. It does not include frontend renderers or process management.
+
+## Toolbar Config
+
+Create a `toolbar.config.ts` module at the host app root:
+
+```ts
+import { defineToolbar } from "@repo/core";
+import { worktreesTool } from "@repo/tool-worktrees";
+import { portlessResolver } from "@repo/tool-worktrees-extension-portless";
+
+export default defineToolbar({
+  tools: [
+    worktreesTool({
+      resolver: portlessResolver({
+        destinations: [
+          {
+            id: "web",
+            label: "Web",
+            appName: "myapp"
+          }
+        ]
+      })
+    })
+  ]
+});
+```
+
+Tool Registration is explicit. Installing a Tool package does not make it available; the app must add it to `tools`.
+
+The config package can discover conventional module config files:
+
+```txt
+toolbar.config.ts
+toolbar.config.mts
+toolbar.config.js
+toolbar.config.mjs
+```
+
+## Toolbar API
+
+All backend adapters expose the Toolbar API under `/__toolbar`:
+
+```txt
+GET /__toolbar
+GET /__toolbar/tools
+GET /__toolbar/tools/:toolId
+GET /__toolbar/tools/:toolId/*
+```
+
+Successful responses use:
+
+```json
+{
+  "ok": true,
+  "data": {}
+}
+```
+
+Error responses use:
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": "UNKNOWN_TOOL",
+    "message": "Unknown tool"
+  }
+}
+```
+
+`@repo/core` owns the protocol schemas, route constants, path builders, and the shared Effect HTTP `ToolbarApi` definition. `@repo/server` implements that protocol as a JavaScript Fetch server using Effect HTTP.
+
+## Direct Fetch Server
+
+Use `@repo/server` directly when the host already works with standard `Request` and `Response` objects:
+
+```ts
+import { createToolbarServer } from "@repo/server";
+import toolbarConfig from "./toolbar.config";
+
+const toolbarServer = createToolbarServer(toolbarConfig);
+
+const response = await toolbarServer.fetch(
+  new Request("http://local.test/__toolbar")
+);
+
+await toolbarServer.dispose();
+```
+
+## Remix Mounting
+
+Remix apps mount the Toolbar API explicitly from app routes.
+
+Create a shared route handler:
+
+```ts
+// app/toolbar.server.ts
+import { createToolbarRouteHandler } from "@repo/adapter-remix";
+import toolbarConfig from "../toolbar.config";
+
+export const toolbarRouteHandler = createToolbarRouteHandler(toolbarConfig);
+```
+
+Mount it from a route that owns `/__toolbar/*`:
+
+```ts
+// app/routes/__toolbar.$.ts
+import { toolbarRouteHandler } from "~/toolbar.server";
+
+export const loader = toolbarRouteHandler;
+export const action = toolbarRouteHandler;
+```
+
+The same handler can serve loader and action requests because the Toolbar Server receives the original Fetch `Request` and handles the method.
+
+## Vite Mounting
+
+Vite apps install the middleware adapter:
+
+```ts
+// vite.config.ts
+import { toolbarVite } from "@repo/adapter-vite";
+import { defineConfig } from "vite";
+import toolbarConfig from "./toolbar.config";
+
+export default defineConfig({
+  plugins: [
+    toolbarVite(toolbarConfig)
+  ]
+});
+```
+
+The adapter mounts `/__toolbar` by default, translates Node middleware requests into Fetch requests, and sends Fetch responses back through Vite middleware responses.
+
+## Worktree Switcher Backend
+
+`@repo/tool-worktrees` registers the `worktrees` Tool. Its backend route is:
+
+```txt
+GET /__toolbar/tools/worktrees
+```
+
+The Tool discovers linked Git worktrees, marks the current worktree, and asks a URL Resolver Extension for navigable destinations.
+
+The v1 Worktree Switcher does not start, stop, install dependencies for, or supervise development servers. It only reports worktrees and destinations for servers that already exist.
+
+## Portless Extension
+
+`@repo/tool-worktrees-extension-portless` is a Worktree Switcher URL Resolver Extension. It converts each discovered worktree into one or more Portless-style destinations:
+
+```ts
+portlessResolver({
+  destinations: [
+    {
+      id: "web",
+      label: "Web",
+      appName: "myapp",
+      primary: true
+    },
+    {
+      id: "docs",
+      label: "Docs",
+      appName: "docs.myapp"
+    }
+  ]
+});
+```
+
+For a branch named `fix-ui`, those destinations resolve to URLs like:
+
+```txt
+https://fix-ui.myapp.localhost
+https://fix-ui.docs.myapp.localhost
+```
+
+Main branches default to unprefixed hostnames:
+
+```txt
+https://myapp.localhost
+```
+
+## Non-Goals
+
+Backend v1 intentionally does not include:
+
+- frontend Toolbar Wrapper rendering
+- frontend Tool renderers
+- React or Remix component APIs for the UI surface
+- process management
+- automatic Tool discovery from installed packages
+- starting inactive worktree dev servers
