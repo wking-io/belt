@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { ToolbarTool } from "@repo/core";
+import { Effect } from "effect";
 
 const execFileAsync = promisify(execFile);
 
@@ -39,7 +40,10 @@ export function worktreesTool(options: WorktreesToolOptions): ToolbarTool {
     id: "worktrees",
     label: "Worktrees",
     routes: {
-      index: async () => Response.json({ worktrees: await listWorktrees(options) })
+      index: () =>
+        Effect.tryPromise(async () => ({
+          worktrees: await listWorktrees(options)
+        }))
     }
   };
 }

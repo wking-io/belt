@@ -1,4 +1,4 @@
-import { expect, it } from "@effect/vitest";
+import { assert, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { BackendPattern, BackendPatternInputSchema } from "../src/index.ts";
 
@@ -10,9 +10,9 @@ it.effect("runs the baseline Effect service/layer/schema pattern", () =>
       });
       const service = yield* BackendPattern;
 
-      expect(yield* service.greet(input)).toBe("hello Belt");
+      assert.strictEqual(yield* service.greet(input), "hello Belt");
     }),
-    BackendPattern.Live
+    BackendPattern.layer
   ));
 
 it.effect("uses tagged errors for recoverable backend failures", () =>
@@ -25,7 +25,7 @@ it.effect("uses tagged errors for recoverable backend failures", () =>
         (error) => Effect.succeed(error.message)
       );
 
-      expect(message).toBe("name is required");
+      assert.strictEqual(message, "name is required");
     }),
-    BackendPattern.Live
+    BackendPattern.layer
   ));

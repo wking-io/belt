@@ -15,10 +15,13 @@ export type BackendPatternService = {
 };
 
 export class BackendPattern extends Context.Service<BackendPattern, BackendPatternService>()("belt/BackendPattern") {
-  static readonly Live = Layer.succeed(BackendPattern)({
-    greet: (input) =>
-      input.name.trim().length === 0
-        ? Effect.fail(new BackendPatternError({ message: "name is required" }))
-        : Effect.succeed(`hello ${input.name}`)
+  static readonly layer = Layer.succeed(BackendPattern)({
+    greet: Effect.fn("BackendPattern.greet")(function*(input) {
+      if (input.name.trim().length === 0) {
+        return yield* new BackendPatternError({ message: "name is required" });
+      }
+
+      return `hello ${input.name}`;
+    })
   });
 }
