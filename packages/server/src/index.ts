@@ -5,7 +5,6 @@ import {
   toolbarApiRelativeRoutes,
   toolbarApiRoutes,
   toolbarApiToolRelativePath,
-  toToolbarToolMetadata,
   ToolbarErrorEnvelopeSchema,
   ToolbarRootDataSchema,
   ToolbarSuccessEnvelopeSchema,
@@ -14,17 +13,15 @@ import {
   ToolbarToolsDataSchema,
   type ToolbarError,
   type ToolbarResponseEnvelope,
-  type ToolDefinition,
   type ToolbarToolData,
-  type ToolbarToolsData,
-  type ToolbarRootData,
   type ToolbarSuccessEnvelope,
   type ToolbarConfig as ToolbarConfigData
 } from "@repo/core";
 import { ToolbarConfig } from "@repo/config";
-import { Context, Effect, Layer, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { HttpRouter, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApi, HttpApiBuilder, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
+import { ToolbarProtocolError, ToolbarToolDispatch } from "./tool-dispatch.js";
 
 export type ToolbarServer = {
   readonly fetch: (request: Request) => Promise<Response>;
@@ -59,90 +56,13 @@ export class ToolbarApi extends HttpApi.make("toolbar-api")
   }))
 {}
 
-export class ToolbarRuntime extends Context.Service<ToolbarRuntime, {
-  readonly root: Effect.Effect<ToolbarSuccessEnvelope<ToolbarRootData>>;
-  readonly tools: Effect.Effect<ToolbarSuccessEnvelope<ToolbarToolsData>>;
-  readonly tool: (toolId: string) => Effect.Effect<ToolbarSuccessEnvelope<ToolbarToolData>, ToolbarProtocolError>;
-  readonly route: (toolId: string, routePath: string, request: Request) => Effect.Effect<unknown, ToolbarProtocolError>;
-}>()("@repo/server/ToolbarRuntime") {
-  static readonly layer = Layer.effect(
-    ToolbarRuntime,
-    Effect.gen(function*() {
-      const config = yield* ToolbarConfig;
-
-      return ToolbarRuntime.of({
-        root: Effect.succeed(
-          toolbarSuccess({
-            apiVersion: 1,
-            tools: config.tools.map(toToolbarToolMetadata)
-          })
-        ),
-        tools: Effect.succeed(
-          toolbarSuccess({
-            tools: config.tools.map(toToolbarToolMetadata)
-          })
-        ),
-        tool: Effect.fn("ToolbarRuntime.tool")(function*(toolId) {
-          const tool = findTool(config, toolId);
-
-          if (!tool) {
-            return yield* new ToolbarProtocolError({
-              error: { code: "UNKNOWN_TOOL", message: "Unknown tool" },
-              status: 404
-            });
-          }
-
-          return toolbarSuccess({
-            tool: toToolbarToolMetadata(tool)
-          });
-        }),
-        route: Effect.fn("ToolbarRuntime.route")(function*(toolId, routePath, request) {
-          const tool = findTool(config, toolId);
-
-          if (!tool) {
-            return yield* new ToolbarProtocolError({
-              error: { code: "UNKNOWN_TOOL", message: "Unknown tool" },
-              status: 404
-            });
-          }
-
-          const route = tool.routes?.[routePath];
-
-          if (!route) {
-            return yield* new ToolbarProtocolError({
-              error: { code: "UNKNOWN_TOOL_ROUTE", message: "Unknown tool route" },
-              status: 404
-            });
-          }
-
-          return yield* route(request).pipe(
-            Effect.catch(() =>
-              Effect.fail(new ToolbarProtocolError({
-                error: { code: "TOOL_ERROR", message: "Tool route failed" },
-                status: 500
-              })))
-          );
-        })
-      });
-    })
-  );
-}
-
-class ToolbarProtocolError extends Schema.TaggedErrorClass<ToolbarProtocolError>()(
-  "ToolbarProtocolError",
-  {
-    error: ToolbarErrorEnvelopeSchema.fields.error,
-    status: Schema.Number
-  }
-) {}
-
 export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   const app = Layer.mergeAll(
     ToolbarApiRoutes,
     ToolDispatchRoutes,
     NotFoundRoutes
   ).pipe(
-    Layer.provide(ToolbarRuntime.layer),
+    Layer.provide(ToolbarToolDispatch.layer),
     Layer.provide(ToolbarConfig.layer(config))
   );
 
@@ -162,7 +82,7 @@ export function createToolbarRouter(config: ToolbarConfigData) {
     ToolDispatchRoutes,
     NotFoundRoutes
   ).pipe(
-    Layer.provide(ToolbarRuntime.layer),
+    Layer.provide(ToolbarToolDispatch.layer),
     Layer.provide(ToolbarConfig.layer(config))
   );
 }
@@ -171,11 +91,20 @@ const ToolbarApiHandlers = HttpApiBuilder.group(
   ToolbarApi,
   "toolbar",
   Effect.fn(function*(handlers) {
-    const toolbar = yield* ToolbarRuntime;
+    const toolDispatch = yield* ToolbarToolDispatch;
 
     return handlers
-      .handle("root", () => toolbar.root)
-      .handle("tools", () => toolbar.tools);
+      .handle("root", () =>
+        Effect.map(toolDispatch.metadata, (tools) =>
+          toolbarSuccess({
+            apiVersion: 1,
+            tools
+          })))
+      .handle("tools", () =>
+        Effect.map(toolDispatch.metadata, (tools) =>
+          toolbarSuccess({
+            tools
+          })));
   })
 );
 
@@ -184,7 +113,7 @@ const ToolbarApiRoutes = HttpApiBuilder.layer(ToolbarApi).pipe(
 );
 
 const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(function*(router_) {
-  const toolbar = yield* ToolbarRuntime;
+  const toolDispatch = yield* ToolbarToolDispatch;
   const router = router_.prefixed(toolbarApiBasePath);
 
   yield* router.add("GET", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
@@ -192,11 +121,11 @@ const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(functi
     const routePath = getToolRoutePath(request.url, toolId);
 
     if (routePath === undefined) {
-      return yield* respond(toolbar.tool(toolId));
+      return yield* respond(Effect.map(toolDispatch.tool(toolId), (tool) => toolbarSuccess({ tool })));
     }
 
     const webRequest = yield* HttpServerRequest.toWeb(request);
-    return yield* respond(Effect.map(toolbar.route(toolId, routePath, webRequest), toolbarSuccess));
+    return yield* respond(Effect.map(toolDispatch.route(toolId, routePath, webRequest), toolbarSuccess));
   }));
 }));
 
@@ -224,10 +153,6 @@ const respond = Effect.fn("ToolbarServer.respond")(function*<Data>(
     onSuccess: (body) => jsonResponse(body)
   });
 });
-
-function findTool(config: ToolbarConfigData, toolId: string): ToolDefinition | undefined {
-  return config.tools.find((candidate) => candidate.id === toolId);
-}
 
 function getToolRoutePath(url: string, toolId: string): string | undefined {
   const pathname = new URL(url, "http://toolbar.local").pathname;
