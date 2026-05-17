@@ -8,6 +8,7 @@ import { Effect, Layer } from "effect";
 import {
   InvalidToolbarConfigExportError,
   MissingToolbarConfigError,
+  ToolbarConfig,
   ToolbarConfigModuleLoadError,
   ToolbarConfigService,
   toolbarConfigFilenames,
@@ -121,6 +122,17 @@ it.effect("can be supplied through a custom ToolbarConfigService layer", () => {
     assert.deepStrictEqual(config.tools, []);
   }).pipe(Effect.provide(TestService));
 });
+
+it.effect("provides a loaded toolbar config as a service layer", () =>
+  Effect.gen(function*() {
+    const config = yield* ToolbarConfig;
+
+    assert.deepStrictEqual(config.tools, [{ id: "worktrees", label: "Worktrees" }]);
+  }).pipe(
+    Effect.provide(ToolbarConfig.layer(defineToolbar({
+      tools: [{ id: "worktrees", label: "Worktrees" }]
+    })))
+  ));
 
 function withTempDir<A, E, R>(run: (cwd: string) => Effect.Effect<A, E, R>): Effect.Effect<A, E, R> {
   return Effect.acquireUseRelease(
