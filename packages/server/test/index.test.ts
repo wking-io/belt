@@ -1,5 +1,11 @@
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar, type ToolbarErrorCode } from "@repo/core";
+import {
+  defineToolbar,
+  toolbarApiRoutes,
+  toolbarApiToolPath,
+  toolbarApiToolRoutePath,
+  type ToolbarErrorCode
+} from "@repo/core";
 import { Effect } from "effect";
 import { createToolbarServer } from "../src/index.ts";
 
@@ -7,7 +13,7 @@ describe("Effect HTTP Toolbar Server", () => {
   it.effect("serves root metadata through the protocol envelope", () =>
     Effect.gen(function*() {
       const server = createToolbarServer(testConfig);
-      const response = yield* Effect.promise(() => server.fetch(request("/__toolbar")));
+      const response = yield* Effect.promise(() => server.fetch(request(toolbarApiRoutes.root)));
       const body = yield* json(response);
 
       assert.strictEqual(response.status, 200);
@@ -31,7 +37,7 @@ describe("Effect HTTP Toolbar Server", () => {
   it.effect("serves registered tool metadata", () =>
     Effect.gen(function*() {
       const server = createToolbarServer(testConfig);
-      const response = yield* Effect.promise(() => server.fetch(request("/__toolbar/tools/worktrees")));
+      const response = yield* Effect.promise(() => server.fetch(request(toolbarApiToolPath("worktrees"))));
       const body = yield* json(response);
 
       assert.strictEqual(response.status, 200);
@@ -52,8 +58,8 @@ describe("Effect HTTP Toolbar Server", () => {
   it.effect("dispatches tool-owned routes", () =>
     Effect.gen(function*() {
       const server = createToolbarServer(testConfig);
-      const indexResponse = yield* Effect.promise(() => server.fetch(request("/__toolbar/tools/worktrees/")));
-      const nestedResponse = yield* Effect.promise(() => server.fetch(request("/__toolbar/tools/worktrees/branches/list")));
+      const indexResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("worktrees", "/"))));
+      const nestedResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("worktrees", "branches/list"))));
 
       assert.deepStrictEqual(yield* json(indexResponse), {
         ok: true,
@@ -76,8 +82,8 @@ describe("Effect HTTP Toolbar Server", () => {
       const server = createToolbarServer(testConfig);
 
       yield* assertError(server, "/elsewhere", 404, "NOT_FOUND");
-      yield* assertError(server, "/__toolbar/tools/missing", 404, "UNKNOWN_TOOL");
-      yield* assertError(server, "/__toolbar/tools/worktrees/missing", 404, "UNKNOWN_TOOL_ROUTE");
+      yield* assertError(server, toolbarApiToolPath("missing"), 404, "UNKNOWN_TOOL");
+      yield* assertError(server, toolbarApiToolRoutePath("worktrees", "missing"), 404, "UNKNOWN_TOOL_ROUTE");
 
       yield* Effect.promise(() => server.dispose());
     }));
@@ -86,7 +92,7 @@ describe("Effect HTTP Toolbar Server", () => {
     Effect.gen(function*() {
       const server = createToolbarServer(failingConfig);
 
-      yield* assertError(server, "/__toolbar/tools/failing/", 500, "TOOL_ERROR");
+      yield* assertError(server, toolbarApiToolRoutePath("failing", "/"), 500, "TOOL_ERROR");
 
       yield* Effect.promise(() => server.dispose());
     }));

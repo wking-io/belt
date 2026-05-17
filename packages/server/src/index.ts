@@ -1,6 +1,10 @@
 import {
   toolbarError,
   toolbarSuccess,
+  toolbarApiBasePath,
+  toolbarApiRelativeRoutes,
+  toolbarApiRoutes,
+  toolbarApiToolRelativePath,
   toToolbarToolMetadata,
   ToolbarErrorEnvelopeSchema,
   ToolbarRootDataSchema,
@@ -36,10 +40,10 @@ const ToolbarToolIdParamsSchema = Schema.Struct({
 
 export class ToolbarApiGroup extends HttpApiGroup.make("toolbar", { topLevel: true })
   .add(
-    HttpApiEndpoint.get("root", "/__toolbar", {
+    HttpApiEndpoint.get("root", toolbarApiRoutes.root, {
       success: ToolbarRootResponseSchema
     }),
-    HttpApiEndpoint.get("tools", "/__toolbar/tools", {
+    HttpApiEndpoint.get("tools", toolbarApiRoutes.tools, {
       success: ToolbarToolsResponseSchema
     })
   )
@@ -181,9 +185,9 @@ const ToolbarApiRoutes = HttpApiBuilder.layer(ToolbarApi).pipe(
 
 const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(function*(router_) {
   const toolbar = yield* ToolbarRuntime;
-  const router = router_.prefixed("/__toolbar");
+  const router = router_.prefixed(toolbarApiBasePath);
 
-  yield* router.add("GET", "/tools/:toolId/*", Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
+  yield* router.add("GET", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
     const { toolId } = yield* HttpRouter.schemaPathParams(ToolbarToolIdParamsSchema);
     const routePath = getToolRoutePath(request.url, toolId);
 
@@ -227,7 +231,7 @@ function findTool(config: ToolbarConfigData, toolId: string): ToolDefinition | u
 
 function getToolRoutePath(url: string, toolId: string): string | undefined {
   const pathname = new URL(url, "http://toolbar.local").pathname;
-  const routePrefix = `/tools/${toolId}`;
+  const routePrefix = toolbarApiToolRelativePath(toolId);
   const remainder = pathname.slice(routePrefix.length);
 
   if (!remainder) {

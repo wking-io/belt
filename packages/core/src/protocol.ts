@@ -9,6 +9,29 @@ export const toolbarApiRoutes = {
   toolRoute: "/__toolbar/tools/:toolId/*routePath"
 } as const;
 
+export const toolbarApiRelativeRoutes = {
+  tool: "/tools/:toolId",
+  toolRoute: "/tools/:toolId/*"
+} as const;
+
+export function toolbarApiToolPath(toolId: string): string {
+  return `${toolbarApiBasePath}${toolbarApiToolRelativePath(toolId)}`;
+}
+
+export function toolbarApiToolRoutePath(toolId: string, routePath?: string): string {
+  const toolPath = toolbarApiToolPath(toolId);
+
+  if (!routePath) {
+    return toolPath;
+  }
+
+  return `${toolPath}/${routePath.replace(/^\/+/, "")}`;
+}
+
+export function toolbarApiToolRelativePath(toolId: string): string {
+  return `/tools/${encodeURIComponent(toolId)}`;
+}
+
 export const ToolbarToolIdSchema = Schema.String;
 export const ToolbarToolLabelSchema = Schema.String;
 export const ToolbarToolRoutePathSchema = Schema.String;

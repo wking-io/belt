@@ -1,5 +1,5 @@
 import { NodeServices } from "@effect/platform-node";
-import { defineTool, type ToolDefinition } from "@repo/core";
+import { defineTool, toolbarApiToolPath, type ToolDefinition } from "@repo/core";
 import { Context, Effect, Layer, Path, Schema } from "effect";
 import { ChildProcess } from "effect/unstable/process";
 import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner";
@@ -170,7 +170,7 @@ export function worktreesTool(options: WorktreesToolOptions): ToolDefinition {
 }
 
 export function createWorktreesClient(options?: { basePath?: string }) {
-  const basePath = options?.basePath ?? "/__toolbar/tools/worktrees";
+  const basePath = options?.basePath ?? toolbarApiToolPath("worktrees");
 
   return {
     async list(): Promise<{ worktrees: WorktreeEntry[] }> {
