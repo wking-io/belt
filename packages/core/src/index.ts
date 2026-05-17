@@ -2,6 +2,7 @@ import { Effect, Schema } from "effect";
 import type { SchemaError } from "effect/Schema";
 
 export * from "./effect.js";
+export * from "./http-api.js";
 export * from "./protocol.js";
 
 export class DuplicateToolbarToolIdError extends Schema.TaggedErrorClass<DuplicateToolbarToolIdError>()(
