@@ -10,7 +10,7 @@ import {
   ToolbarToolsDataSchema,
   type ToolbarError,
   type ToolbarResponseEnvelope,
-  type ToolbarTool,
+  type ToolDefinition,
   type ToolbarToolData,
   type ToolbarToolsData,
   type ToolbarRootData,
@@ -223,7 +223,7 @@ const respond = Effect.fn("ToolbarServer.respond")(function*<Data>(
   });
 });
 
-function findTool(config: ToolbarConfigData, toolId: string): ToolbarTool | undefined {
+function findTool(config: ToolbarConfigData, toolId: string): ToolDefinition | undefined {
   return config.tools.find((candidate) => candidate.id === toolId);
 }
 
