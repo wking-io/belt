@@ -46,7 +46,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tool-worktrees-renderer-remix
 
-  packages/adapter-fetch:
+  packages/adapter-remix:
     dependencies:
       '@repo/core':
         specifier: workspace:*
@@ -55,23 +55,14 @@ importers:
         specifier: workspace:*
         version: link:../server
 
-  packages/adapter-remix:
-    dependencies:
-      '@repo/adapter-fetch':
-        specifier: workspace:*
-        version: link:../adapter-fetch
-      '@repo/core':
-        specifier: workspace:*
-        version: link:../core
-
   packages/adapter-vite:
     dependencies:
-      '@repo/adapter-fetch':
-        specifier: workspace:*
-        version: link:../adapter-fetch
       '@repo/core':
         specifier: workspace:*
         version: link:../core
+      '@repo/server':
+        specifier: workspace:*
+        version: link:../server
     devDependencies:
       '@types/node':
         specifier: ^22.15.18

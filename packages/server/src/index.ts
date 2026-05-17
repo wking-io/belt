@@ -135,7 +135,8 @@ class ToolbarProtocolError extends Schema.TaggedErrorClass<ToolbarProtocolError>
 export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   const app = Layer.mergeAll(
     ToolbarApiRoutes,
-    ToolDispatchRoutes
+    ToolDispatchRoutes,
+    NotFoundRoutes
   ).pipe(
     Layer.provide(ToolbarRuntime.layer),
     Layer.provide(ToolbarConfig.layer(config))
@@ -146,15 +147,7 @@ export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   ));
 
   return {
-    fetch: async (request) => {
-      const response = await handler(request, Context.empty() as Context.Context<unknown>);
-
-      if (response.status === 404 && !isJsonResponse(response)) {
-        return HttpServerResponse.toWeb(await Effect.runPromise(notFoundResponse()));
-      }
-
-      return response;
-    },
+    fetch: handler,
     dispose
   };
 }
@@ -162,7 +155,8 @@ export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
 export function createToolbarRouter(config: ToolbarConfigData) {
   return Layer.mergeAll(
     ToolbarApiRoutes,
-    ToolDispatchRoutes
+    ToolDispatchRoutes,
+    NotFoundRoutes
   ).pipe(
     Layer.provide(ToolbarRuntime.layer),
     Layer.provide(ToolbarConfig.layer(config))
@@ -202,6 +196,10 @@ const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(functi
   }));
 }));
 
+const NotFoundRoutes = HttpRouter.use(Effect.fn("NotFoundRoutes")(function*(router) {
+  yield* router.add("*", "*", notFoundResponse);
+}));
+
 const notFoundResponse = Effect.fn("ToolbarServer.notFoundResponse")(function*() {
   return yield* errorResponse({ code: "NOT_FOUND", message: "Not found" }, 404);
 });
@@ -239,8 +237,4 @@ function getToolRoutePath(url: string, toolId: string): string | undefined {
   const routePath = remainder.replace(/^\/+/, "");
 
   return routePath || "index";
-}
-
-function isJsonResponse(response: Response): boolean {
-  return response.headers.get("content-type")?.includes("application/json") ?? false;
 }

@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import { createToolbarFetchHandler, type ToolbarFetchHandler } from "@repo/adapter-fetch";
 import type { ToolbarConfig } from "@repo/core";
+import { createToolbarServer, type ToolbarServer } from "@repo/server";
 import type { Connect, Plugin } from "vite";
 
 const defaultMountPath = "/__toolbar";
@@ -11,7 +11,7 @@ export type ToolbarViteOptions = {
 };
 
 export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions = {}): Plugin {
-  const fetch = createToolbarFetchHandler(config);
+  const server = createToolbarServer(config);
   const mountPath = normalizeMountPath(options.mountPath ?? defaultMountPath);
 
   return {
@@ -19,16 +19,16 @@ export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions =
     apply: "serve",
     configureServer(viteServer) {
       viteServer.httpServer?.once("close", () => {
-        void fetch.dispose();
+        void server.dispose();
       });
 
-      viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(fetch, { mountPath }));
+      viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(server, { mountPath }));
     }
   };
 }
 
 export function createToolbarViteMiddleware(
-  fetch: ToolbarFetchHandler,
+  server: ToolbarServer,
   options: Required<ToolbarViteOptions>
 ): Connect.NextHandleFunction {
   const mountPath = normalizeMountPath(options.mountPath);
@@ -36,7 +36,7 @@ export function createToolbarViteMiddleware(
   return async (req, res, next) => {
     try {
       const request = await toFetchRequest(req, { mountPath });
-      const response = await fetch(request);
+      const response = await server.fetch(request);
 
       await writeFetchResponse(res, response);
     } catch (error) {
