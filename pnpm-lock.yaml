@@ -46,20 +46,23 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tool-worktrees-renderer-remix
 
-  packages/adapter-remix:
+  packages/adapter-fetch:
     dependencies:
-      '@effect/platform-node':
-        specifier: 4.0.0-beta.66
-        version: 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
       '@repo/core':
         specifier: workspace:*
         version: link:../core
       '@repo/server':
         specifier: workspace:*
         version: link:../server
-      effect:
-        specifier: 4.0.0-beta.66
-        version: 4.0.0-beta.66
+
+  packages/adapter-remix:
+    dependencies:
+      '@repo/adapter-fetch':
+        specifier: workspace:*
+        version: link:../adapter-fetch
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/adapter-vite:
     dependencies:

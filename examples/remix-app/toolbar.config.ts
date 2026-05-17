@@ -6,7 +6,13 @@ export default defineToolbar({
   tools: [
     worktreesTool({
       resolver: portlessResolver({
-        appName: "toolbar-example"
+        destinations: [
+          {
+            id: "web",
+            label: "Web",
+            appName: "toolbar-example"
+          }
+        ]
       })
     })
   ]
