@@ -1,7 +1,5 @@
-import { access } from "node:fs/promises";
-import path from "node:path";
-import { pathToFileURL } from "node:url";
 import type { ToolbarConfig } from "@repo/core";
+import { Context, Effect, FileSystem, Layer, Path, Schema } from "effect";
 
 export const toolbarConfigFilenames = [
   "toolbar.config.ts",
@@ -21,35 +19,118 @@ export type LoadToolbarConfigOptions = FindToolbarConfigOptions & {
   path?: string;
 };
 
-export async function findToolbarConfig(options: FindToolbarConfigOptions = {}): Promise<string | undefined> {
-  const cwd = options.cwd ?? process.cwd();
-  const filenames = options.filenames ?? toolbarConfigFilenames;
-
-  for (const filename of filenames) {
-    const candidate = path.resolve(cwd, filename);
-
-    if (await exists(candidate)) {
-      return candidate;
-    }
+export class MissingToolbarConfigError extends Schema.TaggedErrorClass<MissingToolbarConfigError>()(
+  "MissingToolbarConfigError",
+  {
+    cwd: Schema.String,
+    filenames: Schema.Array(Schema.String)
   }
+) {}
 
-  return undefined;
-}
-
-export async function loadToolbarConfig(options: LoadToolbarConfigOptions = {}): Promise<ToolbarConfig> {
-  const configPath = options.path ? path.resolve(options.path) : await findToolbarConfig(options);
-
-  if (!configPath) {
-    throw new Error(`Could not find toolbar config. Looked for: ${toolbarConfigFilenames.join(", ")}`);
+export class UnsupportedToolbarConfigFormatError extends Schema.TaggedErrorClass<UnsupportedToolbarConfigFormatError>()(
+  "UnsupportedToolbarConfigFormatError",
+  {
+    path: Schema.String,
+    filenames: Schema.Array(Schema.String)
   }
+) {}
 
-  const loaded = await import(pathToFileURL(configPath).href) as { default?: unknown };
-
-  if (!isToolbarConfig(loaded.default)) {
-    throw new Error(`Toolbar config must default-export a toolbar config object: ${configPath}`);
+export class ToolbarConfigModuleLoadError extends Schema.TaggedErrorClass<ToolbarConfigModuleLoadError>()(
+  "ToolbarConfigModuleLoadError",
+  {
+    path: Schema.String,
+    cause: Schema.Unknown
   }
+) {}
 
-  return loaded.default;
+export class InvalidToolbarConfigExportError extends Schema.TaggedErrorClass<InvalidToolbarConfigExportError>()(
+  "InvalidToolbarConfigExportError",
+  {
+    path: Schema.String
+  }
+) {}
+
+export type ToolbarConfigError =
+  | MissingToolbarConfigError
+  | UnsupportedToolbarConfigFormatError
+  | ToolbarConfigModuleLoadError
+  | InvalidToolbarConfigExportError;
+
+export type ToolbarConfigServiceShape = {
+  readonly find: (options?: FindToolbarConfigOptions) => Effect.Effect<string | undefined, never>;
+  readonly load: (options?: LoadToolbarConfigOptions) => Effect.Effect<ToolbarConfig, ToolbarConfigError>;
+};
+
+export class ToolbarConfigService extends Context.Service<ToolbarConfigService, ToolbarConfigServiceShape>()(
+  "belt/ToolbarConfigService"
+) {
+  static readonly layer = Layer.effect(
+    ToolbarConfigService,
+    Effect.gen(function*() {
+      const fs = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
+
+      const find = Effect.fn("ToolbarConfigService.find")(function*(options: FindToolbarConfigOptions = {}) {
+        const cwd = options.cwd ?? process.cwd();
+        const filenames = options.filenames ?? toolbarConfigFilenames;
+
+        for (const filename of filenames) {
+          const candidate = path.resolve(cwd, filename);
+          const found = yield* fs.exists(candidate).pipe(Effect.catch(() => Effect.succeed(false)));
+
+          if (found) {
+            return candidate;
+          }
+        }
+
+        return undefined;
+      });
+
+      const load = Effect.fn("ToolbarConfigService.load")(function*(options: LoadToolbarConfigOptions = {}) {
+        const cwd = options.cwd ?? process.cwd();
+        const filenames = options.filenames ?? toolbarConfigFilenames;
+        const discoveredPath = options.path ? path.resolve(cwd, options.path) : yield* find(options);
+
+        if (!discoveredPath) {
+          return yield* new MissingToolbarConfigError({ cwd, filenames: [...filenames] });
+        }
+
+        const configPath = discoveredPath;
+
+        if (!isSupportedConfigPath(path, configPath, filenames)) {
+          return yield* new UnsupportedToolbarConfigFormatError({ path: configPath, filenames: [...filenames] });
+        }
+
+        const found = yield* fs.exists(configPath).pipe(Effect.catch(() => Effect.succeed(false)));
+
+        if (!found) {
+          return yield* new MissingToolbarConfigError({
+            cwd: path.dirname(configPath),
+            filenames: [path.basename(configPath)]
+          });
+        }
+
+        const configUrl = yield* path.toFileUrl(configPath).pipe(
+          Effect.catch((cause) => Effect.fail(new ToolbarConfigModuleLoadError({ path: configPath, cause })))
+        );
+
+        const loaded = yield* Effect.tryPromise({
+          try: () => import(configUrl.href) as Promise<{ default?: unknown }>,
+          catch: (cause) => new ToolbarConfigModuleLoadError({ path: configPath, cause })
+        });
+
+        const config = loaded.default;
+
+        if (!isToolbarConfig(config)) {
+          return yield* new InvalidToolbarConfigExportError({ path: configPath });
+        }
+
+        return config;
+      });
+
+      return ToolbarConfigService.of({ find, load });
+    })
+  );
 }
 
 function isToolbarConfig(value: unknown): value is ToolbarConfig {
@@ -60,11 +141,6 @@ function isToolbarConfig(value: unknown): value is ToolbarConfig {
   return Array.isArray(candidate.tools);
 }
 
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
+function isSupportedConfigPath(path: Path.Path, filePath: string, filenames: readonly string[]): boolean {
+  return filenames.includes(path.basename(filePath));
 }
