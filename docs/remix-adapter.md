@@ -1,6 +1,6 @@
 # Remix Adapter
 
-`@repo/adapter-remix` connects Remix routes to the framework-neutral Toolbar Server through `@repo/adapter-fetch`.
+`@repo/adapter-remix` connects Remix routes to the JavaScript Fetch Toolbar Server from `@repo/server`.
 
 The adapter does not register routes automatically. Remix apps mount the Toolbar API explicitly from application routes.
 
@@ -28,6 +28,6 @@ export const action = toolbarRouteHandler;
 
 The same route handler can be exported as both `loader` and `action` because the Toolbar Server receives the original `Request` and handles the method itself.
 
-This adapter intentionally exposes only Remix-shaped APIs. Use `@repo/adapter-fetch` directly when a host wants a raw Fetch handler.
+This adapter intentionally exposes only Remix-shaped APIs. Use `@repo/server` directly when a JavaScript host wants a raw Fetch handler.
 
-See [fetch-adapter.md](fetch-adapter.md) for the generic Fetch boundary.
+The cross-language source of truth is the `@repo/core` Toolbar API protocol model; Fetch is the JavaScript server implementation.

@@ -14,8 +14,8 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/adapter-fetch": "workspace:*",
-    "@repo/core": "workspace:*"
+    "@repo/core": "workspace:*",
+    "@repo/server": "workspace:*"
   },
   "engines": {
     "node": ">=20"

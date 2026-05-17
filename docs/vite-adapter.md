@@ -2,7 +2,7 @@
 
 `@repo/adapter-vite` mounts the Toolbar API into Vite's development middleware stack.
 
-The adapter builds on `@repo/adapter-fetch`, so Vite only owns the Node request/response translation layer.
+The adapter builds on the JavaScript Fetch Toolbar Server from `@repo/server`, so Vite only owns the Node request/response translation layer.
 
 ```ts
 // vite.config.ts
