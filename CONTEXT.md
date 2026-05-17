@@ -20,17 +20,25 @@ _Avoid_: Branch picker
 Starting, stopping, installing for, or supervising development servers.
 _Avoid_: Switching
 
+**Backend v1**:
+The first backend-only slice of the toolbar platform: **Toolbar Config**, **Toolbar API**, JavaScript **Toolbar Server**, framework backend **Adapters**, and the **Worktree Switcher** backend.
+_Avoid_: frontend toolbar implementation, process management
+
 **Remix 3 Component**:
-The first UI adapter target used for toolbar and tool rendering.
+The first UI rendering target for toolbar and tool rendering.
 _Avoid_: React package, React component package
 
 **Adapter**:
-A package that enables the **Toolbar Wrapper** or **Toolbar Server** to run in a specific language, framework, host environment, or UI model.
+A package that enables the **Toolbar Server** or toolbar platform to run in a specific language, framework, runtime, or host environment.
 _Avoid_: Tool extension, integration
 
 **Remix Adapter**:
 An **Adapter** that connects the **Toolbar Server** to a Remix 3 application.
 _Avoid_: Vite adapter
+
+**Vite Adapter**:
+An **Adapter** that connects the **Toolbar Server** to Vite development middleware.
+_Avoid_: Remix adapter, renderer
 
 **Explicit Route Mounting**:
 Application code that maps the **Toolbar API** into the host framework's routing system.
@@ -100,12 +108,22 @@ _Avoid_: Public package name
 The language-neutral HTTP protocol exposed by the **Toolbar Wrapper** for registered **Tools**.
 _Avoid_: Per-tool endpoint, dev endpoint
 
+**Toolbar Protocol Model**:
+The shared source of truth for **Toolbar API** paths, schemas, response envelopes, and Effect HTTP API definitions.
+_Avoid_: server implementation, adapter implementation
+
 **Toolbar Server**:
 The JavaScript Fetch API implementation of the **Toolbar API**.
 _Avoid_: Vite plugin, Remix route
 
+**Direct Fetch Server**:
+Using the **Toolbar Server** directly from a JavaScript host that already speaks standard `Request` and `Response`.
+_Avoid_: Fetch adapter package
+
 ## Relationships
 
+- **Backend v1** includes **Toolbar Config**, **Toolbar API**, the JavaScript **Toolbar Server**, backend **Adapters**, and the backend behavior of the **Worktree Switcher**.
+- **Backend v1** does not include frontend **Renderers** or **Process Management**.
 - A **Toolbar Wrapper** hosts one or more **Tools**.
 - A **Toolbar Wrapper** uses **Tool Registration** to determine which **Tools** it hosts.
 - A **Toolbar Config** can provide **Tool Registration** for direct JavaScript use or sidecar use.
@@ -119,16 +137,19 @@ _Avoid_: Vite plugin, Remix route
 - The **Worktree Switcher** is a **Tool**.
 - A **Tool** may define extension points implemented by **Extensions**.
 - An **Adapter** connects the toolbar platform to a specific runtime or host framework.
-- The **Remix Adapter** is distinct from the Vite adapter.
+- The **Remix Adapter** is distinct from the **Vite Adapter**.
 - The **Remix Adapter** uses **Explicit Route Mounting**.
+- The **Vite Adapter** connects the **Toolbar Server** to Vite middleware and restores the **Toolbar API** path before forwarding requests.
 - Non-JavaScript frameworks should prefer a **Sidecar Adapter** before native reimplementation.
 - A **Renderer** displays toolbar or tool UI in a specific UI model.
 - A **Renderer** uses a **Tool Client** instead of owning tool API paths or response shapes.
 - The **Worktree Switcher** uses a **URL Resolver** to determine each worktree's **Destinations**.
 - A worktree may have one or more **Destinations**.
-- A **Remix 3 Component** is provided by an **Adapter**.
+- A **Remix 3 Component** is provided by a **Renderer**.
 - A **Toolbar API** exposes registered **Tools** under a shared namespace.
+- The **Toolbar Protocol Model** lives in the core package and is shared by servers, adapters, clients, and tests.
 - The **Toolbar Server** implements the **Toolbar API** for JavaScript Fetch-compatible environments.
+- A **Direct Fetch Server** does not require a framework **Adapter**.
 - The **Worktree Switcher** does not perform **Process Management** in v1.
 
 ## Example dialogue
@@ -181,6 +202,12 @@ _Avoid_: Vite plugin, Remix route
 > **Dev:** "Is the **Toolbar API** a JavaScript API?"
 > **Domain expert:** "No — it is a language-neutral HTTP protocol; the **Toolbar Server** is the JavaScript Fetch implementation."
 
+> **Dev:** "Where do shared route paths and response schemas live?"
+> **Domain expert:** "In the **Toolbar Protocol Model**, not in framework **Adapters** or individual **Tools**."
+
+> **Dev:** "Do JavaScript hosts need a Fetch adapter package?"
+> **Domain expert:** "No — they can use the **Direct Fetch Server** from the **Toolbar Server** package."
+
 > **Dev:** "Can Remix 3 use the Vite adapter?"
 > **Domain expert:** "No — Remix 3 applications need a **Remix Adapter** because their current template routes requests through a Fetch API server."
 
@@ -211,14 +238,18 @@ _Avoid_: Vite plugin, Remix route
 - **Config Discovery** is allowed for finding the **Toolbar Config**; automatic tool discovery remains out of scope.
 - **Config Discovery** and **Module Config** loading belong in the **Config Package**.
 - v1 supports **Module Config** files such as `toolbar.config.ts`, `toolbar.config.mts`, `toolbar.config.js`, and `toolbar.config.mjs`.
+- **Backend v1** is complete without frontend **Renderers**; frontend planning starts from the **Toolbar API** and **Tool Clients**.
 - Published packages should be ESM-only.
 - Published packages should support Node.js 20 or newer, even if examples require a newer runtime.
 - Package naming and npm scope are deferred because Toolbar is a **Working Name**.
 - All workspace packages start private and use `@repo/*` names until the final package identity is chosen.
 - Tool HTTP behavior is exposed through the **Toolbar API**, not independent per-tool endpoint names.
 - The **Toolbar API** is a language-neutral HTTP protocol, not just a JavaScript interface.
+- Shared **Toolbar API** route paths, schemas, envelopes, and Effect HTTP definitions belong in the **Toolbar Protocol Model**.
 - The **Toolbar Server** is the JavaScript Fetch API implementation of the **Toolbar API**.
+- JavaScript hosts can use the **Direct Fetch Server**; there is no standalone Fetch adapter package.
 - Remix 3 support should use the **Remix Adapter**, not assume a Vite development server.
+- Vite support should use the **Vite Adapter**, not assume Remix route semantics.
 - Remix 3 integration should use **Explicit Route Mounting**, not automatic route registration.
 - Non-JavaScript framework support should start with **Sidecar Adapters** before native tool reimplementation.
 - **Process Management** is out of scope for the v1 **Worktree Switcher**.
