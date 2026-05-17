@@ -3,14 +3,10 @@ import {
   toolbarSuccess,
   toolbarApiBasePath,
   toolbarApiRelativeRoutes,
-  toolbarApiRoutes,
   toolbarApiToolRelativePath,
+  ToolbarApi,
   ToolbarErrorEnvelopeSchema,
-  ToolbarRootDataSchema,
-  ToolbarSuccessEnvelopeSchema,
   ToolbarToolIdSchema,
-  ToolbarToolDataSchema,
-  ToolbarToolsDataSchema,
   type ToolbarError,
   type ToolbarResponseEnvelope,
   type ToolbarToolData,
@@ -20,7 +16,7 @@ import {
 import { ToolbarConfig } from "@repo/config";
 import { Effect, Layer, Schema } from "effect";
 import { HttpRouter, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
-import { HttpApi, HttpApiBuilder, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { ToolbarProtocolError, ToolbarToolDispatch } from "./tool-dispatch.js";
 
 export type ToolbarServer = {
@@ -28,33 +24,9 @@ export type ToolbarServer = {
   readonly dispose: () => Promise<void>;
 };
 
-const ToolbarRootResponseSchema = ToolbarSuccessEnvelopeSchema(ToolbarRootDataSchema);
-const ToolbarToolsResponseSchema = ToolbarSuccessEnvelopeSchema(ToolbarToolsDataSchema);
-const ToolbarToolResponseSchema = ToolbarSuccessEnvelopeSchema(ToolbarToolDataSchema);
 const ToolbarToolIdParamsSchema = Schema.Struct({
   toolId: ToolbarToolIdSchema
 });
-
-export class ToolbarApiGroup extends HttpApiGroup.make("toolbar", { topLevel: true })
-  .add(
-    HttpApiEndpoint.get("root", toolbarApiRoutes.root, {
-      success: ToolbarRootResponseSchema
-    }),
-    HttpApiEndpoint.get("tools", toolbarApiRoutes.tools, {
-      success: ToolbarToolsResponseSchema
-    })
-  )
-  .annotateMerge(OpenApi.annotations({
-    title: "Toolbar"
-  }))
-{}
-
-export class ToolbarApi extends HttpApi.make("toolbar-api")
-  .add(ToolbarApiGroup)
-  .annotateMerge(OpenApi.annotations({
-    title: "Belt Toolbar API"
-  }))
-{}
 
 export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   const app = Layer.mergeAll(
