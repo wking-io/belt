@@ -1,4 +1,4 @@
-import type { ToolbarConfig } from "@repo/core";
+import type { ToolbarConfig as ToolbarConfigData } from "@repo/core";
 import { Context, Effect, FileSystem, Layer, Path, Schema } from "effect";
 
 export const toolbarConfigFilenames = [
@@ -58,8 +58,14 @@ export type ToolbarConfigError =
 
 export type ToolbarConfigServiceShape = {
   readonly find: (options?: FindToolbarConfigOptions) => Effect.Effect<string | undefined, never>;
-  readonly load: (options?: LoadToolbarConfigOptions) => Effect.Effect<ToolbarConfig, ToolbarConfigError>;
+  readonly load: (options?: LoadToolbarConfigOptions) => Effect.Effect<ToolbarConfigData, ToolbarConfigError>;
 };
+
+export class ToolbarConfig extends Context.Service<ToolbarConfig, ToolbarConfigData>()("belt/ToolbarConfig") {
+  static layer(config: ToolbarConfigData) {
+    return Layer.succeed(ToolbarConfig, config);
+  }
+}
 
 export class ToolbarConfigService extends Context.Service<ToolbarConfigService, ToolbarConfigServiceShape>()(
   "belt/ToolbarConfigService"
@@ -133,7 +139,7 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
   );
 }
 
-function isToolbarConfig(value: unknown): value is ToolbarConfig {
+function isToolbarConfig(value: unknown): value is ToolbarConfigData {
   if (!value || typeof value !== "object") return false;
 
   const candidate = value as { tools?: unknown };
