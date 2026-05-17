@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { once } from "node:events";
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar } from "@repo/core";
+import { defineToolbar, toolbarApiBasePath } from "@repo/core";
 import { Effect } from "effect";
 import type { Connect, ViteDevServer } from "vite";
 import { toolbarVite } from "../src/index.ts";
@@ -11,7 +11,7 @@ describe("Vite Toolbar adapter", () => {
     Effect.gen(function*() {
       const mounted = mountToolbarVite();
 
-      assert.strictEqual(mounted.path, "/__toolbar");
+      assert.strictEqual(mounted.path, toolbarApiBasePath);
 
       const response = yield* Effect.promise(() => mounted.fetch("/"));
       const body = yield* json(response);

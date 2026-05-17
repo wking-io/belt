@@ -1,10 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import type { ToolbarConfig } from "@repo/core";
+import { toolbarApiBasePath, type ToolbarConfig } from "@repo/core";
 import { createToolbarServer, type ToolbarServer } from "@repo/server";
 import type { Connect, Plugin } from "vite";
-
-const defaultMountPath = "/__toolbar";
 
 export type ToolbarViteOptions = {
   readonly mountPath?: string;
@@ -12,7 +10,7 @@ export type ToolbarViteOptions = {
 
 export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions = {}): Plugin {
   const server = createToolbarServer(config);
-  const mountPath = normalizeMountPath(options.mountPath ?? defaultMountPath);
+  const mountPath = normalizeMountPath(options.mountPath ?? toolbarApiBasePath);
 
   return {
     name: "toolbar",
@@ -84,7 +82,7 @@ async function writeFetchResponse(res: ServerResponse, response: Response) {
 function normalizeMountPath(path: string): string {
   const normalizedPath = `/${path.replace(/^\/+|\/+$/g, "")}`;
 
-  return normalizedPath === "/" ? defaultMountPath : normalizedPath;
+  return normalizedPath === "/" ? toolbarApiBasePath : normalizedPath;
 }
 
 function withMountPath(url: string, mountPath: string): string {
