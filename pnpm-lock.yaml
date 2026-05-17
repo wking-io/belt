@@ -66,18 +66,12 @@ importers:
 
   packages/adapter-vite:
     dependencies:
-      '@effect/platform-node':
-        specifier: 4.0.0-beta.66
-        version: 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
+      '@repo/adapter-fetch':
+        specifier: workspace:*
+        version: link:../adapter-fetch
       '@repo/core':
         specifier: workspace:*
         version: link:../core
-      '@repo/server':
-        specifier: workspace:*
-        version: link:../server
-      effect:
-        specifier: 4.0.0-beta.66
-        version: 4.0.0-beta.66
     devDependencies:
       '@types/node':
         specifier: ^22.15.18

@@ -1,28 +1,53 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
+import { createToolbarFetchHandler, type ToolbarFetchHandler } from "@repo/adapter-fetch";
 import type { ToolbarConfig } from "@repo/core";
-import { createToolbarServer } from "@repo/server";
-import type { Plugin } from "vite";
+import type { Connect, Plugin } from "vite";
 
-export function toolbarVite(config: ToolbarConfig): Plugin {
-  const server = createToolbarServer(config);
+const defaultMountPath = "/__toolbar";
+
+export type ToolbarViteOptions = {
+  readonly mountPath?: string;
+};
+
+export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions = {}): Plugin {
+  const fetch = createToolbarFetchHandler(config);
+  const mountPath = normalizeMountPath(options.mountPath ?? defaultMountPath);
 
   return {
     name: "toolbar",
     apply: "serve",
     configureServer(viteServer) {
-      viteServer.middlewares.use("/__toolbar", async (req, res) => {
-        const request = await toFetchRequest(req);
-        const response = await server.fetch(request);
-        await writeFetchResponse(res, response);
+      viteServer.httpServer?.once("close", () => {
+        void fetch.dispose();
       });
+
+      viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(fetch, { mountPath }));
     }
   };
 }
 
-async function toFetchRequest(req: IncomingMessage): Promise<Request> {
+export function createToolbarViteMiddleware(
+  fetch: ToolbarFetchHandler,
+  options: Required<ToolbarViteOptions>
+): Connect.NextHandleFunction {
+  const mountPath = normalizeMountPath(options.mountPath);
+
+  return async (req, res, next) => {
+    try {
+      const request = await toFetchRequest(req, { mountPath });
+      const response = await fetch(request);
+
+      await writeFetchResponse(res, response);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+async function toFetchRequest(req: IncomingMessage, options: Required<ToolbarViteOptions>): Promise<Request> {
   const host = req.headers.host ?? "localhost";
-  const url = new URL(req.url ?? "/", `http://${host}`);
+  const url = new URL(withMountPath(req.url ?? "/", options.mountPath), `http://${host}`);
   const headers = new Headers();
   const method = req.method ?? "GET";
 
@@ -41,6 +66,7 @@ async function toFetchRequest(req: IncomingMessage): Promise<Request> {
 
   if (method !== "GET" && method !== "HEAD") {
     init.body = Readable.toWeb(req) as BodyInit;
+    (init as RequestInit & { duplex: "half" }).duplex = "half";
   }
 
   return new Request(url, init);
@@ -53,4 +79,22 @@ async function writeFetchResponse(res: ServerResponse, response: Response) {
   });
 
   res.end(Buffer.from(await response.arrayBuffer()));
+}
+
+function normalizeMountPath(path: string): string {
+  const normalizedPath = `/${path.replace(/^\/+|\/+$/g, "")}`;
+
+  return normalizedPath === "/" ? defaultMountPath : normalizedPath;
+}
+
+function withMountPath(url: string, mountPath: string): string {
+  const parsed = new URL(url, "http://toolbar.local");
+
+  if (parsed.pathname === mountPath || parsed.pathname.startsWith(`${mountPath}/`)) {
+    return `${parsed.pathname}${parsed.search}`;
+  }
+
+  const childPath = parsed.pathname === "/" ? "" : parsed.pathname;
+
+  return `${mountPath}${childPath}${parsed.search}`;
 }
