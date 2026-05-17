@@ -1,4 +1,4 @@
-import { expect, it } from "@effect/vitest";
+import { assert, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import {
   ToolbarErrorEnvelopeSchema,
@@ -25,7 +25,7 @@ it.effect("validates the root success envelope schema", () =>
       })
     );
 
-    expect(decoded.data.tools[0]?.id).toBe("worktrees");
+    assert.strictEqual(decoded.data.tools[0]?.id, "worktrees");
   }));
 
 it.effect("validates the error envelope schema", () =>
@@ -37,11 +37,11 @@ it.effect("validates the error envelope schema", () =>
       })
     );
 
-    expect(decoded.error.code).toBe("UNKNOWN_TOOL");
+    assert.strictEqual(decoded.error.code, "UNKNOWN_TOOL");
   }));
 
 it("documents the initial API route constants", () => {
-  expect(toolbarApiRoutes.root).toBe("/__toolbar");
-  expect(toolbarApiRoutes.tools).toBe("/__toolbar/tools");
-  expect(toolbarApiRoutes.toolRoute).toBe("/__toolbar/tools/:toolId/*routePath");
+  assert.strictEqual(toolbarApiRoutes.root, "/__toolbar");
+  assert.strictEqual(toolbarApiRoutes.tools, "/__toolbar/tools");
+  assert.strictEqual(toolbarApiRoutes.toolRoute, "/__toolbar/tools/:toolId/*routePath");
 });
