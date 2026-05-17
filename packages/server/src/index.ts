@@ -1,6 +1,10 @@
 import {
   toolbarError,
   toolbarSuccess,
+  toolbarApiBasePath,
+  toolbarApiRelativeRoutes,
+  toolbarApiRoutes,
+  toolbarApiToolRelativePath,
   toToolbarToolMetadata,
   ToolbarErrorEnvelopeSchema,
   ToolbarRootDataSchema,
@@ -36,10 +40,10 @@ const ToolbarToolIdParamsSchema = Schema.Struct({
 
 export class ToolbarApiGroup extends HttpApiGroup.make("toolbar", { topLevel: true })
   .add(
-    HttpApiEndpoint.get("root", "/__toolbar", {
+    HttpApiEndpoint.get("root", toolbarApiRoutes.root, {
       success: ToolbarRootResponseSchema
     }),
-    HttpApiEndpoint.get("tools", "/__toolbar/tools", {
+    HttpApiEndpoint.get("tools", toolbarApiRoutes.tools, {
       success: ToolbarToolsResponseSchema
     })
   )
@@ -135,7 +139,8 @@ class ToolbarProtocolError extends Schema.TaggedErrorClass<ToolbarProtocolError>
 export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   const app = Layer.mergeAll(
     ToolbarApiRoutes,
-    ToolDispatchRoutes
+    ToolDispatchRoutes,
+    NotFoundRoutes
   ).pipe(
     Layer.provide(ToolbarRuntime.layer),
     Layer.provide(ToolbarConfig.layer(config))
@@ -146,15 +151,7 @@ export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   ));
 
   return {
-    fetch: async (request) => {
-      const response = await handler(request, Context.empty() as Context.Context<unknown>);
-
-      if (response.status === 404 && !isJsonResponse(response)) {
-        return HttpServerResponse.toWeb(await Effect.runPromise(notFoundResponse()));
-      }
-
-      return response;
-    },
+    fetch: handler,
     dispose
   };
 }
@@ -162,7 +159,8 @@ export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
 export function createToolbarRouter(config: ToolbarConfigData) {
   return Layer.mergeAll(
     ToolbarApiRoutes,
-    ToolDispatchRoutes
+    ToolDispatchRoutes,
+    NotFoundRoutes
   ).pipe(
     Layer.provide(ToolbarRuntime.layer),
     Layer.provide(ToolbarConfig.layer(config))
@@ -187,9 +185,9 @@ const ToolbarApiRoutes = HttpApiBuilder.layer(ToolbarApi).pipe(
 
 const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(function*(router_) {
   const toolbar = yield* ToolbarRuntime;
-  const router = router_.prefixed("/__toolbar");
+  const router = router_.prefixed(toolbarApiBasePath);
 
-  yield* router.add("GET", "/tools/:toolId/*", Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
+  yield* router.add("GET", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
     const { toolId } = yield* HttpRouter.schemaPathParams(ToolbarToolIdParamsSchema);
     const routePath = getToolRoutePath(request.url, toolId);
 
@@ -200,6 +198,10 @@ const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(functi
     const webRequest = yield* HttpServerRequest.toWeb(request);
     return yield* respond(Effect.map(toolbar.route(toolId, routePath, webRequest), toolbarSuccess));
   }));
+}));
+
+const NotFoundRoutes = HttpRouter.use(Effect.fn("NotFoundRoutes")(function*(router) {
+  yield* router.add("*", "*", notFoundResponse);
 }));
 
 const notFoundResponse = Effect.fn("ToolbarServer.notFoundResponse")(function*() {
@@ -229,7 +231,7 @@ function findTool(config: ToolbarConfigData, toolId: string): ToolDefinition | u
 
 function getToolRoutePath(url: string, toolId: string): string | undefined {
   const pathname = new URL(url, "http://toolbar.local").pathname;
-  const routePrefix = `/tools/${toolId}`;
+  const routePrefix = toolbarApiToolRelativePath(toolId);
   const remainder = pathname.slice(routePrefix.length);
 
   if (!remainder) {
@@ -239,8 +241,4 @@ function getToolRoutePath(url: string, toolId: string): string | undefined {
   const routePath = remainder.replace(/^\/+/, "");
 
   return routePath || "index";
-}
-
-function isJsonResponse(response: Response): boolean {
-  return response.headers.get("content-type")?.includes("application/json") ?? false;
 }

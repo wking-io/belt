@@ -8,4 +8,4 @@ In particular: do not create helper functions just to use a service. Yield the s
 
 ## Adapter Boundaries
 
-Keep generic Fetch integration in `@repo/adapter-fetch`. Framework adapters, such as `@repo/adapter-remix`, should build no-brainer framework-shaped APIs on top of that package instead of reaching directly into `@repo/server` unless lower-level composition is required.
+Keep the JavaScript Fetch implementation in `@repo/server`. Framework adapters, such as `@repo/adapter-remix` and `@repo/adapter-vite`, should build no-brainer framework-shaped APIs on top of `@repo/server`. Shared cross-language behavior belongs in the `@repo/core` Toolbar API protocol model, not in a Fetch adapter.

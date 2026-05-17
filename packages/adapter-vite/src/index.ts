@@ -1,34 +1,32 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import { createToolbarFetchHandler, type ToolbarFetchHandler } from "@repo/adapter-fetch";
-import type { ToolbarConfig } from "@repo/core";
+import { toolbarApiBasePath, type ToolbarConfig } from "@repo/core";
+import { createToolbarServer, type ToolbarServer } from "@repo/server";
 import type { Connect, Plugin } from "vite";
-
-const defaultMountPath = "/__toolbar";
 
 export type ToolbarViteOptions = {
   readonly mountPath?: string;
 };
 
 export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions = {}): Plugin {
-  const fetch = createToolbarFetchHandler(config);
-  const mountPath = normalizeMountPath(options.mountPath ?? defaultMountPath);
+  const server = createToolbarServer(config);
+  const mountPath = normalizeMountPath(options.mountPath ?? toolbarApiBasePath);
 
   return {
     name: "toolbar",
     apply: "serve",
     configureServer(viteServer) {
       viteServer.httpServer?.once("close", () => {
-        void fetch.dispose();
+        void server.dispose();
       });
 
-      viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(fetch, { mountPath }));
+      viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(server, { mountPath }));
     }
   };
 }
 
 export function createToolbarViteMiddleware(
-  fetch: ToolbarFetchHandler,
+  server: ToolbarServer,
   options: Required<ToolbarViteOptions>
 ): Connect.NextHandleFunction {
   const mountPath = normalizeMountPath(options.mountPath);
@@ -36,7 +34,7 @@ export function createToolbarViteMiddleware(
   return async (req, res, next) => {
     try {
       const request = await toFetchRequest(req, { mountPath });
-      const response = await fetch(request);
+      const response = await server.fetch(request);
 
       await writeFetchResponse(res, response);
     } catch (error) {
@@ -84,7 +82,7 @@ async function writeFetchResponse(res: ServerResponse, response: Response) {
 function normalizeMountPath(path: string): string {
   const normalizedPath = `/${path.replace(/^\/+|\/+$/g, "")}`;
 
-  return normalizedPath === "/" ? defaultMountPath : normalizedPath;
+  return normalizedPath === "/" ? toolbarApiBasePath : normalizedPath;
 }
 
 function withMountPath(url: string, mountPath: string): string {

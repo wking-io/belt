@@ -2,6 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assert, describe, it } from "@effect/vitest";
+import { toolbarApiToolPath } from "@repo/core";
 import { Effect } from "effect";
 import {
   GitWorktreeParseError,
@@ -134,7 +135,7 @@ describe("worktreesTool", () => {
 
         assert.ok(route);
 
-        const result = yield* route(new Request("http://localhost/__toolbar/tools/worktrees"));
+        const result = yield* route(new Request(new URL(toolbarApiToolPath("worktrees"), "http://localhost")));
 
         assert.deepStrictEqual(result, { worktrees: [] });
       } finally {
