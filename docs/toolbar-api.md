@@ -135,4 +135,4 @@ ToolbarToolDataSchema
 ToolbarSuccessEnvelopeSchema
 ```
 
-These schemas are the JavaScript implementation's source of truth for request and response payloads. Future Effect HTTP endpoint definitions should reuse them rather than redefining wire shapes in `@repo/server` or adapters.
+These schemas are the JavaScript implementation's source of truth for request and response payloads. `@repo/core` also exports the shared Effect HTTP `ToolbarApi` definition, while `@repo/server` provides the JavaScript Fetch implementation.

@@ -26,7 +26,7 @@ GET /__toolbar/tools/:toolId
 GET /__toolbar/tools/:toolId/*
 ```
 
-Vite strips the mounted prefix before calling middleware handlers. The adapter restores the `/__toolbar` prefix before sending the request through the Fetch adapter, so Toolbar Server behavior matches other framework adapters.
+Vite strips the mounted prefix before calling middleware handlers. The adapter restores the `/__toolbar` prefix before sending the request through `@repo/server`, so Toolbar Server behavior matches other framework adapters.
 
 You can override the mount path if an app needs a different explicit route:
 
