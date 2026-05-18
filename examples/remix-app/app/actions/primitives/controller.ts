@@ -1,7 +1,7 @@
 import type { Controller } from "remix/fetch-router";
 import { renderPage } from "../../render.ts";
 import { routes } from "../../routes.ts";
-import { IndexPage } from "./index-page.ts";
+import { IndexPage } from "./index-page.tsx";
 
 export default {
   actions: {
