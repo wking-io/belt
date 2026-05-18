@@ -347,12 +347,20 @@ function beltColorGrid() {
 
 function panelGrid() {
   return (
-    <div className="preview-grid">
+    <div className="preview-grid preview-panel-grid">
       {elevations.map((elevation) => (
         <Panel elevation={elevation}>
           <div className="preview-panel-content">
             <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Elevation {elevation}</span>
-            <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Outer and inner panel structure.</span>
+            <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Default surface.</span>
+          </div>
+        </Panel>
+      ))}
+      {elevations.map((elevation) => (
+        <Panel elevation={elevation} focused>
+          <div className="preview-panel-content">
+            <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Elevation {elevation}</span>
+            <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Focused surface.</span>
           </div>
         </Panel>
       ))}
