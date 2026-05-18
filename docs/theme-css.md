@@ -10,7 +10,7 @@ When no theme is configured, Toolbar defaults to `system`, which resolves to the
 
 ## Tokens
 
-All color values in the default theme use `oklch(...)` or `color-mix(in oklch, ...)`.
+All color values in the default theme use `oklch(...)`, `color-mix(in oklch, ...)`, or `light-dark(...)`. Built-in light and dark values are defined once on each semantic token with `light-dark(...)`; `color-scheme` selects which side is active.
 
 The v1 color contract is:
 
@@ -55,7 +55,7 @@ export default defineToolbar({
 
 Omitting `theme` is equivalent to `theme: "system"`.
 
-Custom themes are partial and inherit from another theme:
+Custom themes are partial and inherit from another theme. The theme `mode` controls the emitted `color-scheme`; custom variables can be fixed values or their own `light-dark(...)` expressions.
 
 ```ts
 import { defineTheme, defineToolbar } from "@riff-refine/belt";

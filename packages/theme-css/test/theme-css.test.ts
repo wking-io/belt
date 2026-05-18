@@ -60,7 +60,7 @@ it("keeps color tokens in oklch-compatible syntax", async () => {
     const trimmed = value.trim();
 
     assert.ok(
-      trimmed.startsWith("oklch(") || trimmed.startsWith("color-mix(in oklch,") || trimmed.startsWith("var(--"),
+      trimmed.startsWith("oklch(") || trimmed.startsWith("color-mix(in oklch,") || trimmed.startsWith("light-dark(") || trimmed.startsWith("var(--"),
       `${name} must use oklch-compatible syntax, received ${trimmed}`
     );
     assert.ok(!/#[0-9a-f]/i.test(trimmed), `${name} must not use hex colors`);
@@ -93,4 +93,14 @@ it("leaves deferred token families out of the v1 contract", async () => {
   assert.ok(!/--belt-color-surface:/.test(css));
   assert.ok(!/--belt-color-selected:/.test(css));
   assert.ok(!/--belt-shadow/.test(css));
+});
+
+it("defines built-in dark mode through color-scheme and light-dark tokens", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /color-scheme:\s*light dark/);
+  assert.match(css, /\[data-belt-theme="belt-light"\]\s*\{\s*color-scheme:\s*light;/);
+  assert.match(css, /\[data-belt-theme="belt-dark"\]\s*\{\s*color-scheme:\s*dark;/);
+  assert.match(css, /--belt-color-elevation-1:\s*light-dark\(/);
+  assert.ok(!/@media\s*\(prefers-color-scheme:\s*dark\)/.test(css));
 });

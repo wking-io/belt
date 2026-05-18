@@ -334,8 +334,19 @@
 }
 
 :root,
-[data-belt-theme="belt-light"] {
+[data-belt-theme="system"] {
+  color-scheme: light dark;
+}
 
+[data-belt-theme="belt-light"] {
+  color-scheme: light;
+}
+
+[data-belt-theme="belt-dark"] {
+  color-scheme: dark;
+}
+
+:root {
   --neutral-1: var(--oatmeal-1);
   --neutral-2: var(--oatmeal-2);
   --neutral-3: var(--oatmeal-3);
@@ -350,83 +361,75 @@
   --neutral-12: var(--oatmeal-12);
   --neutral-13: var(--oatmeal-13);
   --neutral-14: var(--oatmeal-14);
-
-  --belt-color-elevation-1: var(--neutral-4);
-  --belt-color-elevation-1-hover: var(--neutral-3);
-  --belt-color-elevation-1-active: var(--neutral-3);
-  --belt-color-elevation-1-inset: var(--neutral-5);
-  --belt-color-elevation-2: var(--neutral-3);
-  --belt-color-elevation-2-hover: var(--neutral-2);
-  --belt-color-elevation-2-active: var(--neutral-2);
-  --belt-color-elevation-2-inset: var(--neutral-4);
-  --belt-color-elevation-3: var(--neutral-2);
-  --belt-color-elevation-3-hover: var(--neutral-1);
-  --belt-color-elevation-3-active: var(--neutral-1);
-  --belt-color-elevation-3-inset: var(--neutral-3);
-
-  --belt-color-foreground: oklch(24% 0.012 255);
-  --belt-color-foreground-subtle: oklch(52% 0.018 255);
-  --belt-color-foreground-strong: oklch(12% 0.012 255);
-  --belt-color-border: oklch(78% 0.014 255);
-  --belt-color-border-subtle: oklch(86% 0.011 255);
-  --belt-color-border-strong: oklch(66% 0.018 255);
-  --belt-color-focus: oklch(58% 0.19 260);
-
-  --belt-color-primary: oklch(93% 0.032 260);
-  --belt-color-primary-foreground: oklch(36% 0.16 260);
-  --belt-color-primary-foreground-subtle: oklch(48% 0.14 260);
-  --belt-color-primary-foreground-strong: oklch(26% 0.14 260);
-  --belt-color-primary-control: oklch(58% 0.19 260);
-  --belt-color-primary-control-hover: oklch(52% 0.2 260);
-  --belt-color-primary-control-active: oklch(46% 0.18 260);
-  --belt-color-primary-control-foreground: oklch(98% 0.006 260);
-  --belt-color-primary-control-foreground-subtle: oklch(90% 0.022 260);
-  --belt-color-primary-control-foreground-strong: oklch(100% 0 260);
-
-  --belt-color-info: oklch(94% 0.032 235);
-  --belt-color-info-foreground: oklch(38% 0.12 235);
-  --belt-color-info-foreground-subtle: oklch(50% 0.1 235);
-  --belt-color-info-foreground-strong: oklch(28% 0.1 235);
-  --belt-color-info-control: oklch(62% 0.15 235);
-  --belt-color-info-control-hover: oklch(56% 0.16 235);
-  --belt-color-info-control-active: oklch(50% 0.15 235);
-  --belt-color-info-control-foreground: oklch(98% 0.006 235);
-  --belt-color-info-control-foreground-subtle: oklch(90% 0.02 235);
-  --belt-color-info-control-foreground-strong: oklch(100% 0 235);
-
-  --belt-color-success: oklch(94% 0.046 145);
-  --belt-color-success-foreground: oklch(38% 0.12 145);
-  --belt-color-success-foreground-subtle: oklch(50% 0.1 145);
-  --belt-color-success-foreground-strong: oklch(26% 0.1 145);
-  --belt-color-success-control: oklch(62% 0.17 145);
-  --belt-color-success-control-hover: oklch(56% 0.18 145);
-  --belt-color-success-control-active: oklch(50% 0.16 145);
-  --belt-color-success-control-foreground: oklch(98% 0.008 145);
-  --belt-color-success-control-foreground-subtle: oklch(90% 0.028 145);
-  --belt-color-success-control-foreground-strong: oklch(100% 0 145);
-
-  --belt-color-warning: oklch(95% 0.054 82);
-  --belt-color-warning-foreground: oklch(42% 0.1 82);
-  --belt-color-warning-foreground-subtle: oklch(54% 0.09 82);
-  --belt-color-warning-foreground-strong: oklch(30% 0.08 82);
-  --belt-color-warning-control: oklch(72% 0.15 82);
-  --belt-color-warning-control-hover: oklch(66% 0.15 82);
-  --belt-color-warning-control-active: oklch(58% 0.14 82);
-  --belt-color-warning-control-foreground: oklch(20% 0.04 82);
-  --belt-color-warning-control-foreground-subtle: oklch(32% 0.06 82);
-  --belt-color-warning-control-foreground-strong: oklch(12% 0.03 82);
-
-  --belt-color-danger: oklch(94% 0.04 28);
-  --belt-color-danger-foreground: oklch(40% 0.15 28);
-  --belt-color-danger-foreground-subtle: oklch(52% 0.13 28);
-  --belt-color-danger-foreground-strong: oklch(28% 0.12 28);
-  --belt-color-danger-control: oklch(60% 0.2 28);
-  --belt-color-danger-control-hover: oklch(54% 0.21 28);
-  --belt-color-danger-control-active: oklch(48% 0.19 28);
-  --belt-color-danger-control-foreground: oklch(98% 0.008 28);
-  --belt-color-danger-control-foreground-subtle: oklch(90% 0.024 28);
-  --belt-color-danger-control-foreground-strong: oklch(100% 0 28);
-
+  --belt-color-elevation-1: light-dark(var(--neutral-4), oklch(18% 0.008 255));
+  --belt-color-elevation-1-hover: light-dark(var(--neutral-3), oklch(22% 0.01 255));
+  --belt-color-elevation-1-active: light-dark(var(--neutral-3), oklch(25% 0.012 255));
+  --belt-color-elevation-1-inset: light-dark(var(--neutral-5), oklch(14% 0.007 255));
+  --belt-color-elevation-2: light-dark(var(--neutral-3), oklch(22% 0.01 255));
+  --belt-color-elevation-2-hover: light-dark(var(--neutral-2), oklch(26% 0.012 255));
+  --belt-color-elevation-2-active: light-dark(var(--neutral-2), oklch(30% 0.014 255));
+  --belt-color-elevation-2-inset: light-dark(var(--neutral-4), oklch(18% 0.009 255));
+  --belt-color-elevation-3: light-dark(var(--neutral-2), oklch(26% 0.012 255));
+  --belt-color-elevation-3-hover: light-dark(var(--neutral-1), oklch(30% 0.014 255));
+  --belt-color-elevation-3-active: light-dark(var(--neutral-1), oklch(34% 0.016 255));
+  --belt-color-elevation-3-inset: light-dark(var(--neutral-3), oklch(22% 0.01 255));
+  --belt-color-foreground: light-dark(oklch(24% 0.012 255), oklch(94% 0.008 255));
+  --belt-color-foreground-subtle: light-dark(oklch(52% 0.018 255), oklch(68% 0.016 255));
+  --belt-color-foreground-strong: light-dark(oklch(12% 0.012 255), oklch(99% 0.003 255));
+  --belt-color-border: light-dark(oklch(78% 0.014 255), oklch(42% 0.016 255));
+  --belt-color-border-subtle: light-dark(oklch(86% 0.011 255), oklch(34% 0.014 255));
+  --belt-color-border-strong: light-dark(oklch(66% 0.018 255), oklch(54% 0.02 255));
+  --belt-color-focus: light-dark(oklch(58% 0.19 260), oklch(70% 0.17 260));
+  --belt-color-primary: light-dark(oklch(93% 0.032 260), oklch(30% 0.08 260));
+  --belt-color-primary-foreground: light-dark(oklch(36% 0.16 260), oklch(86% 0.06 260));
+  --belt-color-primary-foreground-subtle: light-dark(oklch(48% 0.14 260), oklch(76% 0.07 260));
+  --belt-color-primary-foreground-strong: light-dark(oklch(26% 0.14 260), oklch(95% 0.025 260));
+  --belt-color-primary-control: light-dark(oklch(58% 0.19 260), oklch(68% 0.18 260));
+  --belt-color-primary-control-hover: light-dark(oklch(52% 0.2 260), oklch(74% 0.16 260));
+  --belt-color-primary-control-active: light-dark(oklch(46% 0.18 260), oklch(60% 0.2 260));
+  --belt-color-primary-control-foreground: light-dark(oklch(98% 0.006 260), oklch(15% 0.04 260));
+  --belt-color-primary-control-foreground-subtle: light-dark(oklch(90% 0.022 260), oklch(28% 0.06 260));
+  --belt-color-primary-control-foreground-strong: light-dark(oklch(100% 0 260), oklch(8% 0.02 260));
+  --belt-color-info: light-dark(oklch(94% 0.032 235), oklch(30% 0.07 235));
+  --belt-color-info-foreground: light-dark(oklch(38% 0.12 235), oklch(86% 0.06 235));
+  --belt-color-info-foreground-subtle: light-dark(oklch(50% 0.1 235), oklch(76% 0.07 235));
+  --belt-color-info-foreground-strong: light-dark(oklch(28% 0.1 235), oklch(95% 0.025 235));
+  --belt-color-info-control: light-dark(oklch(62% 0.15 235), oklch(70% 0.14 235));
+  --belt-color-info-control-hover: light-dark(oklch(56% 0.16 235), oklch(76% 0.12 235));
+  --belt-color-info-control-active: light-dark(oklch(50% 0.15 235), oklch(62% 0.15 235));
+  --belt-color-info-control-foreground: light-dark(oklch(98% 0.006 235), oklch(14% 0.04 235));
+  --belt-color-info-control-foreground-subtle: light-dark(oklch(90% 0.02 235), oklch(28% 0.06 235));
+  --belt-color-info-control-foreground-strong: light-dark(oklch(100% 0 235), oklch(8% 0.02 235));
+  --belt-color-success: light-dark(oklch(94% 0.046 145), oklch(30% 0.08 145));
+  --belt-color-success-foreground: light-dark(oklch(38% 0.12 145), oklch(86% 0.08 145));
+  --belt-color-success-foreground-subtle: light-dark(oklch(50% 0.1 145), oklch(76% 0.09 145));
+  --belt-color-success-foreground-strong: light-dark(oklch(26% 0.1 145), oklch(95% 0.035 145));
+  --belt-color-success-control: light-dark(oklch(62% 0.17 145), oklch(72% 0.16 145));
+  --belt-color-success-control-hover: light-dark(oklch(56% 0.18 145), oklch(78% 0.14 145));
+  --belt-color-success-control-active: light-dark(oklch(50% 0.16 145), oklch(64% 0.17 145));
+  --belt-color-success-control-foreground: light-dark(oklch(98% 0.008 145), oklch(12% 0.04 145));
+  --belt-color-success-control-foreground-subtle: light-dark(oklch(90% 0.028 145), oklch(26% 0.06 145));
+  --belt-color-success-control-foreground-strong: light-dark(oklch(100% 0 145), oklch(8% 0.02 145));
+  --belt-color-warning: light-dark(oklch(95% 0.054 82), oklch(32% 0.08 82));
+  --belt-color-warning-foreground: light-dark(oklch(42% 0.1 82), oklch(88% 0.09 82));
+  --belt-color-warning-foreground-subtle: light-dark(oklch(54% 0.09 82), oklch(78% 0.1 82));
+  --belt-color-warning-foreground-strong: light-dark(oklch(30% 0.08 82), oklch(96% 0.04 82));
+  --belt-color-warning-control: light-dark(oklch(72% 0.15 82), oklch(78% 0.14 82));
+  --belt-color-warning-control-hover: light-dark(oklch(66% 0.15 82), oklch(84% 0.12 82));
+  --belt-color-warning-control-active: light-dark(oklch(58% 0.14 82), oklch(70% 0.15 82));
+  --belt-color-warning-control-foreground: light-dark(oklch(20% 0.04 82), oklch(16% 0.04 82));
+  --belt-color-warning-control-foreground-subtle: light-dark(oklch(32% 0.06 82), oklch(30% 0.06 82));
+  --belt-color-warning-control-foreground-strong: light-dark(oklch(12% 0.03 82), oklch(8% 0.02 82));
+  --belt-color-danger: light-dark(oklch(94% 0.04 28), oklch(30% 0.08 28));
+  --belt-color-danger-foreground: light-dark(oklch(40% 0.15 28), oklch(86% 0.07 28));
+  --belt-color-danger-foreground-subtle: light-dark(oklch(52% 0.13 28), oklch(76% 0.08 28));
+  --belt-color-danger-foreground-strong: light-dark(oklch(28% 0.12 28), oklch(95% 0.03 28));
+  --belt-color-danger-control: light-dark(oklch(60% 0.2 28), oklch(68% 0.19 28));
+  --belt-color-danger-control-hover: light-dark(oklch(54% 0.21 28), oklch(74% 0.17 28));
+  --belt-color-danger-control-active: light-dark(oklch(48% 0.19 28), oklch(60% 0.2 28));
+  --belt-color-danger-control-foreground: light-dark(oklch(98% 0.008 28), oklch(14% 0.04 28));
+  --belt-color-danger-control-foreground-subtle: light-dark(oklch(90% 0.024 28), oklch(28% 0.06 28));
+  --belt-color-danger-control-foreground-strong: light-dark(oklch(100% 0 28), oklch(8% 0.02 28));
   --belt-space: 0.25rem;
   --belt-space-0: 0;
   --belt-space-1: calc(var(--belt-space) * 1);
@@ -438,176 +441,14 @@
   --belt-space-8: calc(var(--belt-space) * 8);
   --belt-space-10: calc(var(--belt-space) * 10);
   --belt-space-12: calc(var(--belt-space) * 12);
-
   --belt-radius-inner: 4px;
   --belt-radius: 6px;
   --belt-radius-outer: 8px;
-
   --belt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --belt-font-feature-settings: "calt" 1, "dlig" 1, "case" 1, "ccmp" 1, "zero" 1, "ss01" 1, "ss02" 1, "ss07" 1, "ss08" 1, "cv06" 1, "cv11" 1;
   --belt-font-variant-alternates: styleset(ss01) styleset(ss02) styleset(ss07) styleset(ss08) character-variant(cv06) character-variant(cv11);
   --belt-font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
   --belt-font-variant-numeric: slashed-zero;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-
-    --belt-color-elevation-1: oklch(18% 0.008 255);
-    --belt-color-elevation-1-hover: oklch(22% 0.01 255);
-    --belt-color-elevation-1-active: oklch(25% 0.012 255);
-    --belt-color-elevation-1-inset: oklch(14% 0.007 255);
-    --belt-color-elevation-1-highlight: oklch(22% 0.01 255);
-    --belt-color-elevation-2: oklch(22% 0.01 255);
-    --belt-color-elevation-2-hover: oklch(26% 0.012 255);
-    --belt-color-elevation-2-active: oklch(30% 0.014 255);
-    --belt-color-elevation-2-inset: oklch(18% 0.009 255);
-    --belt-color-elevation-3: oklch(26% 0.012 255);
-    --belt-color-elevation-3-hover: oklch(30% 0.014 255);
-    --belt-color-elevation-3-active: oklch(34% 0.016 255);
-    --belt-color-elevation-3-inset: oklch(22% 0.01 255);
-
-    --belt-color-foreground: oklch(94% 0.008 255);
-    --belt-color-foreground-subtle: oklch(68% 0.016 255);
-    --belt-color-foreground-strong: oklch(99% 0.003 255);
-    --belt-color-border: oklch(42% 0.016 255);
-    --belt-color-border-subtle: oklch(34% 0.014 255);
-    --belt-color-border-strong: oklch(54% 0.02 255);
-    --belt-color-focus: oklch(70% 0.17 260);
-
-    --belt-color-primary: oklch(30% 0.08 260);
-    --belt-color-primary-foreground: oklch(86% 0.06 260);
-    --belt-color-primary-foreground-subtle: oklch(76% 0.07 260);
-    --belt-color-primary-foreground-strong: oklch(95% 0.025 260);
-    --belt-color-primary-control: oklch(68% 0.18 260);
-    --belt-color-primary-control-hover: oklch(74% 0.16 260);
-    --belt-color-primary-control-active: oklch(60% 0.2 260);
-    --belt-color-primary-control-foreground: oklch(15% 0.04 260);
-    --belt-color-primary-control-foreground-subtle: oklch(28% 0.06 260);
-    --belt-color-primary-control-foreground-strong: oklch(8% 0.02 260);
-
-    --belt-color-info: oklch(30% 0.07 235);
-    --belt-color-info-foreground: oklch(86% 0.06 235);
-    --belt-color-info-foreground-subtle: oklch(76% 0.07 235);
-    --belt-color-info-foreground-strong: oklch(95% 0.025 235);
-    --belt-color-info-control: oklch(70% 0.14 235);
-    --belt-color-info-control-hover: oklch(76% 0.12 235);
-    --belt-color-info-control-active: oklch(62% 0.15 235);
-    --belt-color-info-control-foreground: oklch(14% 0.04 235);
-    --belt-color-info-control-foreground-subtle: oklch(28% 0.06 235);
-    --belt-color-info-control-foreground-strong: oklch(8% 0.02 235);
-
-    --belt-color-success: oklch(30% 0.08 145);
-    --belt-color-success-foreground: oklch(86% 0.08 145);
-    --belt-color-success-foreground-subtle: oklch(76% 0.09 145);
-    --belt-color-success-foreground-strong: oklch(95% 0.035 145);
-    --belt-color-success-control: oklch(72% 0.16 145);
-    --belt-color-success-control-hover: oklch(78% 0.14 145);
-    --belt-color-success-control-active: oklch(64% 0.17 145);
-    --belt-color-success-control-foreground: oklch(12% 0.04 145);
-    --belt-color-success-control-foreground-subtle: oklch(26% 0.06 145);
-    --belt-color-success-control-foreground-strong: oklch(8% 0.02 145);
-
-    --belt-color-warning: oklch(32% 0.08 82);
-    --belt-color-warning-foreground: oklch(88% 0.09 82);
-    --belt-color-warning-foreground-subtle: oklch(78% 0.1 82);
-    --belt-color-warning-foreground-strong: oklch(96% 0.04 82);
-    --belt-color-warning-control: oklch(78% 0.14 82);
-    --belt-color-warning-control-hover: oklch(84% 0.12 82);
-    --belt-color-warning-control-active: oklch(70% 0.15 82);
-    --belt-color-warning-control-foreground: oklch(16% 0.04 82);
-    --belt-color-warning-control-foreground-subtle: oklch(30% 0.06 82);
-    --belt-color-warning-control-foreground-strong: oklch(8% 0.02 82);
-
-    --belt-color-danger: oklch(30% 0.08 28);
-    --belt-color-danger-foreground: oklch(86% 0.07 28);
-    --belt-color-danger-foreground-subtle: oklch(76% 0.08 28);
-    --belt-color-danger-foreground-strong: oklch(95% 0.03 28);
-    --belt-color-danger-control: oklch(68% 0.19 28);
-    --belt-color-danger-control-hover: oklch(74% 0.17 28);
-    --belt-color-danger-control-active: oklch(60% 0.2 28);
-    --belt-color-danger-control-foreground: oklch(14% 0.04 28);
-    --belt-color-danger-control-foreground-subtle: oklch(28% 0.06 28);
-    --belt-color-danger-control-foreground-strong: oklch(8% 0.02 28);
-  }
-}
-
-[data-belt-theme="belt-dark"] {
-  --belt-color-elevation-1: oklch(18% 0.008 255);
-  --belt-color-elevation-1-hover: oklch(22% 0.01 255);
-  --belt-color-elevation-1-active: oklch(25% 0.012 255);
-  --belt-color-elevation-1-inset: oklch(14% 0.007 255);
-  --belt-color-elevation-2: oklch(22% 0.01 255);
-  --belt-color-elevation-2-hover: oklch(26% 0.012 255);
-  --belt-color-elevation-2-active: oklch(30% 0.014 255);
-  --belt-color-elevation-2-inset: oklch(18% 0.009 255);
-  --belt-color-elevation-3: oklch(26% 0.012 255);
-  --belt-color-elevation-3-hover: oklch(30% 0.014 255);
-  --belt-color-elevation-3-active: oklch(34% 0.016 255);
-  --belt-color-elevation-3-inset: oklch(22% 0.01 255);
-
-  --belt-color-foreground: oklch(94% 0.008 255);
-  --belt-color-foreground-subtle: oklch(68% 0.016 255);
-  --belt-color-foreground-strong: oklch(99% 0.003 255);
-  --belt-color-border: oklch(42% 0.016 255);
-  --belt-color-border-subtle: oklch(34% 0.014 255);
-  --belt-color-border-strong: oklch(54% 0.02 255);
-  --belt-color-focus: oklch(70% 0.17 260);
-
-  --belt-color-primary: oklch(30% 0.08 260);
-  --belt-color-primary-foreground: oklch(86% 0.06 260);
-  --belt-color-primary-foreground-subtle: oklch(76% 0.07 260);
-  --belt-color-primary-foreground-strong: oklch(95% 0.025 260);
-  --belt-color-primary-control: oklch(68% 0.18 260);
-  --belt-color-primary-control-hover: oklch(74% 0.16 260);
-  --belt-color-primary-control-active: oklch(60% 0.2 260);
-  --belt-color-primary-control-foreground: oklch(15% 0.04 260);
-  --belt-color-primary-control-foreground-subtle: oklch(28% 0.06 260);
-  --belt-color-primary-control-foreground-strong: oklch(8% 0.02 260);
-
-  --belt-color-info: oklch(30% 0.07 235);
-  --belt-color-info-foreground: oklch(86% 0.06 235);
-  --belt-color-info-foreground-subtle: oklch(76% 0.07 235);
-  --belt-color-info-foreground-strong: oklch(95% 0.025 235);
-  --belt-color-info-control: oklch(70% 0.14 235);
-  --belt-color-info-control-hover: oklch(76% 0.12 235);
-  --belt-color-info-control-active: oklch(62% 0.15 235);
-  --belt-color-info-control-foreground: oklch(14% 0.04 235);
-  --belt-color-info-control-foreground-subtle: oklch(28% 0.06 235);
-  --belt-color-info-control-foreground-strong: oklch(8% 0.02 235);
-
-  --belt-color-success: oklch(30% 0.08 145);
-  --belt-color-success-foreground: oklch(86% 0.08 145);
-  --belt-color-success-foreground-subtle: oklch(76% 0.09 145);
-  --belt-color-success-foreground-strong: oklch(95% 0.035 145);
-  --belt-color-success-control: oklch(72% 0.16 145);
-  --belt-color-success-control-hover: oklch(78% 0.14 145);
-  --belt-color-success-control-active: oklch(64% 0.17 145);
-  --belt-color-success-control-foreground: oklch(12% 0.04 145);
-  --belt-color-success-control-foreground-subtle: oklch(26% 0.06 145);
-  --belt-color-success-control-foreground-strong: oklch(8% 0.02 145);
-
-  --belt-color-warning: oklch(32% 0.08 82);
-  --belt-color-warning-foreground: oklch(88% 0.09 82);
-  --belt-color-warning-foreground-subtle: oklch(78% 0.1 82);
-  --belt-color-warning-foreground-strong: oklch(96% 0.04 82);
-  --belt-color-warning-control: oklch(78% 0.14 82);
-  --belt-color-warning-control-hover: oklch(84% 0.12 82);
-  --belt-color-warning-control-active: oklch(70% 0.15 82);
-  --belt-color-warning-control-foreground: oklch(16% 0.04 82);
-  --belt-color-warning-control-foreground-subtle: oklch(30% 0.06 82);
-  --belt-color-warning-control-foreground-strong: oklch(8% 0.02 82);
-
-  --belt-color-danger: oklch(30% 0.08 28);
-  --belt-color-danger-foreground: oklch(86% 0.07 28);
-  --belt-color-danger-foreground-subtle: oklch(76% 0.08 28);
-  --belt-color-danger-foreground-strong: oklch(95% 0.03 28);
-  --belt-color-danger-control: oklch(68% 0.19 28);
-  --belt-color-danger-control-hover: oklch(74% 0.17 28);
-  --belt-color-danger-control-active: oklch(60% 0.2 28);
-  --belt-color-danger-control-foreground: oklch(14% 0.04 28);
-  --belt-color-danger-control-foreground-subtle: oklch(28% 0.06 28);
-  --belt-color-danger-control-foreground-strong: oklch(8% 0.02 28);
 }
 
 .belt-panel {
