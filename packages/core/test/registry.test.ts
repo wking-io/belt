@@ -1,9 +1,12 @@
 import { assert, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import {
+  defineTheme,
   defineToolbar,
   defineTool,
   DuplicateToolbarToolIdError,
+  ToolbarThemeConfigSchema,
+  ToolbarThemeSchema,
   ToolDefinitionSchema,
   ToolbarToolSchema,
   toToolbarToolMetadata,
@@ -26,6 +29,45 @@ it.effect("validates explicit tool registration", () =>
     });
 
     assert.strictEqual(config.tools[0]?.id, "worktrees");
+  }));
+
+it.effect("validates toolbar theme config in string and object forms", () =>
+  Effect.gen(function*() {
+    const stringConfig = yield* Schema.decodeUnknownEffect(ToolbarThemeConfigSchema)("system");
+    const objectConfig = yield* Schema.decodeUnknownEffect(ToolbarThemeConfigSchema)({
+      default: "my-dark",
+      themes: [
+        defineTheme({
+          id: "my-dark",
+          name: "My Dark",
+          mode: "dark",
+          extends: "belt-dark",
+          variables: {
+            "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+          }
+        })
+      ]
+    });
+
+    assert.strictEqual(stringConfig, "system");
+    assert.strictEqual(typeof objectConfig, "object");
+    assert.strictEqual(objectConfig.themes?.[0]?.id, "my-dark");
+  }));
+
+it.effect("validates theme definitions with belt-prefixed CSS variables", () =>
+  Effect.gen(function*() {
+    const theme = yield* Schema.decodeUnknownEffect(ToolbarThemeSchema)({
+      id: "my-light",
+      name: "My Light",
+      mode: "light",
+      variables: {
+        "--belt-color-primary": "oklch(62% 0.2 260)",
+        "--belt-radius": "6px"
+      }
+    });
+
+    assert.strictEqual(theme.mode, "light");
+    assert.strictEqual(theme.variables["--belt-radius"], "6px");
   }));
 
 it.effect("validates toolbar tool data with the source-of-truth schema", () =>
@@ -64,6 +106,19 @@ it("throws from defineTool for invalid tool definitions", () => {
   );
 });
 
+it("throws from defineTheme for non-belt CSS variables", () => {
+  assert.throws(() =>
+    defineTheme({
+      id: "bad-theme",
+      name: "Bad Theme",
+      mode: "dark",
+      variables: {
+        "--primary": "oklch(62% 0.2 260)"
+      }
+    })
+  );
+});
+
 it.effect("fails validation for duplicate tool ids with a typed error", () =>
   Effect.gen(function*() {
     const duplicateId = yield* Effect.catchTag(
@@ -91,6 +146,41 @@ it("throws a typed error from defineToolbar for invalid module config registrati
       }),
     DuplicateToolbarToolIdError
   );
+});
+
+it("preserves configured theme registration from defineToolbar", () => {
+  const config = defineToolbar({
+    theme: {
+      default: "my-dark",
+      themes: [
+        defineTheme({
+          id: "my-dark",
+          name: "My Dark",
+          mode: "dark",
+          extends: "belt-dark",
+          variables: {
+            "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+          }
+        })
+      ]
+    },
+    tools: []
+  });
+
+  assert.deepStrictEqual(config.theme, {
+    default: "my-dark",
+    themes: [
+      {
+        id: "my-dark",
+        name: "My Dark",
+        mode: "dark",
+        extends: "belt-dark",
+        variables: {
+          "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+        }
+      }
+    ]
+  });
 });
 
 it("derives tool metadata from route contributions", () => {

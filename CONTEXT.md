@@ -100,6 +100,10 @@ _Avoid_: styling library, hard-coded styles
 The target-neutral CSS package that defines the **Theme** custom properties and default styles.
 _Avoid_: component library, framework CSS
 
+**Theme Registration**:
+The optional **Toolbar Config** entry that selects an initial Theme and registers custom partial Themes.
+_Avoid_: frontend-only theme registry, automatic theme package scanning
+
 **Default Theme**:
 The **Theme** shipped by toolbar packages for apps that do not provide custom styling.
 _Avoid_: required design system
@@ -233,6 +237,11 @@ _Avoid_: Fetch adapter package
 - The **Toolbar Shell** may fetch global **Toolbar API** metadata for drift warnings; Tool-specific data still belongs to Tool **Renderers** using the shared **Tool Client**.
 - **Renderers** use the **Theme** for visual styling.
 - **Theme CSS** is target-neutral because it is plain CSS and CSS custom properties.
+- **Theme Registration** belongs in **Toolbar Config**.
+- Omitting **Theme Registration** defaults to system preference.
+- Custom Themes may be partial and inherit from built-in or registered Themes.
+- Theme color variables should use OKLCH values or OKLCH color mixing.
+- Theme color variables use elevation, foreground, border, focus, and intent/control families instead of background/surface tokens.
 - The **Default Theme** is optional and can be customized or replaced by the host app.
 - The **Internal Component Library** provides the preferred building blocks for **Renderers** and downstream Tools.
 - Each supported frontend rendering target should have a **Target Component Library**.
@@ -296,6 +305,9 @@ _Avoid_: Fetch adapter package
 
 > **Dev:** "Should Tool UIs bring their own styling framework?"
 > **Domain expert:** "No — use plain CSS and CSS custom properties through the shared **Theme**."
+
+> **Dev:** "Where are custom Themes registered?"
+> **Domain expert:** "In **Toolbar Config** through **Theme Registration**; custom Themes are partial and inherit from a built-in or registered Theme."
 
 > **Dev:** "Should theme CSS be bundled into the first component library?"
 > **Domain expert:** "No — **Theme CSS** should be target-neutral, while component libraries are target-specific."
@@ -388,6 +400,9 @@ _Avoid_: Fetch adapter package
 - The **Toolbar Shell** should support both default **Tool Client** creation and host-provided client override.
 - **Renderers** use **Tool Clients** and do not own tool API contracts.
 - **Renderers** should use plain CSS and CSS custom properties through the **Theme**.
+- **Theme Registration** should live in **Toolbar Config**, support `system` as the default, and allow custom partial Themes.
+- Theme colors should use OKLCH values or OKLCH color mixing.
+- V1 Theme tokens should use elevation, foreground, border, focus, and intent/control families; background/surface, selected/highlight, and shadow tokens are deferred.
 - **Theme CSS** should be target-neutral and reusable across frontend rendering targets.
 - A **Default Theme** should ship with the package, but host apps may customize it.
 - The **Internal Component Library** is the preferred UI vocabulary for downstream Tools.
