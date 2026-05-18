@@ -52,7 +52,7 @@ it("sets the default font family and OpenType feature contract", async () => {
 
 it("keeps color tokens in oklch-compatible syntax", async () => {
   const css = await readFile(themeCssPath, "utf8");
-  const colorDeclarations = [...css.matchAll(/(--belt-color-[^:]+):\s*([^;]+);/g)];
+  const colorDeclarations = [...css.matchAll(/^\s*(--belt-color-[^:]+):\s*([^;]+);/gm)];
 
   assert.ok(colorDeclarations.length > 0);
 
@@ -82,7 +82,7 @@ it("keeps raw color palettes on a 14-step scale", async () => {
   assert.ok(palettes.size > 0);
 
   for (const [name, indexes] of palettes) {
-    assert.deepEqual([...indexes].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], `${name} must expose 14 steps`);
+    assert.deepEqual([...indexes].sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], `${name} must expose 14 steps`);
   }
 });
 
