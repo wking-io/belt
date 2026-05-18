@@ -473,7 +473,6 @@
   isolation: isolate;
   outline: none;
   position: relative;
-  z-index: 30;
 }
 
 :where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before,
@@ -481,9 +480,6 @@
   content: "";
   pointer-events: none;
   position: absolute;
-  transition-duration: 150ms;
-  transition-property: box-shadow, opacity;
-  transition-timing-function: ease-out;
 }
 
 :where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before {
