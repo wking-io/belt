@@ -30,6 +30,8 @@ import { layout } from "../../ui/layout.ts";
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
 const elevations = [0, 1, 2, 3] as const;
+const paletteGroups = ["ruby", "honey", "jade", "denim", "iris", "oatmeal"] as const;
+const paletteSteps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
 
 const primitivePreviewStyle: CSSMixinDescriptor = css({
   display: "grid",
@@ -67,6 +69,34 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
     display: "grid",
     gap: "12px",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))"
+  },
+  ".preview-palette": {
+    display: "grid",
+    gap: "10px"
+  },
+  ".preview-palette-row": {
+    alignItems: "center",
+    display: "grid",
+    gap: "10px",
+    gridTemplateColumns: "72px 1fr"
+  },
+  ".preview-palette-label": {
+    color: "var(--belt-color-foreground-subtle)",
+    fontSize: "12px",
+    fontWeight: 600,
+    lineHeight: 1,
+    textTransform: "capitalize"
+  },
+  ".preview-palette-chips": {
+    display: "grid",
+    gap: "6px",
+    gridTemplateColumns: "repeat(14, minmax(20px, 1fr))"
+  },
+  ".preview-palette-chip": {
+    aspectRatio: "1",
+    border: "0.5px solid color-mix(in oklch, var(--belt-color-border) 65%, transparent)",
+    borderRadius: "var(--belt-radius-inner)",
+    minWidth: 0
   },
   ".preview-row": {
     alignItems: "center",
@@ -125,6 +155,7 @@ export function IndexPage() {
             Preview rendered from the example app with actual @repo/renderer-remix components and @repo/theme-css tokens.
           </p>
         </header>
+        {section({ title: "Color Palette", children: paletteGrid() })}
         {section({ title: "Panel", children: panelGrid() })}
         {section({ title: "Buttons", children: buttonGrid() })}
         {section({ title: "StatusBanner", children: statusBannerGrid() })}
@@ -142,6 +173,28 @@ function section(props: { readonly children?: RemixNode; readonly title: string 
       <h2 className="preview-section-title">{props.title}</h2>
       {props.children}
     </section>
+  );
+}
+
+function paletteGrid() {
+  return (
+    <div className="preview-palette">
+      {paletteGroups.map((group) => (
+        <div className="preview-palette-row">
+          <span className="preview-palette-label">{group}</span>
+          <div className="preview-palette-chips">
+            {paletteSteps.map((step) => (
+              <span
+                aria-label={`${group} ${step}`}
+                className="preview-palette-chip"
+                style={{ backgroundColor: `var(--${group}-${step})` }}
+                title={`${group}-${step}`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
