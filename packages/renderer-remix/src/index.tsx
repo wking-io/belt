@@ -119,7 +119,6 @@ export type PanelProps = Props<"div"> & {
   readonly focused?: boolean;
   readonly innerClassName?: string;
   readonly innerMix?: MixInput;
-  readonly inset?: boolean;
 };
 
 export function Panel(handle: Handle<PanelProps>) {
@@ -130,7 +129,6 @@ export function Panel(handle: Handle<PanelProps>) {
       focused = false,
       innerClassName,
       innerMix,
-      inset = false,
       mix,
       className,
       ...rootProps
@@ -145,9 +143,7 @@ export function Panel(handle: Handle<PanelProps>) {
         data-belt-elevation={String(elevation)}
         data-belt-surface-elevation={String(elevation)}
         data-belt-surface-size="surface-default"
-        data-belt-surface-variant={inset ? "inset" : "default"}
         data-focused={focused ? "true" : undefined}
-        data-inset={inset ? "true" : undefined}
         mix={mix}
       >
         <div className={classNames("belt-surface__inner", innerClassName)} data-belt-surface-inner="" mix={innerMix}>
@@ -469,7 +465,6 @@ export const buttonBaseStyle: CSSMixinDescriptor = css({
   paddingBlock: "0",
   paddingInline: "var(--belt-space-3)",
   position: "relative",
-  transition: "background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease",
   userSelect: "none",
   verticalAlign: "top",
   whiteSpace: "nowrap",
@@ -532,7 +527,7 @@ export const fieldStyle: CSSMixinDescriptor = css({
 
 export const inputStyle: CSSMixinDescriptor = css({
   appearance: "none",
-  backgroundColor: "var(--belt-color-elevation-2-inset)",
+  backgroundColor: "var(--belt-color-elevation-2)",
   border: "0.5px solid var(--belt-color-border)",
   borderRadius: "var(--belt-radius)",
   boxSizing: "border-box",
@@ -601,14 +596,11 @@ export const comboboxRootStyle: CSSMixinDescriptor = css({
 export function panelRootStyle(options: {
   readonly elevation: Elevation;
   readonly focused: boolean;
-  readonly inset: boolean;
 }): CSSMixinDescriptor {
   return css({
     backgroundColor: `var(--belt-color-elevation-${options.elevation})`,
     borderRadius: "var(--belt-radius-outer)",
-    boxShadow: options.inset
-      ? "inset 0 1px 2px color-mix(in oklch, var(--belt-color-foreground) 12%, transparent)"
-      : "0 1px 1px color-mix(in oklch, var(--belt-color-foreground) 10%, transparent), 0 8px 24px color-mix(in oklch, var(--belt-color-foreground) 12%, transparent)",
+    boxShadow: "0 1px 1px color-mix(in oklch, var(--belt-color-foreground) 10%, transparent), 0 8px 24px color-mix(in oklch, var(--belt-color-foreground) 12%, transparent)",
     boxSizing: "border-box",
     outline: options.focused ? "2px solid var(--belt-color-focus)" : "none",
     outlineOffset: "2px",
@@ -619,10 +611,9 @@ export function panelRootStyle(options: {
 
 export function panelInnerStyle(options: {
   readonly elevation: Elevation;
-  readonly inset: boolean;
 }): CSSMixinDescriptor {
   return css({
-    backgroundColor: `var(--belt-color-elevation-${options.elevation}${options.inset ? "-inset" : ""})`,
+    backgroundColor: `var(--belt-color-elevation-${options.elevation})`,
     border: "0.5px solid var(--belt-color-border-subtle)",
     borderRadius: "var(--belt-radius)",
     boxSizing: "border-box",

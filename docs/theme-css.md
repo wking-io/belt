@@ -15,7 +15,7 @@ All color values in the default theme use `oklch(...)`, `color-mix(in oklch, ...
 The v1 color contract is:
 
 - `--belt-color-elevation-1` through `--belt-color-elevation-3`
-- `--belt-color-elevation-N-hover`, `--belt-color-elevation-N-active`, and `--belt-color-elevation-N-inset`
+- `--belt-color-elevation-N-hover` and `--belt-color-elevation-N-active`
 - `--belt-color-foreground`, `--belt-color-foreground-subtle`, and `--belt-color-foreground-strong`
 - `--belt-color-border`, `--belt-color-border-subtle`, and `--belt-color-border-strong`
 - `--belt-color-focus`
@@ -50,7 +50,6 @@ The theme CSS also ships portable surface classes so renderers and future React/
   data-belt-surface
   data-belt-surface-elevation="3"
   data-belt-surface-size="surface-default"
-  data-belt-surface-variant="default"
 >
   <div class="belt-surface__inner" data-belt-surface-inner>
     ...
@@ -60,11 +59,10 @@ The theme CSS also ships portable surface classes so renderers and future React/
 
 `belt-surface` and `belt-surface__inner` are class hooks. The equivalent `data-belt-surface` and `data-belt-surface-inner` attributes are also supported for adapters that prefer attribute-only markup.
 
-Surface variants are selected with attributes:
+Surface styling is selected with attributes:
 
 - `data-belt-surface-elevation="1" | "2" | "3"`
 - `data-belt-surface-size="control-sm" | "control-default" | "control-lg" | "surface-sm" | "surface-default" | "surface-lg"`
-- `data-belt-surface-variant="default" | "elevated" | "inset" | "inset-subtle"`
 - `data-focused="true"` or `:focus-within` for the focused treatment
 - `data-belt-placement="absolute" | "relative"` when placement should be encoded in markup
 

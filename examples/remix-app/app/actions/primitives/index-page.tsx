@@ -58,15 +58,15 @@ const paletteSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
 const beltColorGroups = [
   {
     label: "elevation 1",
-    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active", "elevation-1-inset", "elevation-1-highlight"]
+    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active"]
   },
   {
     label: "elevation 2",
-    tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active", "elevation-2-inset"]
+    tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active"]
   },
   {
     label: "elevation 3",
-    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active", "elevation-3-inset"]
+    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active"]
   },
   {
     label: "foreground",

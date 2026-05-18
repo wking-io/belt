@@ -11,7 +11,6 @@ it("exports the v1 theme token contract", async () => {
     "--belt-color-elevation-1",
     "--belt-color-elevation-1-hover",
     "--belt-color-elevation-1-active",
-    "--belt-color-elevation-1-inset",
     "--belt-color-elevation-3",
     "--belt-color-foreground",
     "--belt-color-foreground-subtle",
@@ -136,8 +135,6 @@ it("exports portable surface classes with attribute selector variants", async ()
     "[data-belt-surface]",
     "[data-belt-surface-inner]",
     '[data-belt-surface-size="surface-default"]',
-    '[data-belt-surface-variant="inset"]',
-    '[data-belt-surface-variant="elevated"]',
     '[data-belt-surface-elevation="3"]',
   ]) {
     assert.match(css, new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -146,6 +143,15 @@ it("exports portable surface classes with attribute selector variants", async ()
   assert.match(css, /::before/);
   assert.match(css, /::after/);
   assert.match(css, /:focus-within/);
+  assert.ok(!/transition/.test(css), "surface CSS should not define transitions");
+  assert.ok(
+    !/elevation-\d-inset/.test(css),
+    "surface CSS should only use the three elevated levels",
+  );
+  assert.ok(
+    !/data-belt-surface-variant/.test(css),
+    "surface CSS should not expose inset/default/elevated variants",
+  );
   assert.ok(
     !/&::?/.test(css),
     "surface CSS should be emitted as plain selectors instead of nested mixin syntax",
