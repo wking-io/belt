@@ -7,7 +7,7 @@ import * as RemixMenu from "@remix-run/ui/menu";
 import * as RemixSelect from "@remix-run/ui/select";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
-type Elevation = 0 | 1 | 2;
+type Elevation = 1 | 2 | 3;
 type ForegroundTone = "foreground" | "subtle" | "strong";
 type TextSize = "xs" | "sm" | "md";
 type BadgeTone = IntentTone;
@@ -73,7 +73,7 @@ export function badgeStyle(options: {
 
   return css({
     alignItems: "center",
-    backgroundColor: tone === "neutral" ? "var(--belt-color-elevation-1)" : `var(--belt-color-${tone})`,
+    backgroundColor: tone === "neutral" ? "var(--belt-color-elevation-2)" : `var(--belt-color-${tone})`,
     border: `0.5px solid ${tone === "neutral" ? "var(--belt-color-border-subtle)" : `color-mix(in oklch, var(--belt-color-${tone}-foreground) 24%, transparent)`}`,
     borderRadius: "999px",
     boxSizing: "border-box",
@@ -126,7 +126,7 @@ export function Panel(handle: Handle<PanelProps>) {
   return () => {
     const {
       children,
-      elevation = 2,
+      elevation = 3,
       focused = false,
       innerClassName,
       innerMix,
@@ -525,7 +525,7 @@ export const fieldStyle: CSSMixinDescriptor = css({
 
 export const inputStyle: CSSMixinDescriptor = css({
   appearance: "none",
-  backgroundColor: "var(--belt-color-elevation-1-inset)",
+  backgroundColor: "var(--belt-color-elevation-2-inset)",
   border: "0.5px solid var(--belt-color-border)",
   borderRadius: "var(--belt-radius)",
   boxSizing: "border-box",
@@ -562,7 +562,7 @@ export const menuButtonStyle: CSSMixinDescriptor = css({
 });
 
 export const menuListStyle: CSSMixinDescriptor = css({
-  backgroundColor: "var(--belt-color-elevation-2)",
+  backgroundColor: "var(--belt-color-elevation-3)",
   border: "0.5px solid var(--belt-color-border-subtle)",
   borderRadius: "var(--belt-radius-outer)",
   boxShadow: "0 12px 30px color-mix(in oklch, var(--belt-color-foreground) 18%, transparent)",
@@ -574,7 +574,7 @@ export const menuItemStyle: CSSMixinDescriptor = css({
   borderRadius: "var(--belt-radius)",
   color: "var(--belt-color-foreground)",
   "&[data-highlighted=\"true\"]": {
-    backgroundColor: "var(--belt-color-elevation-2-hover)"
+    backgroundColor: "var(--belt-color-elevation-3-hover)"
   }
 });
 
@@ -628,15 +628,15 @@ export function panelInnerStyle(options: {
 export function buttonToneStyle(tone: IntentTone): CSSMixinDescriptor {
   if (tone === "neutral") {
     return css({
-      backgroundColor: "var(--belt-color-elevation-2)",
+      backgroundColor: "var(--belt-color-elevation-3)",
       border: "0.5px solid var(--belt-color-border)",
       boxShadow: "inset 0 1px 0 color-mix(in oklch, var(--belt-color-foreground-strong) 8%, transparent)",
       color: "var(--belt-color-foreground)",
       "&:hover": {
-        backgroundColor: "var(--belt-color-elevation-2-hover)"
+        backgroundColor: "var(--belt-color-elevation-3-hover)"
       },
       "&:active": {
-        backgroundColor: "var(--belt-color-elevation-2-active)"
+        backgroundColor: "var(--belt-color-elevation-3-active)"
       }
     });
   }
@@ -662,11 +662,11 @@ export function ghostButtonToneStyle(tone: IntentTone): CSSMixinDescriptor {
       border: "0.5px solid transparent",
       color: "var(--belt-color-foreground-subtle)",
       "&:hover": {
-        backgroundColor: "var(--belt-color-elevation-1-hover)",
+        backgroundColor: "var(--belt-color-elevation-2-hover)",
         color: "var(--belt-color-foreground)"
       },
       "&:active": {
-        backgroundColor: "var(--belt-color-elevation-1-active)",
+        backgroundColor: "var(--belt-color-elevation-2-active)",
         color: "var(--belt-color-foreground-strong)"
       }
     });
@@ -690,7 +690,7 @@ export function statusBannerRootStyle(tone: StatusBannerTone): CSSMixinDescripto
   const neutral = tone === "neutral";
 
   return css({
-    backgroundColor: neutral ? "var(--belt-color-elevation-1)" : `var(--belt-color-${tone})`,
+    backgroundColor: neutral ? "var(--belt-color-elevation-2)" : `var(--belt-color-${tone})`,
     border: `0.5px solid ${neutral ? "var(--belt-color-border-subtle)" : `color-mix(in oklch, var(--belt-color-${tone}-foreground) 24%, transparent)`}`,
     borderRadius: "var(--belt-radius-outer)",
     boxShadow: "0 1px 2px color-mix(in oklch, var(--belt-color-foreground) 10%, transparent)",

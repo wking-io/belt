@@ -5,7 +5,7 @@ import { document } from "./document.ts";
 const appChrome = css({
   "--rmx-font-family-mono": "var(--belt-font-family)",
   "--rmx-font-family-sans": "var(--belt-font-family)",
-  background: "var(--belt-color-elevation-0)",
+  background: "var(--belt-color-elevation-1)",
   color: "var(--belt-color-foreground)",
   fontFamily: "var(--belt-font-family)",
   fontFeatureSettings: "var(--belt-font-feature-settings)",
@@ -59,7 +59,7 @@ const appChrome = css({
     textDecoration: "none"
   },
   ".app-nav-link:hover": {
-    backgroundColor: "var(--belt-color-elevation-1-hover)",
+    backgroundColor: "var(--belt-color-elevation-2-hover)",
     color: "var(--belt-color-foreground)"
   }
 });

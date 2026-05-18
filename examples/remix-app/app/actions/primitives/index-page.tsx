@@ -29,7 +29,7 @@ import {
 import { layout } from "../../ui/layout.ts";
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
-const elevations = [0, 1, 2] as const;
+const elevations = [1, 2, 3] as const;
 const paletteGroups = [
   "strawberry",
   "ruby",
@@ -57,16 +57,16 @@ const paletteGroups = [
 const paletteSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
 const beltColorGroups = [
   {
-    label: "elevation 0",
-    tokens: ["elevation-0", "elevation-0-hover", "elevation-0-active", "elevation-0-inset", "elevation-0-highlight"]
-  },
-  {
     label: "elevation 1",
-    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active", "elevation-1-inset"]
+    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active", "elevation-1-inset", "elevation-1-highlight"]
   },
   {
     label: "elevation 2",
     tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active", "elevation-2-inset"]
+  },
+  {
+    label: "elevation 3",
+    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active", "elevation-3-inset"]
   },
   {
     label: "foreground",
@@ -250,7 +250,7 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   },
   ".preview-radius": {
     alignItems: "center",
-    backgroundColor: "var(--belt-color-elevation-2)",
+    backgroundColor: "var(--belt-color-elevation-3)",
     border: "0.5px solid var(--belt-color-border-subtle)",
     display: "inline-flex",
     height: "40px",

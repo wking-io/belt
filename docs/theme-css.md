@@ -14,7 +14,7 @@ All color values in the default theme use `oklch(...)` or `color-mix(in oklch, .
 
 The v1 color contract is:
 
-- `--belt-color-elevation-0` through `--belt-color-elevation-2`
+- `--belt-color-elevation-1` through `--belt-color-elevation-3`
 - `--belt-color-elevation-N-hover`, `--belt-color-elevation-N-active`, and `--belt-color-elevation-N-inset`
 - `--belt-color-foreground`, `--belt-color-foreground-subtle`, and `--belt-color-foreground-strong`
 - `--belt-color-border`, `--belt-color-border-subtle`, and `--belt-color-border-strong`
@@ -70,7 +70,7 @@ export default defineToolbar({
         mode: "dark",
         extends: "belt-dark",
         variables: {
-          "--belt-color-elevation-0": "oklch(18% 0.01 255)",
+          "--belt-color-elevation-1": "oklch(18% 0.01 255)",
           "--belt-color-primary-control": "oklch(70% 0.18 260)"
         }
       })
