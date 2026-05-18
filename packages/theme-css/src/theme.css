@@ -9,14 +9,13 @@
   --strawberry-5: oklch(74.77% 0.194 0);
   --strawberry-6: oklch(70% 0.27 0);
   --strawberry-7: oklch(64.57% 0.2945 0);
-  --strawberry-8: oklch(58.84% 0.2684 0);
-  --strawberry-9: oklch(52.67% 0.2403 0);
-  --strawberry-10: oklch(45.91% 0.2089 0);
-  --strawberry-11: oklch(37.32% 0.1699 0);
-  --strawberry-12: oklch(27.57% 0.125 0);
-  --strawberry-13: oklch(22% 0.0998 0);
-  --strawberry-14: oklch(16.43% 0.0745 0);
-  --strawberry-15: oklch(0% 0.043 0);
+  --strawberry-8: oklch(54% 0.2544 0);
+  --strawberry-9: oklch(45.91% 0.2089 0);
+  --strawberry-10: oklch(37.32% 0.1699 0);
+  --strawberry-11: oklch(27.57% 0.125 0);
+  --strawberry-12: oklch(22% 0.0998 0);
+  --strawberry-13: oklch(16.43% 0.0745 0);
+  --strawberry-14: oklch(0% 0.043 0);
 
   --ruby-1: oklch(96% 0.0129 17.895);
   --ruby-2: oklch(91.21% 0.0352 17.895);
@@ -25,14 +24,13 @@
   --ruby-5: oklch(74.77% 0.1759 17.895);
   --ruby-6: oklch(70% 0.245 17.895);
   --ruby-7: oklch(64.57% 0.291 17.895);
-  --ruby-8: oklch(58.84% 0.2653 17.895);
-  --ruby-9: oklch(52.67% 0.2372 17.895);
-  --ruby-10: oklch(45.91% 0.2068 17.895);
-  --ruby-11: oklch(37.32% 0.1678 17.895);
-  --ruby-12: oklch(27.57% 0.1241 17.895);
-  --ruby-13: oklch(22% 0.0991 17.895);
-  --ruby-14: oklch(16.43% 0.0741 17.895);
-  --ruby-15: oklch(0% 0.032 17.895);
+  --ruby-8: oklch(54% 0.2512 17.895);
+  --ruby-9: oklch(45.91% 0.2068 17.895);
+  --ruby-10: oklch(37.32% 0.1678 17.895);
+  --ruby-11: oklch(27.57% 0.1241 17.895);
+  --ruby-12: oklch(22% 0.0991 17.895);
+  --ruby-13: oklch(16.43% 0.0741 17.895);
+  --ruby-14: oklch(0% 0.032 17.895);
 
   --tangerine-1: oklch(96% 0.0129 35.789);
   --tangerine-2: oklch(91.21% 0.0357 35.789);
@@ -41,14 +39,13 @@
   --tangerine-5: oklch(74.77% 0.1773 35.789);
   --tangerine-6: oklch(70% 0.245 35.789);
   --tangerine-7: oklch(64.57% 0.2497 35.789);
-  --tangerine-8: oklch(58.84% 0.2271 35.789);
-  --tangerine-9: oklch(52.67% 0.2036 35.789);
-  --tangerine-10: oklch(45.91% 0.1771 35.789);
-  --tangerine-11: oklch(37.32% 0.1443 35.789);
-  --tangerine-12: oklch(27.57% 0.1061 35.789);
-  --tangerine-13: oklch(22% 0.0847 35.789);
-  --tangerine-14: oklch(16.43% 0.0632 35.789);
-  --tangerine-15: oklch(0% 0.0187 35.789);
+  --tangerine-8: oklch(54% 0.2154 35.789);
+  --tangerine-9: oklch(45.91% 0.1771 35.789);
+  --tangerine-10: oklch(37.32% 0.1443 35.789);
+  --tangerine-11: oklch(27.57% 0.1061 35.789);
+  --tangerine-12: oklch(22% 0.0847 35.789);
+  --tangerine-13: oklch(16.43% 0.0632 35.789);
+  --tangerine-14: oklch(0% 0.0187 35.789);
 
   --ochre-1: oklch(96% 0.0145 53.684);
   --ochre-2: oklch(91.21% 0.04 53.684);
@@ -57,14 +54,13 @@
   --ochre-5: oklch(74.77% 0.1923 53.684);
   --ochre-6: oklch(70% 0.2 53.684);
   --ochre-7: oklch(64.57% 0.1852 53.684);
-  --ochre-8: oklch(58.84% 0.168 53.684);
-  --ochre-9: oklch(52.67% 0.1508 53.684);
-  --ochre-10: oklch(45.91% 0.1313 53.684);
-  --ochre-11: oklch(37.32% 0.107 53.684);
-  --ochre-12: oklch(27.57% 0.0789 53.684);
-  --ochre-13: oklch(22% 0.0629 53.684);
-  --ochre-14: oklch(16.43% 0.0469 53.684);
-  --ochre-15: oklch(0% 0.0141 53.684);
+  --ochre-8: oklch(54% 0.1594 53.684);
+  --ochre-9: oklch(45.91% 0.1313 53.684);
+  --ochre-10: oklch(37.32% 0.107 53.684);
+  --ochre-11: oklch(27.57% 0.0789 53.684);
+  --ochre-12: oklch(22% 0.0629 53.684);
+  --ochre-13: oklch(16.43% 0.0469 53.684);
+  --ochre-14: oklch(0% 0.0141 53.684);
 
   --honey-1: oklch(96% 0.0188 71.579);
   --honey-2: oklch(91.21% 0.0513 71.579);
@@ -73,14 +69,13 @@
   --honey-5: oklch(74.77% 0.165 71.579);
   --honey-6: oklch(70% 0.172 71.579);
   --honey-7: oklch(64.57% 0.1587 71.579);
-  --honey-8: oklch(58.84% 0.1446 71.579);
-  --honey-9: oklch(52.67% 0.1293 71.579);
-  --honey-10: oklch(45.91% 0.1126 71.579);
-  --honey-11: oklch(37.32% 0.0915 71.579);
-  --honey-12: oklch(27.57% 0.0672 71.579);
-  --honey-13: oklch(22% 0.0536 71.579);
-  --honey-14: oklch(16.43% 0.0399 71.579);
-  --honey-15: oklch(0% 0.0117 71.579);
+  --honey-8: oklch(54% 0.137 71.579);
+  --honey-9: oklch(45.91% 0.1126 71.579);
+  --honey-10: oklch(37.32% 0.0915 71.579);
+  --honey-11: oklch(27.57% 0.0672 71.579);
+  --honey-12: oklch(22% 0.0536 71.579);
+  --honey-13: oklch(16.43% 0.0399 71.579);
+  --honey-14: oklch(0% 0.0117 71.579);
 
   --lemon-1: oklch(96% 0.0301 89.474);
   --lemon-2: oklch(91.21% 0.0809 89.474);
@@ -89,14 +84,13 @@
   --lemon-5: oklch(74.77% 0.158 89.474);
   --lemon-6: oklch(70% 0.165 89.474);
   --lemon-7: oklch(64.57% 0.1517 89.474);
-  --lemon-8: oklch(58.84% 0.1384 89.474);
-  --lemon-9: oklch(52.67% 0.1234 89.474);
-  --lemon-10: oklch(45.91% 0.1079 89.474);
-  --lemon-11: oklch(37.32% 0.0876 89.474);
-  --lemon-12: oklch(27.57% 0.0649 89.474);
-  --lemon-13: oklch(22% 0.0516 89.474);
-  --lemon-14: oklch(16.43% 0.0383 89.474);
-  --lemon-15: oklch(0% 0.0117 89.474);
+  --lemon-8: oklch(54% 0.1309 89.474);
+  --lemon-9: oklch(45.91% 0.1079 89.474);
+  --lemon-10: oklch(37.32% 0.0876 89.474);
+  --lemon-11: oklch(27.57% 0.0649 89.474);
+  --lemon-12: oklch(22% 0.0516 89.474);
+  --lemon-13: oklch(16.43% 0.0383 89.474);
+  --lemon-14: oklch(0% 0.0117 89.474);
 
   --pear-1: oklch(96% 0.0932 107.37);
   --pear-2: oklch(91.21% 0.1366 107.37);
@@ -105,14 +99,13 @@
   --pear-5: oklch(74.77% 0.1668 107.37);
   --pear-6: oklch(70% 0.174 107.37);
   --pear-7: oklch(64.57% 0.1607 107.37);
-  --pear-8: oklch(58.84% 0.1459 107.37);
-  --pear-9: oklch(52.67% 0.1311 107.37);
-  --pear-10: oklch(45.91% 0.1139 107.37);
-  --pear-11: oklch(37.32% 0.0929 107.37);
-  --pear-12: oklch(27.57% 0.0687 107.37);
-  --pear-13: oklch(22% 0.0547 107.37);
-  --pear-14: oklch(16.43% 0.0406 107.37);
-  --pear-15: oklch(0% 0.0125 107.37);
+  --pear-8: oklch(54% 0.1385 107.37);
+  --pear-9: oklch(45.91% 0.1139 107.37);
+  --pear-10: oklch(37.32% 0.0929 107.37);
+  --pear-11: oklch(27.57% 0.0687 107.37);
+  --pear-12: oklch(22% 0.0547 107.37);
+  --pear-13: oklch(16.43% 0.0406 107.37);
+  --pear-14: oklch(0% 0.0125 107.37);
 
   --pistachio-1: oklch(96% 0.0569 125.26);
   --pistachio-2: oklch(91.21% 0.1609 125.26);
@@ -121,14 +114,13 @@
   --pistachio-5: oklch(74.77% 0.1967 125.26);
   --pistachio-6: oklch(70% 0.205 125.26);
   --pistachio-7: oklch(64.57% 0.1894 125.26);
-  --pistachio-8: oklch(58.84% 0.1723 125.26);
-  --pistachio-9: oklch(52.67% 0.1543 125.26);
-  --pistachio-10: oklch(45.91% 0.1348 125.26);
-  --pistachio-11: oklch(37.32% 0.1091 125.26);
-  --pistachio-12: oklch(27.57% 0.0803 125.26);
-  --pistachio-13: oklch(22% 0.0643 125.26);
-  --pistachio-14: oklch(16.43% 0.0483 125.26);
-  --pistachio-15: oklch(0% 0.0148 125.26);
+  --pistachio-8: oklch(54% 0.1633 125.26);
+  --pistachio-9: oklch(45.91% 0.1348 125.26);
+  --pistachio-10: oklch(37.32% 0.1091 125.26);
+  --pistachio-11: oklch(27.57% 0.0803 125.26);
+  --pistachio-12: oklch(22% 0.0643 125.26);
+  --pistachio-13: oklch(16.43% 0.0483 125.26);
+  --pistachio-14: oklch(0% 0.0148 125.26);
 
   --jade-1: oklch(96% 0.0393 143.16);
   --jade-2: oklch(91.21% 0.1147 143.16);
@@ -137,14 +129,13 @@
   --jade-5: oklch(74.77% 0.2719 143.16);
   --jade-6: oklch(70% 0.284 143.16);
   --jade-7: oklch(64.57% 0.2614 143.16);
-  --jade-8: oklch(58.84% 0.2381 143.16);
-  --jade-9: oklch(52.67% 0.2132 143.16);
-  --jade-10: oklch(45.91% 0.186 143.16);
-  --jade-11: oklch(37.32% 0.1509 143.16);
-  --jade-12: oklch(27.57% 0.1113 143.16);
-  --jade-13: oklch(22% 0.0887 143.16);
-  --jade-14: oklch(16.43% 0.0661 143.16);
-  --jade-15: oklch(0% 0.0218 143.16);
+  --jade-8: oklch(54% 0.2257 143.16);
+  --jade-9: oklch(45.91% 0.186 143.16);
+  --jade-10: oklch(37.32% 0.1509 143.16);
+  --jade-11: oklch(27.57% 0.1113 143.16);
+  --jade-12: oklch(22% 0.0887 143.16);
+  --jade-13: oklch(16.43% 0.0661 143.16);
+  --jade-14: oklch(0% 0.0218 143.16);
 
   --emerald-1: oklch(96% 0.0332 161.05);
   --emerald-2: oklch(91.21% 0.0949 161.05);
@@ -153,14 +144,13 @@
   --emerald-5: oklch(74.77% 0.2049 161.05);
   --emerald-6: oklch(70% 0.214 161.05);
   --emerald-7: oklch(64.57% 0.1968 161.05);
-  --emerald-8: oklch(58.84% 0.1796 161.05);
-  --emerald-9: oklch(52.67% 0.1609 161.05);
-  --emerald-10: oklch(45.91% 0.1398 161.05);
-  --emerald-11: oklch(37.32% 0.114 161.05);
-  --emerald-12: oklch(27.57% 0.0844 161.05);
-  --emerald-13: oklch(22% 0.0672 161.05);
-  --emerald-14: oklch(16.43% 0.05 161.05);
-  --emerald-15: oklch(0% 0.0391 161.05);
+  --emerald-8: oklch(54% 0.1703 161.05);
+  --emerald-9: oklch(45.91% 0.1398 161.05);
+  --emerald-10: oklch(37.32% 0.114 161.05);
+  --emerald-11: oklch(27.57% 0.0844 161.05);
+  --emerald-12: oklch(22% 0.0672 161.05);
+  --emerald-13: oklch(16.43% 0.05 161.05);
+  --emerald-14: oklch(0% 0.0391 161.05);
 
   --aqua-1: oklch(96% 0.032 178.95);
   --aqua-2: oklch(91.21% 0.091 178.95);
@@ -169,14 +159,13 @@
   --aqua-5: oklch(74.77% 0.1659 178.95);
   --aqua-6: oklch(70% 0.173 178.95);
   --aqua-7: oklch(64.57% 0.159 178.95);
-  --aqua-8: oklch(58.84% 0.1449 178.95);
-  --aqua-9: oklch(52.67% 0.1301 178.95);
-  --aqua-10: oklch(45.91% 0.113 178.95);
-  --aqua-11: oklch(37.32% 0.092 178.95);
-  --aqua-12: oklch(27.57% 0.0678 178.95);
-  --aqua-13: oklch(22% 0.0542 178.95);
-  --aqua-14: oklch(16.43% 0.0405 178.95);
-  --aqua-15: oklch(0% 0.0304 178.95);
+  --aqua-8: oklch(54% 0.1375 178.95);
+  --aqua-9: oklch(45.91% 0.113 178.95);
+  --aqua-10: oklch(37.32% 0.092 178.95);
+  --aqua-11: oklch(27.57% 0.0678 178.95);
+  --aqua-12: oklch(22% 0.0542 178.95);
+  --aqua-13: oklch(16.43% 0.0405 178.95);
+  --aqua-14: oklch(0% 0.0304 178.95);
 
   --ocean-1: oklch(96% 0.0308 196.84);
   --ocean-2: oklch(91.21% 0.0821 196.84);
@@ -185,14 +174,13 @@
   --ocean-5: oklch(74.77% 0.1526 196.84);
   --ocean-6: oklch(70% 0.159 196.84);
   --ocean-7: oklch(64.57% 0.1465 196.84);
-  --ocean-8: oklch(58.84% 0.1341 196.84);
-  --ocean-9: oklch(52.67% 0.12 196.84);
-  --ocean-10: oklch(45.91% 0.1044 196.84);
-  --ocean-11: oklch(37.32% 0.085 196.84);
-  --ocean-12: oklch(27.57% 0.0624 196.84);
-  --ocean-13: oklch(22% 0.0499 196.84);
-  --ocean-14: oklch(16.43% 0.0374 196.84);
-  --ocean-15: oklch(0% 0.0273 196.84);
+  --ocean-8: oklch(54% 0.1271 196.84);
+  --ocean-9: oklch(45.91% 0.1044 196.84);
+  --ocean-10: oklch(37.32% 0.085 196.84);
+  --ocean-11: oklch(27.57% 0.0624 196.84);
+  --ocean-12: oklch(22% 0.0499 196.84);
+  --ocean-13: oklch(16.43% 0.0374 196.84);
+  --ocean-14: oklch(0% 0.0273 196.84);
 
   --sky-1: oklch(96% 0.0168 214.74);
   --sky-2: oklch(91.21% 0.0456 214.74);
@@ -201,14 +189,13 @@
   --sky-5: oklch(74.77% 0.1571 214.74);
   --sky-6: oklch(70% 0.164 214.74);
   --sky-7: oklch(64.57% 0.1507 214.74);
-  --sky-8: oklch(58.84% 0.1374 214.74);
-  --sky-9: oklch(52.67% 0.1234 214.74);
-  --sky-10: oklch(45.91% 0.107 214.74);
-  --sky-11: oklch(37.32% 0.0875 214.74);
-  --sky-12: oklch(27.57% 0.064 214.74);
-  --sky-13: oklch(22% 0.0512 214.74);
-  --sky-14: oklch(16.43% 0.0383 214.74);
-  --sky-15: oklch(0% 0.0297 214.74);
+  --sky-8: oklch(54% 0.1304 214.74);
+  --sky-9: oklch(45.91% 0.107 214.74);
+  --sky-10: oklch(37.32% 0.0875 214.74);
+  --sky-11: oklch(27.57% 0.064 214.74);
+  --sky-12: oklch(22% 0.0512 214.74);
+  --sky-13: oklch(16.43% 0.0383 214.74);
+  --sky-14: oklch(0% 0.0297 214.74);
 
   --cobalt-1: oklch(96% 0.0125 232.63);
   --cobalt-2: oklch(91.21% 0.0334 232.63);
@@ -217,14 +204,13 @@
   --cobalt-5: oklch(74.77% 0.1522 232.63);
   --cobalt-6: oklch(70% 0.189 232.63);
   --cobalt-7: oklch(64.57% 0.1742 232.63);
-  --cobalt-8: oklch(58.84% 0.1585 232.63);
-  --cobalt-9: oklch(52.67% 0.1421 232.63);
-  --cobalt-10: oklch(45.91% 0.1234 232.63);
-  --cobalt-11: oklch(37.32% 0.1007 232.63);
-  --cobalt-12: oklch(27.57% 0.0742 232.63);
-  --cobalt-13: oklch(22% 0.059 232.63);
-  --cobalt-14: oklch(16.43% 0.0437 232.63);
-  --cobalt-15: oklch(0% 0.0258 232.63);
+  --cobalt-8: oklch(54% 0.1503 232.63);
+  --cobalt-9: oklch(45.91% 0.1234 232.63);
+  --cobalt-10: oklch(37.32% 0.1007 232.63);
+  --cobalt-11: oklch(27.57% 0.0742 232.63);
+  --cobalt-12: oklch(22% 0.059 232.63);
+  --cobalt-13: oklch(16.43% 0.0437 232.63);
+  --cobalt-14: oklch(0% 0.0258 232.63);
 
   --denim-1: oklch(96% 0.0106 250.53);
   --denim-2: oklch(91.21% 0.0287 250.53);
@@ -233,14 +219,13 @@
   --denim-5: oklch(74.77% 0.1307 250.53);
   --denim-6: oklch(70% 0.176 250.53);
   --denim-7: oklch(64.57% 0.2112 250.53);
-  --denim-8: oklch(58.84% 0.2175 250.53);
-  --denim-9: oklch(52.67% 0.1948 250.53);
-  --denim-10: oklch(45.91% 0.1697 250.53);
-  --denim-11: oklch(37.32% 0.1377 250.53);
-  --denim-12: oklch(27.57% 0.1017 250.53);
-  --denim-13: oklch(22% 0.0809 250.53);
-  --denim-14: oklch(16.43% 0.0601 250.53);
-  --denim-15: oklch(0% 0.0211 250.53);
+  --denim-8: oklch(54% 0.2062 250.53);
+  --denim-9: oklch(45.91% 0.1697 250.53);
+  --denim-10: oklch(37.32% 0.1377 250.53);
+  --denim-11: oklch(27.57% 0.1017 250.53);
+  --denim-12: oklch(22% 0.0809 250.53);
+  --denim-13: oklch(16.43% 0.0601 250.53);
+  --denim-14: oklch(0% 0.0211 250.53);
 
   --iris-1: oklch(96% 0.0102 268.42);
   --iris-2: oklch(91.21% 0.0278 268.42);
@@ -249,14 +234,13 @@
   --iris-5: oklch(74.77% 0.1258 268.42);
   --iris-6: oklch(70% 0.169 268.42);
   --iris-7: oklch(64.57% 0.2026 268.42);
-  --iris-8: oklch(58.84% 0.2402 268.42);
-  --iris-9: oklch(52.67% 0.2811 268.42);
-  --iris-10: oklch(45.91% 0.3059 268.42);
-  --iris-11: oklch(37.32% 0.2488 268.42);
-  --iris-12: oklch(27.57% 0.1839 268.42);
-  --iris-13: oklch(22% 0.1467 268.42);
-  --iris-14: oklch(16.43% 0.1095 268.42);
-  --iris-15: oklch(0% 0.0203 268.42);
+  --iris-8: oklch(54% 0.2607 268.42);
+  --iris-9: oklch(45.91% 0.3059 268.42);
+  --iris-10: oklch(37.32% 0.2488 268.42);
+  --iris-11: oklch(27.57% 0.1839 268.42);
+  --iris-12: oklch(22% 0.1467 268.42);
+  --iris-13: oklch(16.43% 0.1095 268.42);
+  --iris-14: oklch(0% 0.0203 268.42);
 
   --grape-1: oklch(96% 0.0109 286.32);
   --grape-2: oklch(91.21% 0.0292 286.32);
@@ -265,14 +249,13 @@
   --grape-5: oklch(74.77% 0.1334 286.32);
   --grape-6: oklch(70% 0.179 286.32);
   --grape-7: oklch(64.57% 0.2157 286.32);
-  --grape-8: oklch(58.84% 0.2548 286.32);
-  --grape-9: oklch(52.67% 0.2988 286.32);
-  --grape-10: oklch(45.91% 0.2712 286.32);
-  --grape-11: oklch(37.32% 0.2204 286.32);
-  --grape-12: oklch(27.57% 0.1626 286.32);
-  --grape-13: oklch(22% 0.1298 286.32);
-  --grape-14: oklch(16.43% 0.0969 286.32);
-  --grape-15: oklch(0% 0.0211 286.32);
+  --grape-8: oklch(54% 0.2768 286.32);
+  --grape-9: oklch(45.91% 0.2712 286.32);
+  --grape-10: oklch(37.32% 0.2204 286.32);
+  --grape-11: oklch(27.57% 0.1626 286.32);
+  --grape-12: oklch(22% 0.1298 286.32);
+  --grape-13: oklch(16.43% 0.0969 286.32);
+  --grape-14: oklch(0% 0.0211 286.32);
 
   --lilac-1: oklch(96% 0.0129 304.21);
   --lilac-2: oklch(91.21% 0.0347 304.21);
@@ -281,14 +264,13 @@
   --lilac-5: oklch(74.77% 0.1575 304.21);
   --lilac-6: oklch(70% 0.212 304.21);
   --lilac-7: oklch(64.57% 0.2556 304.21);
-  --lilac-8: oklch(58.84% 0.3024 304.21);
-  --lilac-9: oklch(52.67% 0.2868 304.21);
-  --lilac-10: oklch(45.91% 0.2502 304.21);
-  --lilac-11: oklch(37.32% 0.2034 304.21);
-  --lilac-12: oklch(27.57% 0.1496 304.21);
-  --lilac-13: oklch(22% 0.1196 304.21);
-  --lilac-14: oklch(16.43% 0.0896 304.21);
-  --lilac-15: oklch(0% 0.0249 304.21);
+  --lilac-8: oklch(54% 0.2946 304.21);
+  --lilac-9: oklch(45.91% 0.2502 304.21);
+  --lilac-10: oklch(37.32% 0.2034 304.21);
+  --lilac-11: oklch(27.57% 0.1496 304.21);
+  --lilac-12: oklch(22% 0.1196 304.21);
+  --lilac-13: oklch(16.43% 0.0896 304.21);
+  --lilac-14: oklch(0% 0.0249 304.21);
 
   --fuchsia-1: oklch(96% 0.018 322.11);
   --fuchsia-2: oklch(91.21% 0.0485 322.11);
@@ -297,14 +279,13 @@
   --fuchsia-5: oklch(74.77% 0.2213 322.11);
   --fuchsia-6: oklch(70% 0.298 322.11);
   --fuchsia-7: oklch(64.57% 0.331 322.11);
-  --fuchsia-8: oklch(58.84% 0.3019 322.11);
-  --fuchsia-9: oklch(52.67% 0.2701 322.11);
-  --fuchsia-10: oklch(45.91% 0.2354 322.11);
-  --fuchsia-11: oklch(37.32% 0.1909 322.11);
-  --fuchsia-12: oklch(27.57% 0.141 322.11);
-  --fuchsia-13: oklch(22% 0.1124 322.11);
-  --fuchsia-14: oklch(16.43% 0.0838 322.11);
-  --fuchsia-15: oklch(0% 0.0352 322.11);
+  --fuchsia-8: oklch(54% 0.286 322.11);
+  --fuchsia-9: oklch(45.91% 0.2354 322.11);
+  --fuchsia-10: oklch(37.32% 0.1909 322.11);
+  --fuchsia-11: oklch(27.57% 0.141 322.11);
+  --fuchsia-12: oklch(22% 0.1124 322.11);
+  --fuchsia-13: oklch(16.43% 0.0838 322.11);
+  --fuchsia-14: oklch(0% 0.0352 322.11);
 
   --blush-1: oklch(96% 0.0176 340);
   --blush-2: oklch(91.21% 0.049 340);
@@ -313,14 +294,13 @@
   --blush-5: oklch(74.77% 0.2467 340);
   --blush-6: oklch(70% 0.338 340);
   --blush-7: oklch(64.57% 0.3114 340);
-  --blush-8: oklch(58.84% 0.2835 340);
-  --blush-9: oklch(52.67% 0.2533 340);
-  --blush-10: oklch(45.91% 0.2214 340);
-  --blush-11: oklch(37.32% 0.18 340);
-  --blush-12: oklch(27.57% 0.1325 340);
-  --blush-13: oklch(22% 0.1058 340);
-  --blush-14: oklch(16.43% 0.079 340);
-  --blush-15: oklch(0% 0.0501 340);
+  --blush-8: oklch(54% 0.2684 340);
+  --blush-9: oklch(45.91% 0.2214 340);
+  --blush-10: oklch(37.32% 0.18 340);
+  --blush-11: oklch(27.57% 0.1325 340);
+  --blush-12: oklch(22% 0.1058 340);
+  --blush-13: oklch(16.43% 0.079 340);
+  --blush-14: oklch(0% 0.0501 340);
 
   --plum-1: oklch(96% 0.0042 328.3);
   --plum-2: oklch(88.74% 0.005 328.3);
@@ -329,14 +309,13 @@
   --plum-5: oklch(70.89% 0.0121 328.3);
   --plum-6: oklch(65.9% 0.013 328.3);
   --plum-7: oklch(60.63% 0.012 328.3);
-  --plum-8: oklch(55.13% 0.0109 328.3);
-  --plum-9: oklch(49.25% 0.0097 328.3);
-  --plum-10: oklch(42.84% 0.0085 328.3);
-  --plum-11: oklch(34.68% 0.0069 328.3);
-  --plum-12: oklch(25.39% 0.005 328.3);
-  --plum-13: oklch(20.065% 0.004 328.3);
-  --plum-14: oklch(14.74% 0.003 328.3);
-  --plum-15: oklch(0% 0.003 328.3);
+  --plum-8: oklch(54% 0.0103 328.3);
+  --plum-9: oklch(42.84% 0.0085 328.3);
+  --plum-10: oklch(34.68% 0.0069 328.3);
+  --plum-11: oklch(25.39% 0.005 328.3);
+  --plum-12: oklch(20.065% 0.004 328.3);
+  --plum-13: oklch(14.74% 0.003 328.3);
+  --plum-14: oklch(0% 0.003 328.3);
 
   --oatmeal-1: oklch(96% 0.0034 66.2);
   --oatmeal-2: oklch(88.74% 0.005 66.2);
@@ -345,14 +324,13 @@
   --oatmeal-5: oklch(70.89% 0.0126 66.2);
   --oatmeal-6: oklch(65.9% 0.013 66.2);
   --oatmeal-7: oklch(60.63% 0.012 66.2);
-  --oatmeal-8: oklch(55.13% 0.0109 66.2);
-  --oatmeal-9: oklch(49.25% 0.0097 66.2);
-  --oatmeal-10: oklch(42.84% 0.0084 66.2);
-  --oatmeal-11: oklch(34.68% 0.0069 66.2);
-  --oatmeal-12: oklch(25.39% 0.005 66.2);
-  --oatmeal-13: oklch(20.065% 0.004 66.2);
-  --oatmeal-14: oklch(14.74% 0.003 66.2);
-  --oatmeal-15: oklch(0% 0.003 66.2);
+  --oatmeal-8: oklch(54% 0.0103 66.2);
+  --oatmeal-9: oklch(42.84% 0.0084 66.2);
+  --oatmeal-10: oklch(34.68% 0.0069 66.2);
+  --oatmeal-11: oklch(25.39% 0.005 66.2);
+  --oatmeal-12: oklch(20.065% 0.004 66.2);
+  --oatmeal-13: oklch(14.74% 0.003 66.2);
+  --oatmeal-14: oklch(0% 0.003 66.2);
 }
 
 :root,
@@ -372,7 +350,6 @@
   --neutral-12: var(--oatmeal-12);
   --neutral-13: var(--oatmeal-13);
   --neutral-14: var(--oatmeal-14);
-  --neutral-15: var(--oatmeal-15);
 
   --belt-color-elevation-0: var(--neutral-4);
   --belt-color-elevation-0-hover: var(--neutral-3);
@@ -648,8 +625,8 @@
 .belt-panel {
   --panel-bg: var(--belt-color-elevation-0);
 
-  --panel-shadow-color: color-mix(in oklch, var(--neutral-15) 15%, transparent);
-  --panel-shadow-color-inset: color-mix(in oklch, var(--neutral-15) 15%, transparent);
+  --panel-shadow-color: color-mix(in oklch, var(--neutral-14) 15%, transparent);
+  --panel-shadow-color-inset: color-mix(in oklch, var(--neutral-14) 15%, transparent);
   --panel-shadow-color-highlight: color-mix(in oklch, var(--belt-color-elevation-0-highlight) 50%, transparent);
 
   isolation: isolate;
