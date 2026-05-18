@@ -1,5 +1,6 @@
 // @jsxRuntime classic
 // @jsx createElement
+// oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
 import { createElement, css, type CSSMixinDescriptor, type Handle, type MixInput, type Props, type RemixNode } from "@remix-run/ui";
 import * as RemixCombobox from "@remix-run/ui/combobox";
 import * as RemixMenu from "@remix-run/ui/menu";
