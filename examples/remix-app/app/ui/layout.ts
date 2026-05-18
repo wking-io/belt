@@ -5,7 +5,7 @@ import { document } from "./document.ts";
 const appChrome = css({
   "--rmx-font-family-mono": "var(--belt-font-family)",
   "--rmx-font-family-sans": "var(--belt-font-family)",
-  background: "var(--belt-color-elevation-1)",
+  background: "var(--white)",
   color: "var(--belt-color-foreground)",
   fontFamily: "var(--belt-font-family)",
   fontFeatureSettings: "var(--belt-font-feature-settings)",
@@ -20,6 +20,9 @@ const appChrome = css({
   MozOsxFontSmoothing: "grayscale",
   textRendering: "optimizeLegibility",
   WebkitFontSmoothing: "antialiased",
+  "@media (prefers-color-scheme: dark)": {
+    background: "var(--black)",
+  },
   "& *, & *::before, & *::after": {
     boxSizing: "border-box"
   },
