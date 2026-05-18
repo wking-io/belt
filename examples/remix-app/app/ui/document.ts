@@ -2,10 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createElement, type RemixNode } from "remix/ui";
 
-const themeCss = readFileSync(
-  fileURLToPath(new URL("../../../../packages/theme-css/src/theme.css", import.meta.url)),
-  "utf8"
-);
+const themeCssPath = fileURLToPath(new URL("../../../../packages/theme-css/src/theme.css", import.meta.url));
+const themeCss = readFileSync(themeCssPath, "utf8");
 
 const interStylesheetHref =
   "https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap";
@@ -31,8 +29,14 @@ export function document(options: {
         href: interStylesheetHref,
         rel: "stylesheet"
       }),
-      createElement("style", undefined, themeCss)
+      createElement("style", undefined, getThemeCss())
     ),
     createElement("body", { mix: options.bodyMix }, options.children)
   );
+}
+
+function getThemeCss() {
+  if (process.env.NODE_ENV === "production") return themeCss;
+
+  return readFileSync(themeCssPath, "utf8");
 }
