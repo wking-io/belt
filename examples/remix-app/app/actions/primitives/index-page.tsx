@@ -32,6 +32,111 @@ const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as 
 const elevations = [0, 1, 2, 3] as const;
 const paletteGroups = ["ruby", "honey", "jade", "denim", "iris", "oatmeal"] as const;
 const paletteSteps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
+const beltColorGroups = [
+  {
+    label: "elevation 0",
+    tokens: ["elevation-0", "elevation-0-hover", "elevation-0-active", "elevation-0-inset", "elevation-0-highlight"]
+  },
+  {
+    label: "elevation 1",
+    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active", "elevation-1-inset"]
+  },
+  {
+    label: "elevation 2",
+    tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active", "elevation-2-inset"]
+  },
+  {
+    label: "elevation 3",
+    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active", "elevation-3-inset"]
+  },
+  {
+    label: "foreground",
+    tokens: ["foreground", "foreground-subtle", "foreground-strong"]
+  },
+  {
+    label: "border",
+    tokens: ["border", "border-subtle", "border-strong"]
+  },
+  {
+    label: "focus",
+    tokens: ["focus"]
+  },
+  {
+    label: "primary",
+    tokens: [
+      "primary",
+      "primary-foreground",
+      "primary-foreground-subtle",
+      "primary-foreground-strong",
+      "primary-control",
+      "primary-control-hover",
+      "primary-control-active",
+      "primary-control-foreground",
+      "primary-control-foreground-subtle",
+      "primary-control-foreground-strong"
+    ]
+  },
+  {
+    label: "info",
+    tokens: [
+      "info",
+      "info-foreground",
+      "info-foreground-subtle",
+      "info-foreground-strong",
+      "info-control",
+      "info-control-hover",
+      "info-control-active",
+      "info-control-foreground",
+      "info-control-foreground-subtle",
+      "info-control-foreground-strong"
+    ]
+  },
+  {
+    label: "success",
+    tokens: [
+      "success",
+      "success-foreground",
+      "success-foreground-subtle",
+      "success-foreground-strong",
+      "success-control",
+      "success-control-hover",
+      "success-control-active",
+      "success-control-foreground",
+      "success-control-foreground-subtle",
+      "success-control-foreground-strong"
+    ]
+  },
+  {
+    label: "warning",
+    tokens: [
+      "warning",
+      "warning-foreground",
+      "warning-foreground-subtle",
+      "warning-foreground-strong",
+      "warning-control",
+      "warning-control-hover",
+      "warning-control-active",
+      "warning-control-foreground",
+      "warning-control-foreground-subtle",
+      "warning-control-foreground-strong"
+    ]
+  },
+  {
+    label: "danger",
+    tokens: [
+      "danger",
+      "danger-foreground",
+      "danger-foreground-subtle",
+      "danger-foreground-strong",
+      "danger-control",
+      "danger-control-hover",
+      "danger-control-active",
+      "danger-control-foreground",
+      "danger-control-foreground-subtle",
+      "danger-control-foreground-strong"
+    ]
+  }
+] as const;
 
 const primitivePreviewStyle: CSSMixinDescriptor = css({
   display: "grid",
@@ -90,7 +195,7 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   ".preview-palette-chips": {
     display: "grid",
     gap: "6px",
-    gridTemplateColumns: "repeat(14, minmax(20px, 1fr))"
+    gridTemplateColumns: "repeat(auto-fill, minmax(24px, 1fr))"
   },
   ".preview-palette-chip": {
     aspectRatio: "1",
@@ -156,6 +261,7 @@ export function IndexPage() {
           </p>
         </header>
         {section({ title: "Color Palette", children: paletteGrid() })}
+        {section({ title: "Belt Colors", children: beltColorGrid() })}
         {section({ title: "Panel", children: panelGrid() })}
         {section({ title: "Buttons", children: buttonGrid() })}
         {section({ title: "StatusBanner", children: statusBannerGrid() })}
@@ -189,6 +295,28 @@ function paletteGrid() {
                 className="preview-palette-chip"
                 style={{ backgroundColor: `var(--${group}-${step})` }}
                 title={`${group}-${step}`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function beltColorGrid() {
+  return (
+    <div className="preview-palette">
+      {beltColorGroups.map((group) => (
+        <div className="preview-palette-row">
+          <span className="preview-palette-label">{group.label}</span>
+          <div className="preview-palette-chips">
+            {group.tokens.map((token) => (
+              <span
+                aria-label={`belt color ${token}`}
+                className="preview-palette-chip"
+                style={{ backgroundColor: `var(--belt-color-${token})` }}
+                title={`--belt-color-${token}`}
               />
             ))}
           </div>
