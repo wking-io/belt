@@ -29,7 +29,7 @@ import {
 import { layout } from "../../ui/layout.ts";
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
-const elevations = [0, 1, 2, 3] as const;
+const elevations = [0, 1, 2] as const;
 const paletteGroups = [
   "strawberry",
   "ruby",
@@ -67,10 +67,6 @@ const beltColorGroups = [
   {
     label: "elevation 2",
     tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active", "elevation-2-inset"]
-  },
-  {
-    label: "elevation 3",
-    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active", "elevation-3-inset"]
   },
   {
     label: "foreground",

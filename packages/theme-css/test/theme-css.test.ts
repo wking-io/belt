@@ -12,7 +12,7 @@ it("exports the v1 theme token contract", async () => {
     "--belt-color-elevation-0-hover",
     "--belt-color-elevation-0-active",
     "--belt-color-elevation-0-inset",
-    "--belt-color-elevation-3",
+    "--belt-color-elevation-2",
     "--belt-color-foreground",
     "--belt-color-foreground-subtle",
     "--belt-color-foreground-strong",

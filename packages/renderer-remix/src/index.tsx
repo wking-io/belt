@@ -7,7 +7,7 @@ import * as RemixMenu from "@remix-run/ui/menu";
 import * as RemixSelect from "@remix-run/ui/select";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
-type Elevation = 0 | 1 | 2 | 3;
+type Elevation = 0 | 1 | 2;
 type ForegroundTone = "foreground" | "subtle" | "strong";
 type TextSize = "xs" | "sm" | "md";
 type BadgeTone = IntentTone;
@@ -562,7 +562,7 @@ export const menuButtonStyle: CSSMixinDescriptor = css({
 });
 
 export const menuListStyle: CSSMixinDescriptor = css({
-  backgroundColor: "var(--belt-color-elevation-3)",
+  backgroundColor: "var(--belt-color-elevation-2)",
   border: "0.5px solid var(--belt-color-border-subtle)",
   borderRadius: "var(--belt-radius-outer)",
   boxShadow: "0 12px 30px color-mix(in oklch, var(--belt-color-foreground) 18%, transparent)",
@@ -574,7 +574,7 @@ export const menuItemStyle: CSSMixinDescriptor = css({
   borderRadius: "var(--belt-radius)",
   color: "var(--belt-color-foreground)",
   "&[data-highlighted=\"true\"]": {
-    backgroundColor: "var(--belt-color-elevation-3-hover)"
+    backgroundColor: "var(--belt-color-elevation-2-hover)"
   }
 });
 
