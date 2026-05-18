@@ -177,13 +177,13 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   },
   ".preview-palette": {
     display: "grid",
-    gap: "10px"
+    gap: "14px"
   },
   ".preview-palette-row": {
-    alignItems: "center",
+    alignItems: "start",
     display: "grid",
-    gap: "10px",
-    gridTemplateColumns: "72px 1fr"
+    gap: "12px",
+    gridTemplateColumns: "96px 1fr"
   },
   ".preview-palette-label": {
     color: "var(--belt-color-foreground-subtle)",
@@ -194,8 +194,8 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   },
   ".preview-palette-chips": {
     display: "grid",
-    gap: "6px",
-    gridTemplateColumns: "repeat(auto-fill, minmax(24px, 1fr))"
+    gap: "8px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(44px, 1fr))"
   },
   ".preview-palette-chip": {
     aspectRatio: "1",
