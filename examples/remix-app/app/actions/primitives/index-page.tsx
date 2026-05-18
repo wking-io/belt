@@ -30,7 +30,30 @@ import { layout } from "../../ui/layout.ts";
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
 const elevations = [0, 1, 2, 3] as const;
-const paletteGroups = ["ruby", "honey", "jade", "denim", "iris", "oatmeal"] as const;
+const paletteGroups = [
+  "strawberry",
+  "ruby",
+  "tangerine",
+  "ochre",
+  "honey",
+  "lemon",
+  "pear",
+  "pistachio",
+  "jade",
+  "emerald",
+  "aqua",
+  "ocean",
+  "sky",
+  "cobalt",
+  "denim",
+  "iris",
+  "grape",
+  "lilac",
+  "fuchsia",
+  "blush",
+  "plum",
+  "oatmeal"
+] as const;
 const paletteSteps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
 const beltColorGroups = [
   {

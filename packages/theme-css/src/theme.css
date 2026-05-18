@@ -1,21 +1,372 @@
+:root {
+  --white: oklch(100% 0 0);
+  --black: oklch(0% 0 0);
+
+  --strawberry-0: oklch(96% 0.0141 0);
+  --strawberry-1: oklch(92.46% 0.033 0);
+  --strawberry-2: oklch(87.05% 0.0688 0);
+  --strawberry-3: oklch(81.1% 0.1218 0);
+  --strawberry-4: oklch(75.27% 0.1891 0);
+  --strawberry-5: oklch(70% 0.27 0);
+  --strawberry-6: oklch(62.79% 0.2864 0);
+  --strawberry-7: oklch(55.23% 0.252 0);
+  --strawberry-8: oklch(48.72% 0.2223 0);
+  --strawberry-9: oklch(40.85% 0.1863 0);
+  --strawberry-10: oklch(31.71% 0.1442 0);
+  --strawberry-11: oklch(21.56% 0.0978 0);
+  --strawberry-12: oklch(11.69% 0.0685 0);
+  --strawberry-13: oklch(3% 0.032 0);
+
+  --ruby-0: oklch(96% 0.0129 17.895);
+  --ruby-1: oklch(92.46% 0.03 17.895);
+  --ruby-2: oklch(87.05% 0.0626 17.895);
+  --ruby-3: oklch(81.1% 0.1108 17.895);
+  --ruby-4: oklch(75.27% 0.1717 17.895);
+  --ruby-5: oklch(70% 0.245 17.895);
+  --ruby-6: oklch(62.79% 0.2832 17.895);
+  --ruby-7: oklch(55.23% 0.2489 17.895);
+  --ruby-8: oklch(48.72% 0.2193 17.895);
+  --ruby-9: oklch(40.85% 0.1841 17.895);
+  --ruby-10: oklch(31.71% 0.1428 17.895);
+  --ruby-11: oklch(21.56% 0.0968 17.895);
+  --ruby-12: oklch(11.69% 0.0685 17.895);
+  --ruby-13: oklch(3% 0.032 17.895);
+
+  --tangerine-0: oklch(96% 0.0129 35.789);
+  --tangerine-1: oklch(92.46% 0.0305 35.789);
+  --tangerine-2: oklch(87.05% 0.0632 35.789);
+  --tangerine-3: oklch(81.1% 0.112 35.789);
+  --tangerine-4: oklch(75.27% 0.1724 35.789);
+  --tangerine-5: oklch(70% 0.245 35.789);
+  --tangerine-6: oklch(62.79% 0.2427 35.789);
+  --tangerine-7: oklch(55.23% 0.213 35.789);
+  --tangerine-8: oklch(48.72% 0.188 35.789);
+  --tangerine-9: oklch(40.85% 0.1576 35.789);
+  --tangerine-10: oklch(31.71% 0.1225 35.789);
+  --tangerine-11: oklch(21.56% 0.0835 35.789);
+  --tangerine-12: oklch(11.69% 0.0685 35.789);
+  --tangerine-13: oklch(3% 0.032 35.789);
+
+  --ochre-0: oklch(96% 0.0145 53.684);
+  --ochre-1: oklch(92.46% 0.0343 53.684);
+  --ochre-2: oklch(87.05% 0.0709 53.684);
+  --ochre-3: oklch(81.1% 0.1247 53.684);
+  --ochre-4: oklch(75.27% 0.1916 53.684);
+  --ochre-5: oklch(70% 0.2 53.684);
+  --ochre-6: oklch(62.79% 0.1797 53.684);
+  --ochre-7: oklch(55.23% 0.1578 53.684);
+  --ochre-8: oklch(48.72% 0.1391 53.684);
+  --ochre-9: oklch(40.85% 0.1164 53.684);
+  --ochre-10: oklch(31.71% 0.0906 53.684);
+  --ochre-11: oklch(21.56% 0.0617 53.684);
+  --ochre-12: oklch(11.69% 0.0685 53.684);
+  --ochre-13: oklch(3% 0.032 53.684);
+
+  --honey-0: oklch(96% 0.0188 71.579);
+  --honey-1: oklch(92.46% 0.0438 71.579);
+  --honey-2: oklch(87.05% 0.09 71.579);
+  --honey-3: oklch(81.1% 0.1574 71.579);
+  --honey-4: oklch(75.27% 0.1664 71.579);
+  --honey-5: oklch(70% 0.172 71.579);
+  --honey-6: oklch(62.79% 0.1542 71.579);
+  --honey-7: oklch(55.23% 0.136 71.579);
+  --honey-8: oklch(48.72% 0.1196 71.579);
+  --honey-9: oklch(40.85% 0.1001 71.579);
+  --honey-10: oklch(31.71% 0.0776 71.579);
+  --honey-11: oklch(21.56% 0.0532 71.579);
+  --honey-12: oklch(11.69% 0.0685 71.579);
+  --honey-13: oklch(3% 0.032 71.579);
+
+  --lemon-0: oklch(96% 0.0301 89.474);
+  --lemon-1: oklch(92.46% 0.0692 89.474);
+  --lemon-2: oklch(87.05% 0.1402 89.474);
+  --lemon-3: oklch(81.1% 0.1531 89.474);
+  --lemon-4: oklch(75.27% 0.1594 89.474);
+  --lemon-5: oklch(70% 0.165 89.474);
+  --lemon-6: oklch(62.79% 0.1478 89.474);
+  --lemon-7: oklch(55.23% 0.1298 89.474);
+  --lemon-8: oklch(48.72% 0.1141 89.474);
+  --lemon-9: oklch(40.85% 0.0962 89.474);
+  --lemon-10: oklch(31.71% 0.0743 89.474);
+  --lemon-11: oklch(21.56% 0.0508 89.474);
+  --lemon-12: oklch(11.69% 0.0685 89.474);
+  --lemon-13: oklch(3% 0.032 89.474);
+
+  --pear-0: oklch(96% 0.052 107.37);
+  --pear-1: oklch(92.46% 0.8 107.37);
+  --pear-2: oklch(87.05% 0.1 107.37);
+  --pear-3: oklch(81.1% 0.1615 107.37);
+  --pear-4: oklch(75.27% 0.1682 107.37);
+  --pear-5: oklch(70% 0.174 107.37);
+  --pear-6: oklch(62.79% 0.1561 107.37);
+  --pear-7: oklch(55.23% 0.1373 107.37);
+  --pear-8: oklch(48.72% 0.1209 107.37);
+  --pear-9: oklch(40.85% 0.1014 107.37);
+  --pear-10: oklch(31.71% 0.0788 107.37);
+  --pear-11: oklch(21.56% 0.0531 107.37);
+  --pear-12: oklch(11.69% 0.0685 107.37);
+  --pear-13: oklch(3% 0.032 107.37);
+
+  --pistachio-0: oklch(96% 0.0569 125.26);
+  --pistachio-1: oklch(92.46% 0.1534 125.26);
+  --pistachio-2: oklch(87.05% 0.1784 125.26);
+  --pistachio-3: oklch(81.1% 0.1907 125.26);
+  --pistachio-4: oklch(75.27% 0.1981 125.26);
+  --pistachio-5: oklch(70% 0.205 125.26);
+  --pistachio-6: oklch(62.79% 0.184 125.26);
+  --pistachio-7: oklch(55.23% 0.1621 125.26);
+  --pistachio-8: oklch(48.72% 0.1426 125.26);
+  --pistachio-9: oklch(40.85% 0.1193 125.26);
+  --pistachio-10: oklch(31.71% 0.0928 125.26);
+  --pistachio-11: oklch(21.56% 0.0631 125.26);
+  --pistachio-12: oklch(11.69% 0.0685 125.26);
+  --pistachio-13: oklch(3% 0.032 125.26);
+
+  --jade-0: oklch(96% 0.0393 143.16);
+  --jade-1: oklch(92.46% 0.096 143.16);
+  --jade-2: oklch(87.05% 0.2172 143.16);
+  --jade-3: oklch(81.1% 0.2634 143.16);
+  --jade-4: oklch(75.27% 0.274 143.16);
+  --jade-5: oklch(70% 0.284 143.16);
+  --jade-6: oklch(62.79% 0.2544 143.16);
+  --jade-7: oklch(55.23% 0.2241 143.16);
+  --jade-8: oklch(48.72% 0.1976 143.16);
+  --jade-9: oklch(40.85% 0.1657 143.16);
+  --jade-10: oklch(31.71% 0.1284 143.16);
+  --jade-11: oklch(21.56% 0.0871 143.16);
+  --jade-12: oklch(11.69% 0.0685 143.16);
+  --jade-13: oklch(3% 0.032 143.16);
+
+  --emerald-0: oklch(96% 0.0332 161.05);
+  --emerald-1: oklch(92.46% 0.0799 161.05);
+  --emerald-2: oklch(87.05% 0.175 161.05);
+  --emerald-3: oklch(81.1% 0.1986 161.05);
+  --emerald-4: oklch(75.27% 0.2063 161.05);
+  --emerald-5: oklch(70% 0.214 161.05);
+  --emerald-6: oklch(62.79% 0.1921 161.05);
+  --emerald-7: oklch(55.23% 0.1687 161.05);
+  --emerald-8: oklch(48.72% 0.1484 161.05);
+  --emerald-9: oklch(40.85% 0.125 161.05);
+  --emerald-10: oklch(31.71% 0.0968 161.05);
+  --emerald-11: oklch(21.56% 0.0656 161.05);
+  --emerald-12: oklch(11.69% 0.0685 161.05);
+  --emerald-13: oklch(3% 0.032 161.05);
+
+  --aqua-0: oklch(96% 0.032 178.95);
+  --aqua-1: oklch(92.46% 0.0764 178.95);
+  --aqua-2: oklch(87.05% 0.1501 178.95);
+  --aqua-3: oklch(81.1% 0.1607 178.95);
+  --aqua-4: oklch(75.27% 0.1666 178.95);
+  --aqua-5: oklch(70% 0.173 178.95);
+  --aqua-6: oklch(62.79% 0.1551 178.95);
+  --aqua-7: oklch(55.23% 0.1364 178.95);
+  --aqua-8: oklch(48.72% 0.12 178.95);
+  --aqua-9: oklch(40.85% 0.1005 178.95);
+  --aqua-10: oklch(31.71% 0.0779 178.95);
+  --aqua-11: oklch(21.56% 0.053 178.95);
+  --aqua-12: oklch(11.69% 0.0685 178.95);
+  --aqua-13: oklch(3% 0.032 178.95);
+
+  --ocean-0: oklch(96% 0.0308 196.84);
+  --ocean-1: oklch(92.46% 0.0704 196.84);
+  --ocean-2: oklch(87.05% 0.1382 196.84);
+  --ocean-3: oklch(81.1% 0.1482 196.84);
+  --ocean-4: oklch(75.27% 0.154 196.84);
+  --ocean-5: oklch(70% 0.159 196.84);
+  --ocean-6: oklch(62.79% 0.1426 196.84);
+  --ocean-7: oklch(55.23% 0.1255 196.84);
+  --ocean-8: oklch(48.72% 0.1107 196.84);
+  --ocean-9: oklch(40.85% 0.0927 196.84);
+  --ocean-10: oklch(31.71% 0.0717 196.84);
+  --ocean-11: oklch(21.56% 0.0491 196.84);
+  --ocean-12: oklch(11.69% 0.0685 196.84);
+  --ocean-13: oklch(3% 0.032 196.84);
+
+  --sky-0: oklch(96% 0.0168 214.74);
+  --sky-1: oklch(92.46% 0.0385 214.74);
+  --sky-2: oklch(87.05% 0.0785 214.74);
+  --sky-3: oklch(81.1% 0.1347 214.74);
+  --sky-4: oklch(75.27% 0.1585 214.74);
+  --sky-5: oklch(70% 0.164 214.74);
+  --sky-6: oklch(62.79% 0.1468 214.74);
+  --sky-7: oklch(55.23% 0.1289 214.74);
+  --sky-8: oklch(48.72% 0.114 214.74);
+  --sky-9: oklch(40.85% 0.0953 214.74);
+  --sky-10: oklch(31.71% 0.0742 214.74);
+  --sky-11: oklch(21.56% 0.05 214.74);
+  --sky-12: oklch(11.69% 0.0685 214.74);
+  --sky-13: oklch(3% 0.032 214.74);
+
+  --cobalt-0: oklch(96% 0.0125 232.63);
+  --cobalt-1: oklch(92.46% 0.0287 232.63);
+  --cobalt-2: oklch(87.05% 0.0583 232.63);
+  --cobalt-3: oklch(81.1% 0.0996 232.63);
+  --cobalt-4: oklch(75.27% 0.1487 232.63);
+  --cobalt-5: oklch(70% 0.189 232.63);
+  --cobalt-6: oklch(62.79% 0.1695 232.63);
+  --cobalt-7: oklch(55.23% 0.1492 232.63);
+  --cobalt-8: oklch(48.72% 0.1312 232.63);
+  --cobalt-9: oklch(40.85% 0.1101 232.63);
+  --cobalt-10: oklch(31.71% 0.0851 232.63);
+  --cobalt-11: oklch(21.56% 0.0578 232.63);
+  --cobalt-12: oklch(11.69% 0.0685 232.63);
+  --cobalt-13: oklch(3% 0.032 232.63);
+
+  --denim-0: oklch(96% 0.0106 250.53);
+  --denim-1: oklch(92.46% 0.0245 250.53);
+  --denim-2: oklch(87.05% 0.0502 250.53);
+  --denim-3: oklch(81.1% 0.086 250.53);
+  --denim-4: oklch(75.27% 0.1279 250.53);
+  --denim-5: oklch(70% 0.176 250.53);
+  --denim-6: oklch(62.79% 0.2228 250.53);
+  --denim-7: oklch(55.23% 0.2042 250.53);
+  --denim-8: oklch(48.72% 0.1799 250.53);
+  --denim-9: oklch(40.85% 0.151 250.53);
+  --denim-10: oklch(31.71% 0.1173 250.53);
+  --denim-11: oklch(21.56% 0.0798 250.53);
+  --denim-12: oklch(11.69% 0.0685 250.53);
+  --denim-13: oklch(3% 0.032 250.53);
+
+  --iris-0: oklch(96% 0.0102 268.42);
+  --iris-1: oklch(92.46% 0.0235 268.42);
+  --iris-2: oklch(87.05% 0.048 268.42);
+  --iris-3: oklch(81.1% 0.0822 268.42);
+  --iris-4: oklch(75.27% 0.123 268.42);
+  --iris-5: oklch(70% 0.169 268.42);
+  --iris-6: oklch(62.79% 0.2144 268.42);
+  --iris-7: oklch(55.23% 0.2639 268.42);
+  --iris-8: oklch(48.72% 0.248 268.42);
+  --iris-9: oklch(40.85% 0.23 268.42);
+  --iris-10: oklch(31.71% 0.171 268.42);
+  --iris-11: oklch(21.56% 0.1434 268.42);
+  --iris-12: oklch(11.69% 0.0685 268.42);
+  --iris-13: oklch(3% 0.032 268.42);
+
+  --grape-0: oklch(96% 0.0109 286.32);
+  --grape-1: oklch(92.46% 0.0249 286.32);
+  --grape-2: oklch(87.05% 0.0507 286.32);
+  --grape-3: oklch(81.1% 0.0872 286.32);
+  --grape-4: oklch(75.27% 0.1306 286.32);
+  --grape-5: oklch(70% 0.179 286.32);
+  --grape-6: oklch(62.79% 0.2275 286.32);
+  --grape-7: oklch(55.23% 0.2806 286.32);
+  --grape-8: oklch(48.72% 0.2877 286.32);
+  --grape-9: oklch(40.85% 0.2415 286.32);
+  --grape-10: oklch(31.71% 0.1876 286.32);
+  --grape-11: oklch(21.56% 0.1274 286.32);
+  --grape-12: oklch(11.69% 0.0685 286.32);
+  --grape-13: oklch(3% 0.032 286.32);
+
+  --lilac-0: oklch(96% 0.0129 304.21);
+  --lilac-1: oklch(92.46% 0.0295 304.21);
+  --lilac-2: oklch(87.05% 0.0604 304.21);
+  --lilac-3: oklch(81.1% 0.1032 304.21);
+  --lilac-4: oklch(75.27% 0.154 304.21);
+  --lilac-5: oklch(70% 0.212 304.21);
+  --lilac-6: oklch(62.79% 0.2697 304.21);
+  --lilac-7: oklch(55.23% 0.3009 304.21);
+  --lilac-8: oklch(48.72% 0.265 304.21);
+  --lilac-9: oklch(40.85% 0.2221 304.21);
+  --lilac-10: oklch(31.71% 0.1722 304.21);
+  --lilac-11: oklch(21.56% 0.1169 304.21);
+  --lilac-12: oklch(11.69% 0.0685 304.21);
+  --lilac-13: oklch(3% 0.032 304.21);
+
+  --fuchsia-0: oklch(96% 0.018 322.11);
+  --fuchsia-1: oklch(92.46% 0.0414 322.11);
+  --fuchsia-2: oklch(87.05% 0.0841 322.11);
+  --fuchsia-3: oklch(81.1% 0.1443 322.11);
+  --fuchsia-4: oklch(75.27% 0.2164 322.11);
+  --fuchsia-5: oklch(70% 0.298 322.11);
+  --fuchsia-6: oklch(62.79% 0.3222 322.11);
+  --fuchsia-7: oklch(55.23% 0.2831 322.11);
+  --fuchsia-8: oklch(48.72% 0.2493 322.11);
+  --fuchsia-9: oklch(40.85% 0.2096 322.11);
+  --fuchsia-10: oklch(31.71% 0.1627 322.11);
+  --fuchsia-11: oklch(21.56% 0.1103 322.11);
+  --fuchsia-12: oklch(11.69% 0.0685 322.11);
+  --fuchsia-13: oklch(3% 0.032 322.11);
+
+  --blush-0: oklch(96% 0.0176 340);
+  --blush-1: oklch(92.46% 0.0419 340);
+  --blush-2: oklch(87.05% 0.0874 340);
+  --blush-3: oklch(81.1% 0.155 340);
+  --blush-4: oklch(75.27% 0.2411 340);
+  --blush-5: oklch(70% 0.338 340);
+  --blush-6: oklch(62.79% 0.3028 340);
+  --blush-7: oklch(55.23% 0.266 340);
+  --blush-8: oklch(48.72% 0.2347 340);
+  --blush-9: oklch(40.85% 0.1964 340);
+  --blush-10: oklch(31.71% 0.1526 340);
+  --blush-11: oklch(21.56% 0.1041 340);
+  --blush-12: oklch(11.69% 0.0685 340);
+  --blush-13: oklch(3% 0.032 340);
+
+  --plum-0: oklch(96% 0.0042 328.3);
+  --plum-1: oklch(89.57% 0.005 328.3);
+  --plum-2: oklch(83.73% 0.005 328.3);
+  --plum-3: oklch(77.43% 0.0082 328.3);
+  --plum-4: oklch(71.32% 0.0119 328.3);
+  --plum-5: oklch(65.9% 0.013 328.3);
+  --plum-6: oklch(58.8% 0.0116 328.3);
+  --plum-7: oklch(51.49% 0.0102 328.3);
+  --plum-8: oklch(45.24% 0.0089 328.3);
+  --plum-9: oklch(37.67% 0.0074 328.3);
+  --plum-10: oklch(28.9% 0.0057 328.3);
+  --plum-11: oklch(24.4% 0.0048 328.3);
+  --plum-12: oklch(19.19% 0.0038 328.3);
+  --plum-13: oklch(2% 0.003 328.3);
+
+  --oatmeal-0: oklch(96% 0.0034 66.2);
+  --oatmeal-1: oklch(89.57% 0.005 66.2);
+  --oatmeal-2: oklch(83.73% 0.0082 66.2);
+  --oatmeal-3: oklch(77.43% 0.0123 66.2);
+  --oatmeal-4: oklch(71.32% 0.0127 66.2);
+  --oatmeal-5: oklch(65.9% 0.013 66.2);
+  --oatmeal-6: oklch(58.8% 0.0116 66.2);
+  --oatmeal-7: oklch(51.49% 0.0101 66.2);
+  --oatmeal-8: oklch(45.24% 0.0089 66.2);
+  --oatmeal-9: oklch(37.67% 0.0074 66.2);
+  --oatmeal-10: oklch(28.9% 0.0057 66.2);
+  --oatmeal-11: oklch(24.4% 0.0048 66.2);
+  --oatmeal-12: oklch(19.19% 0.0038 66.2);
+  --oatmeal-13: oklch(2% 0.003 66.2);
+}
+
 :root,
 [data-belt-theme="belt-light"] {
-  --belt-color-elevation-0: oklch(98% 0.004 255);
-  --belt-color-elevation-0-hover: oklch(95% 0.006 255);
-  --belt-color-elevation-0-active: oklch(92% 0.008 255);
-  --belt-color-elevation-0-inset: oklch(94% 0.006 255);
-  --belt-color-elevation-1: oklch(96% 0.005 255);
-  --belt-color-elevation-1-hover: oklch(93% 0.007 255);
-  --belt-color-elevation-1-active: oklch(90% 0.009 255);
-  --belt-color-elevation-1-inset: oklch(91% 0.008 255);
-  --belt-color-elevation-2: oklch(93% 0.007 255);
-  --belt-color-elevation-2-hover: oklch(90% 0.009 255);
-  --belt-color-elevation-2-active: oklch(87% 0.011 255);
-  --belt-color-elevation-2-inset: oklch(88% 0.01 255);
-  --belt-color-elevation-3: oklch(90% 0.009 255);
-  --belt-color-elevation-3-hover: oklch(87% 0.011 255);
-  --belt-color-elevation-3-active: oklch(84% 0.013 255);
-  --belt-color-elevation-3-inset: oklch(85% 0.012 255);
+
+  --neutral-0: var(--oatmeal-0);
+  --neutral-1: var(--oatmeal-1);
+  --neutral-2: var(--oatmeal-2);
+  --neutral-3: var(--oatmeal-3);
+  --neutral-4: var(--oatmeal-4);
+  --neutral-5: var(--oatmeal-5);
+  --neutral-6: var(--oatmeal-6);
+  --neutral-7: var(--oatmeal-7);
+  --neutral-8: var(--oatmeal-8);
+  --neutral-9: var(--oatmeal-9);
+  --neutral-10: var(--oatmeal-10);
+  --neutral-11: var(--oatmeal-11);
+  --neutral-12: var(--oatmeal-12);
+  --neutral-13: var(--oatmeal-13);
+
+  --belt-color-elevation-0: var(--neutral-3);
+  --belt-color-elevation-0-hover: var(--neutral-2);
+  --belt-color-elevation-0-active: var(--neutral-2);
+  --belt-color-elevation-0-inset: var(--neutral-4);
+  --belt-color-elevation-1: var(--neutral-2);
+  --belt-color-elevation-1-hover: var(--neutral-1);
+  --belt-color-elevation-1-active: var(--neutral-1);
+  --belt-color-elevation-1-inset: var(--neutral-3);
+  --belt-color-elevation-2: var(--neutral-1);
+  --belt-color-elevation-2-hover: var(--neutral-0);
+  --belt-color-elevation-2-active: var(--neutral-0);
+  --belt-color-elevation-2-inset: var(--neutral-2);
+  --belt-color-elevation-3: var(--neutral-0);
+  --belt-color-elevation-3-hover: var(--white);
+  --belt-color-elevation-3-active: var(--white);
+  --belt-color-elevation-3-inset: var(--neutral-1);
 
   --belt-color-foreground: oklch(24% 0.012 255);
   --belt-color-foreground-subtle: oklch(52% 0.018 255);
@@ -105,10 +456,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+
     --belt-color-elevation-0: oklch(18% 0.008 255);
     --belt-color-elevation-0-hover: oklch(22% 0.01 255);
     --belt-color-elevation-0-active: oklch(25% 0.012 255);
     --belt-color-elevation-0-inset: oklch(14% 0.007 255);
+    --belt-color-elevation-0-highlight: oklch(22% 0.01 255);
     --belt-color-elevation-1: oklch(22% 0.01 255);
     --belt-color-elevation-1-hover: oklch(26% 0.012 255);
     --belt-color-elevation-1-active: oklch(30% 0.014 255);
@@ -268,3 +621,47 @@
   --belt-color-danger-control-foreground-subtle: oklch(28% 0.06 28);
   --belt-color-danger-control-foreground-strong: oklch(8% 0.02 28);
 }
+
+.belt-panel {
+  --panel-bg: var(--belt-color-elevation-0);
+
+  --panel-shadow-color: color-mix(in oklch, var(--belt-color-neutral-13) 15%, transparent);
+  --panel-shadow-color-inset: color-mix(in oklch, var(--belt-color-neutral-13) 15%, transparent);
+  --panel-shadow-color-highlight: color-mix(in oklch, var(--belt-color-elevation-0-highlight) 50%, transparent);
+
+  isolation: isolate;
+  z-index: 1;
+  background-color: var(--panel-bg);
+
+  &:before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0.5px 1px 1px var(--panel-shadow-color);
+  }
+
+  &:after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 1px;
+    box-shadow: inset 0px 0px 0px 1px var(--panel-shadow-color-highlight), inset 0px 1px 0px var(--panel-shadow-color-highlight);
+    ;
+  }
+
+  &>* {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 1px 3px 0 var(--panel-shadow-color), 0 1px 2px -1px var(--panel-shadow-color);
+  }
+}
+
+.belt-panel[elevation="0"] {}
+
+.belt-panel[elevation="1"] {}
+
+.belt-panel[elevation="2"] {}

@@ -50,7 +50,7 @@ it("sets the default font family and OpenType feature contract", async () => {
   assert.match(css, /--belt-font-variant-alternates:.*styleset\(ss01\).*character-variant\(cv11\)/);
 });
 
-it("keeps color tokens in oklch color syntax", async () => {
+it("keeps color tokens in oklch-compatible syntax", async () => {
   const css = await readFile(themeCssPath, "utf8");
   const colorDeclarations = [...css.matchAll(/(--belt-color-[^:]+):\s*([^;]+);/g)];
 
@@ -60,11 +60,29 @@ it("keeps color tokens in oklch color syntax", async () => {
     const trimmed = value.trim();
 
     assert.ok(
-      trimmed.startsWith("oklch(") || trimmed.startsWith("color-mix(in oklch,"),
-      `${name} must use oklch syntax, received ${trimmed}`
+      trimmed.startsWith("oklch(") || trimmed.startsWith("color-mix(in oklch,") || trimmed.startsWith("var(--"),
+      `${name} must use oklch-compatible syntax, received ${trimmed}`
     );
     assert.ok(!/#[0-9a-f]/i.test(trimmed), `${name} must not use hex colors`);
     assert.ok(!/\brgba?\(/i.test(trimmed), `${name} must not use rgb colors`);
+  }
+});
+
+it("keeps raw color palettes on a 14-step scale", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+  const rawColorDeclarations = [...css.matchAll(/^\s*--([a-z]+)-(\d+):\s*oklch\(([^)]*)\);/gm)];
+  const palettes = new Map<string, Set<number>>();
+
+  for (const [, name, index] of rawColorDeclarations) {
+    const indexes = palettes.get(name) ?? new Set<number>();
+    indexes.add(Number(index));
+    palettes.set(name, indexes);
+  }
+
+  assert.ok(palettes.size > 0);
+
+  for (const [name, indexes] of palettes) {
+    assert.deepEqual([...indexes].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], `${name} must expose 14 steps`);
   }
 });
 
