@@ -451,46 +451,176 @@
   --belt-font-variant-numeric: slashed-zero;
 }
 
-.belt-panel {
-  --panel-bg: var(--belt-color-elevation-1);
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]) {
+  --belt-surface-bg: var(--belt-color-elevation-3);
+  --belt-surface-inner-bg: var(--belt-color-elevation-3);
+  --belt-surface-border: var(--belt-color-border-subtle);
+  --belt-surface-border-focused: color-mix(in oklch, var(--belt-color-focus) 50%, transparent);
+  --belt-surface-highlight: color-mix(in oklch, var(--white) 50%, transparent);
+  --belt-surface-depth: color-mix(in oklch, var(--neutral-14) 10%, transparent);
+  --belt-surface-recess: color-mix(in oklch, var(--neutral-14) 15%, transparent);
+  --belt-surface-radius: var(--belt-radius-outer);
+  --belt-surface-inner-radius: var(--belt-radius);
+  --belt-surface-highlight-inset: 1px;
+  --belt-surface-highlight-border: transparent;
+  --belt-surface-highlight-shadow: inset 0 0 0 1px var(--belt-surface-highlight), inset 0 1px 0 var(--belt-surface-highlight);
+  --belt-surface-root-shadow: none;
+  --belt-surface-inner-shadow: 0 1px 3px 0 var(--belt-surface-depth), 0 1px 2px -1px var(--belt-surface-depth);
 
-  --panel-shadow-color: color-mix(in oklch, var(--neutral-14) 15%, transparent);
-  --panel-shadow-color-inset: color-mix(in oklch, var(--neutral-14) 15%, transparent);
-  --panel-shadow-color-highlight: color-mix(in oklch, var(--belt-color-elevation-1-highlight) 50%, transparent);
-
+  background-color: var(--belt-surface-bg);
+  border-radius: var(--belt-surface-radius);
+  box-sizing: border-box;
   isolation: isolate;
-  z-index: 1;
-  background-color: var(--panel-bg);
-
-  &:before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    box-shadow: inset 0 0.5px 1px 1px var(--panel-shadow-color);
-  }
-
-  &:after {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 1px;
-    box-shadow: inset 0px 0px 0px 1px var(--panel-shadow-color-highlight), inset 0px 1px 0px var(--panel-shadow-color-highlight);
-    ;
-  }
-
-  &>* {
-    position: relative;
-    height: 100%;
-    overflow: hidden;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    box-shadow: 0 1px 3px 0 var(--panel-shadow-color), 0 1px 2px -1px var(--panel-shadow-color);
-  }
+  outline: none;
+  position: relative;
+  z-index: 30;
 }
 
-.belt-panel[elevation="1"] {}
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before,
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  transition-duration: 150ms;
+  transition-property: box-shadow, opacity;
+  transition-timing-function: ease-out;
+}
 
-.belt-panel[elevation="2"] {}
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before {
+  border-radius: var(--belt-surface-radius);
+  box-shadow: inset 0 0.5px 1px 1px var(--belt-surface-recess);
+  inset: 0;
+}
 
-.belt-panel[elevation="3"] {}
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::after {
+  border-bottom: 1px solid var(--belt-surface-highlight-border);
+  border-radius: var(--belt-surface-inner-radius);
+  box-shadow: var(--belt-surface-highlight-shadow);
+  inset: var(--belt-surface-highlight-inset);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-placement="absolute"], [data-belt-placement="absolute"]) {
+  position: absolute;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-placement="relative"], [data-belt-placement="relative"]) {
+  position: relative;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within) {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 10%, transparent), var(--belt-surface-root-shadow);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within)::before {
+  box-shadow: inset 0 0.5px 1px 1px color-mix(in oklch, var(--belt-color-focus) 30%, transparent);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within) > :where(.belt-surface__inner, [data-belt-surface-inner]) {
+  border-color: var(--belt-surface-border-focused);
+  box-shadow: 0 1px 3px 0 color-mix(in oklch, var(--belt-color-focus) 30%, transparent), 0 1px 2px -1px color-mix(in oklch, var(--belt-color-focus) 30%, transparent);
+}
+
+:where(.belt-surface__inner, [data-belt-surface-inner]) {
+  background-clip: padding-box;
+  background-color: var(--belt-surface-inner-bg);
+  border: 0.5px solid var(--belt-surface-border);
+  border-radius: var(--belt-surface-inner-radius);
+  box-shadow: var(--belt-surface-inner-shadow);
+  box-sizing: border-box;
+  color: var(--belt-color-foreground);
+  height: 100%;
+  min-width: 0;
+  outline: none;
+  overflow: hidden;
+  position: relative;
+  transition-duration: 150ms;
+  transition-property: background-color, border-color, box-shadow, opacity;
+  transition-timing-function: ease-out;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-surface-size="control-sm"], [data-belt-surface-size="control-default"], [data-belt-surface-size="control-lg"]) {
+  --belt-surface-radius: 4px;
+  --belt-surface-inner-radius: 4px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-surface-size="control-sm"], [data-belt-surface-size="control-default"], [data-belt-surface-size="control-lg"])::after {
+  border-radius: 3px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"] {
+  --belt-surface-radius: 5px;
+  --belt-surface-inner-radius: 5px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"]::before,
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"]::after {
+  border-radius: 4px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"] {
+  --belt-surface-radius: var(--belt-radius-outer);
+  --belt-surface-inner-radius: var(--belt-radius-outer);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"]::before,
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"]::after {
+  border-radius: var(--belt-radius);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-lg"] {
+  --belt-surface-radius: 10px;
+  --belt-surface-inner-radius: 10px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-lg"]::after {
+  border-radius: 9px;
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="1"], [data-belt-surface-elevation="1"]) {
+  --belt-surface-bg: var(--belt-color-elevation-1);
+  --belt-surface-inner-bg: var(--belt-color-elevation-1);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="2"], [data-belt-surface-elevation="2"]) {
+  --belt-surface-bg: var(--belt-color-elevation-2);
+  --belt-surface-inner-bg: var(--belt-color-elevation-2);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="3"], [data-belt-surface-elevation="3"]) {
+  --belt-surface-bg: var(--belt-color-elevation-3);
+  --belt-surface-inner-bg: var(--belt-color-elevation-3);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-inset="true"], [data-belt-surface-variant="inset"]) {
+  --belt-surface-bg: var(--belt-color-elevation-1-inset);
+  --belt-surface-inner-bg: var(--belt-color-elevation-1-inset);
+  --belt-surface-highlight-border: color-mix(in oklch, var(--belt-surface-highlight) 65%, transparent);
+  --belt-surface-highlight-inset: -1px;
+  --belt-surface-highlight-shadow: none;
+  --belt-surface-inner-shadow: inset 0 1px 2px color-mix(in oklch, var(--neutral-14) 20%, transparent);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-inset="true"], [data-belt-surface-variant="inset"]):where([data-belt-elevation="2"], [data-belt-surface-elevation="2"]) {
+  --belt-surface-bg: var(--belt-color-elevation-2-inset);
+  --belt-surface-inner-bg: var(--belt-color-elevation-2-inset);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-inset="true"], [data-belt-surface-variant="inset"]):where([data-belt-elevation="3"], [data-belt-surface-elevation="3"]) {
+  --belt-surface-bg: var(--belt-color-elevation-3-inset);
+  --belt-surface-inner-bg: var(--belt-color-elevation-3-inset);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-variant="inset-subtle"] {
+  --belt-surface-bg: var(--belt-color-elevation-1);
+  --belt-surface-inner-bg: var(--belt-color-elevation-1);
+  --belt-surface-highlight-border: color-mix(in oklch, var(--belt-surface-highlight) 65%, transparent);
+  --belt-surface-highlight-inset: -1px;
+  --belt-surface-highlight-shadow: none;
+  --belt-surface-inner-shadow: inset 0 1px 2px color-mix(in oklch, var(--neutral-14) 20%, transparent);
+}
+
+:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-variant="elevated"] {
+  --belt-surface-bg: var(--belt-color-elevation-3);
+  --belt-surface-inner-bg: var(--belt-color-elevation-3);
+  --belt-surface-highlight: color-mix(in oklch, var(--white) 65%, transparent);
+}

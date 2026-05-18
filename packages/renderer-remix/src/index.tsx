@@ -132,18 +132,25 @@ export function Panel(handle: Handle<PanelProps>) {
       innerMix,
       inset = false,
       mix,
+      className,
       ...rootProps
     } = handle.props;
 
     return (
       <div
         {...rootProps}
+        className={classNames("belt-surface belt-panel", className)}
         data-belt-panel=""
+        data-belt-surface=""
+        data-belt-elevation={String(elevation)}
+        data-belt-surface-elevation={String(elevation)}
+        data-belt-surface-size="surface-default"
+        data-belt-surface-variant={inset ? "inset" : "default"}
         data-focused={focused ? "true" : undefined}
         data-inset={inset ? "true" : undefined}
-        mix={composeMix(panelRootStyle({ elevation, focused, inset }), mix)}
+        mix={mix}
       >
-        <div className={innerClassName} mix={composeMix(panelInnerStyle({ elevation, inset }), innerMix)}>
+        <div className={classNames("belt-surface__inner", innerClassName)} data-belt-surface-inner="" mix={innerMix}>
           {children}
         </div>
       </div>
@@ -768,6 +775,12 @@ function withMix<Props_ extends WithMix>(
       mix: [...styles, handle.props.mix]
     }
   };
+}
+
+function classNames(...parts: readonly (string | undefined)[]): string | undefined {
+  const className = parts.filter(Boolean).join(" ");
+
+  return className === "" ? undefined : className;
 }
 
 function composeMix(...parts: readonly unknown[]) {

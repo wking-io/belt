@@ -40,6 +40,36 @@ The default typography contract uses Inter and enables `calt`, `dlig`, `case`, `
 
 V1 does not include background/surface tokens, selected/highlight tokens, shadows, or a TypeScript spacing helper.
 
+## Surface Classes
+
+The theme CSS also ships portable surface classes so renderers and future React/Rails/Laravel integrations can share the same layered panel treatment without translating framework-specific styles.
+
+```html
+<div
+  class="belt-surface"
+  data-belt-surface
+  data-belt-surface-elevation="3"
+  data-belt-surface-size="surface-default"
+  data-belt-surface-variant="default"
+>
+  <div class="belt-surface__inner" data-belt-surface-inner>
+    ...
+  </div>
+</div>
+```
+
+`belt-surface` and `belt-surface__inner` are class hooks. The equivalent `data-belt-surface` and `data-belt-surface-inner` attributes are also supported for adapters that prefer attribute-only markup.
+
+Surface variants are selected with attributes:
+
+- `data-belt-surface-elevation="1" | "2" | "3"`
+- `data-belt-surface-size="control-sm" | "control-default" | "control-lg" | "surface-sm" | "surface-default" | "surface-lg"`
+- `data-belt-surface-variant="default" | "elevated" | "inset" | "inset-subtle"`
+- `data-focused="true"` or `:focus-within` for the focused treatment
+- `data-belt-placement="absolute" | "relative"` when placement should be encoded in markup
+
+The legacy `belt-panel` and `data-belt-panel` hooks currently alias the surface styles.
+
 ## Theme Registration
 
 Theme registration lives in Toolbar config. A string selects the initial built-in or registered theme:

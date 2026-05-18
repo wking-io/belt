@@ -19,7 +19,7 @@ import {
   Slider,
   StatusBanner,
   Switch,
-  textStyle
+  textStyle,
 } from "../src/index.tsx";
 
 it("renders the core primitive wrappers through Remix UI server rendering", async () => {
@@ -36,13 +36,18 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
           StatusBanner.Row,
           null,
           createElement(StatusBanner.Icon, null, "!"),
-          createElement(StatusBanner.Message, null, "Unsaved changes")
-        )
-      )
-    )
+          createElement(StatusBanner.Message, null, "Unsaved changes"),
+        ),
+      ),
+    ),
   );
 
   assert.match(html, /data-belt-panel/);
+  assert.match(html, /data-belt-surface/);
+  assert.match(html, /data-belt-surface-inner/);
+  assert.match(html, /data-belt-surface-elevation="2"/);
+  assert.match(html, /belt-surface belt-panel outer-panel/);
+  assert.match(html, /belt-surface__inner inner-panel/);
   assert.match(html, /outer-panel/);
   assert.match(html, /inner-panel/);
   assert.match(html, /Launch/);
@@ -62,8 +67,8 @@ it("renders form primitives and style-only mixins", async () => {
       createElement(Slider, { min: 0, max: 10 }),
       createElement(Switch, { checked: true }),
       createElement("span", { mix: textStyle({ tone: "subtle", size: "xs" }) }, "quiet text"),
-      createElement("span", { mix: badgeStyle({ tone: "success" }) }, "ready")
-    )
+      createElement("span", { mix: badgeStyle({ tone: "success" }) }, "ready"),
+    ),
   );
 
   assert.match(html, /Branch/);
