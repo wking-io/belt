@@ -25,10 +25,29 @@ it("exports the v1 theme token contract", async () => {
     "--belt-space-12",
     "--belt-radius-inner",
     "--belt-radius",
-    "--belt-radius-outer"
+    "--belt-radius-outer",
+    "--belt-font-family",
+    "--belt-font-feature-settings",
+    "--belt-font-variant-alternates",
+    "--belt-font-variant-ligatures",
+    "--belt-font-variant-numeric"
   ]) {
     assert.match(css, new RegExp(`${token}:`));
   }
+});
+
+it("sets the default font family and OpenType feature contract", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /--belt-font-family:\s*"Inter"/);
+
+  for (const feature of ["calt", "dlig", "case", "ccmp", "zero", "ss01", "ss02", "ss07", "ss08", "cv06", "cv11"]) {
+    assert.match(css, new RegExp(`"${feature}" 1`));
+  }
+
+  assert.match(css, /--belt-font-variant-ligatures:\s*common-ligatures discretionary-ligatures contextual/);
+  assert.match(css, /--belt-font-variant-numeric:\s*slashed-zero/);
+  assert.match(css, /--belt-font-variant-alternates:.*styleset\(ss01\).*character-variant\(cv11\)/);
 });
 
 it("keeps color tokens in oklch color syntax", async () => {

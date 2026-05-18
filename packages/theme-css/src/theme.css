@@ -95,6 +95,12 @@
   --belt-radius-inner: 4px;
   --belt-radius: 6px;
   --belt-radius-outer: 8px;
+
+  --belt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --belt-font-feature-settings: "calt" 1, "dlig" 1, "case" 1, "ccmp" 1, "zero" 1, "ss01" 1, "ss02" 1, "ss07" 1, "ss08" 1, "cv06" 1, "cv11" 1;
+  --belt-font-variant-alternates: styleset(ss01) styleset(ss02) styleset(ss07) styleset(ss08) character-variant(cv06) character-variant(cv11);
+  --belt-font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
+  --belt-font-variant-numeric: slashed-zero;
 }
 
 @media (prefers-color-scheme: dark) {

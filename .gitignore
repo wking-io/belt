@@ -8,3 +8,4 @@ packages/belt/npm
 .env.*
 !.env.example
 coverage
+examples/remix-app/primitive-preview.html

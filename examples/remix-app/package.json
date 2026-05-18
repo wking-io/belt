@@ -3,12 +3,27 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "tsc -p tsconfig.json"
+    "check": "tsc -p tsconfig.json",
+    "dev": "tsx watch server.ts",
+    "preview:primitives": "tsx scripts/render-primitives-preview.ts",
+    "start": "tsx server.ts"
   },
   "dependencies": {
-    "@riff-refine/belt": "workspace:*"
+    "@remix-run/ui": "0.1.1",
+    "@riff-refine/belt": "workspace:*",
+    "@repo/adapter-remix": "workspace:*",
+    "@repo/core": "workspace:*",
+    "@repo/renderer-remix": "workspace:*",
+    "@repo/theme-css": "workspace:*",
+    "@repo/tool-worktrees": "workspace:*",
+    "@repo/tool-worktrees-extension-portless": "workspace:*",
+    "@repo/tool-worktrees-renderer-remix": "workspace:*",
+    "remix": "3.0.0-beta.0"
   },
   "engines": {
     "node": ">=24.3.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.2"
   }
 }

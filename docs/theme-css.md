@@ -28,6 +28,16 @@ Layout tokens are:
 - numbered spacing variables such as `--belt-space-1`, `--belt-space-2`, and `--belt-space-12`
 - `--belt-radius-inner`, `--belt-radius`, and `--belt-radius-outer`
 
+Typography tokens are:
+
+- `--belt-font-family`
+- `--belt-font-feature-settings`
+- `--belt-font-variant-alternates`
+- `--belt-font-variant-ligatures`
+- `--belt-font-variant-numeric`
+
+The default typography contract uses Inter and enables `calt`, `dlig`, `case`, `ccmp`, `zero`, `ss01`, `ss02`, `ss07`, `ss08`, `cv06`, and `cv11`. It also opts into common, discretionary, and contextual ligatures plus slashed zero through `font-variant-*` tokens. The theme CSS defines the family and feature settings, but it does not load font files. Host apps should load Inter however they already manage fonts.
+
 V1 does not include background/surface tokens, selected/highlight tokens, shadows, or a TypeScript spacing helper.
 
 ## Theme Registration
