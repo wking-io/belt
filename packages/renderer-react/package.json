@@ -14,7 +14,16 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/core": "workspace:*"
+    "@repo/glyphs": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "engines": {
     "node": ">=20"

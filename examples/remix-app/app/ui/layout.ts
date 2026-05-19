@@ -1,12 +1,13 @@
 import { css, createElement, type RemixNode } from "remix/ui";
+import { GlyphSheet } from "@repo/renderer-remix";
 import { routes } from "../routes.ts";
 import { document } from "./document.ts";
 
 const appChrome = css({
   "--rmx-font-family-mono": "var(--belt-font-family)",
   "--rmx-font-family-sans": "var(--belt-font-family)",
-  background: "var(--white)",
-  color: "var(--belt-color-foreground)",
+  background: "var(--belt-color-elevation-1)",
+  color: "var(--belt-color-elevation-1-foreground)",
   fontFamily: "var(--belt-font-family)",
   fontFeatureSettings: "var(--belt-font-feature-settings)",
   fontKerning: "normal",
@@ -20,9 +21,6 @@ const appChrome = css({
   MozOsxFontSmoothing: "grayscale",
   textRendering: "optimizeLegibility",
   WebkitFontSmoothing: "antialiased",
-  "@media (prefers-color-scheme: dark)": {
-    background: "var(--black)",
-  },
   "& *, & *::before, & *::after": {
     boxSizing: "border-box"
   },
@@ -40,7 +38,7 @@ const appChrome = css({
     justifyContent: "space-between"
   },
   ".app-brand": {
-    color: "var(--belt-color-foreground-strong)",
+    color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "14px",
     fontWeight: 700,
     lineHeight: 1,
@@ -53,7 +51,7 @@ const appChrome = css({
   },
   ".app-nav-link": {
     borderRadius: "var(--belt-radius)",
-    color: "var(--belt-color-foreground-subtle)",
+    color: "var(--belt-color-elevation-1-foreground-subtle)",
     fontSize: "13px",
     fontWeight: 500,
     lineHeight: 1,
@@ -63,7 +61,7 @@ const appChrome = css({
   },
   ".app-nav-link:hover": {
     backgroundColor: "var(--belt-color-elevation-2-hover)",
-    color: "var(--belt-color-foreground)"
+    color: "var(--belt-color-elevation-1-foreground)"
   }
 });
 
@@ -77,6 +75,7 @@ export function layout(options: {
     children: createElement(
       "div",
       { className: "app-shell" },
+      createElement(GlyphSheet),
       createElement(
         "header",
         { className: "app-header" },

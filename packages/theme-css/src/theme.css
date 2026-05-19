@@ -347,100 +347,126 @@
 }
 
 :root {
-  --neutral-1: var(--oatmeal-1);
-  --neutral-2: var(--oatmeal-2);
-  --neutral-3: var(--oatmeal-3);
-  --neutral-4: var(--oatmeal-4);
-  --neutral-5: var(--oatmeal-5);
-  --neutral-6: var(--oatmeal-6);
-  --neutral-7: var(--oatmeal-7);
-  --neutral-8: var(--oatmeal-8);
-  --neutral-9: var(--oatmeal-9);
-  --neutral-10: var(--oatmeal-10);
-  --neutral-11: var(--oatmeal-11);
-  --neutral-12: var(--oatmeal-12);
-  --neutral-13: var(--oatmeal-13);
-  --neutral-14: var(--oatmeal-14);
-  --belt-color-elevation-1: light-dark(var(--neutral-3), var(--neutral-12));
-  --belt-color-elevation-1-hover: light-dark(var(--neutral-2), var(--neutral-11));
-  --belt-color-elevation-1-active: light-dark(var(--neutral-2), var(--neutral-11));
-  --belt-color-elevation-2: light-dark(var(--neutral-2), var(--neutral-11));
-  --belt-color-elevation-2-hover: light-dark(var(--neutral-1), var(--neutral-10));
-  --belt-color-elevation-2-active: light-dark(var(--neutral-1), var(--neutral-10));
-  --belt-color-elevation-3: light-dark(var(--neutral-1), var(--neutral-10));
-  --belt-color-elevation-3-hover: light-dark(var(--white), var(--neutral-9));
-  --belt-color-elevation-3-active: light-dark(var(--white), var(--neutral-9));
-  --belt-color-foreground: light-dark(var(--neutral-10), var(--neutral-3));
-  --belt-color-foreground-subtle: light-dark(var(--neutral-8), var(--neutral-5));
-  --belt-color-foreground-strong: light-dark(var(--neutral-12), var(--neutral-1));
-  --belt-color-border: light-dark(color-mix(in oklch, var(--neutral-14) 20%, transparent), color-mix(in oklch, var(--neutral-1) 20%, transparent));
-  --belt-color-border-subtle: light-dark(color-mix(in oklch, var(--neutral-14) 10%, transparent), color-mix(in oklch, var(--neutral-1) 10%, transparent));
-  --belt-color-border-strong: light-dark(color-mix(in oklch, var(--neutral-14) 30%, transparent), color-mix(in oklch, var(--neutral-1) 30%, transparent));
+  --belt-neutral-1: var(--oatmeal-1);
+  --belt-neutral-2: var(--oatmeal-2);
+  --belt-neutral-3: var(--oatmeal-3);
+  --belt-neutral-4: var(--oatmeal-4);
+  --belt-neutral-5: var(--oatmeal-5);
+  --belt-neutral-6: var(--oatmeal-6);
+  --belt-neutral-7: var(--oatmeal-7);
+  --belt-neutral-8: var(--oatmeal-8);
+  --belt-neutral-9: var(--oatmeal-9);
+  --belt-neutral-10: var(--oatmeal-10);
+  --belt-neutral-11: var(--oatmeal-11);
+  --belt-neutral-12: var(--oatmeal-12);
+  --belt-neutral-13: var(--oatmeal-13);
+  --belt-neutral-14: var(--oatmeal-14);
+
+  --belt-color-elevation-1: light-dark(var(--belt-neutral-3), var(--belt-neutral-12));
+  --belt-color-elevation-1-hover: light-dark(var(--belt-neutral-2), var(--belt-neutral-11));
+  --belt-color-elevation-1-active: light-dark(var(--belt-neutral-2), var(--belt-neutral-11));
+  --belt-color-elevation-1-inset: light-dark(var(--belt-neutral-4), var(--belt-neutral-14));
+  --belt-color-elevation-1-highlight: light-dark(var(--white), var(--belt-neutral-9));
+  --belt-color-elevation-1-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-3));
+  --belt-color-elevation-1-foreground-subtle: light-dark(var(--belt-neutral-8), var(--belt-neutral-6));
+  --belt-color-elevation-1-foreground-strong: light-dark(var(--belt-neutral-12), var(--belt-neutral-1));
+
+  --belt-color-elevation-2: light-dark(var(--belt-neutral-2), var(--belt-neutral-11));
+  --belt-color-elevation-2-hover: light-dark(var(--belt-neutral-1), var(--belt-neutral-10));
+  --belt-color-elevation-2-active: light-dark(var(--belt-neutral-1), var(--belt-neutral-10));
+  --belt-color-elevation-2-inset: light-dark(var(--belt-neutral-5), var(--belt-neutral-13));
+  --belt-color-elevation-2-highlight: light-dark(var(--white), var(--belt-neutral-9));
+  --belt-color-elevation-2-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-2));
+  --belt-color-elevation-2-foreground-subtle: light-dark(var(--belt-neutral-8), var(--belt-neutral-4));
+  --belt-color-elevation-2-foreground-strong: light-dark(var(--belt-neutral-12), var(--belt-neutral-1));
+
+  --belt-color-elevation-3: light-dark(var(--belt-neutral-1), var(--belt-neutral-10));
+  --belt-color-elevation-3-hover: light-dark(var(--white), var(--belt-neutral-9));
+  --belt-color-elevation-3-active: light-dark(var(--white), var(--belt-neutral-9));
+  --belt-color-elevation-3-inset: light-dark(var(--belt-neutral-6), var(--belt-neutral-12));
+  --belt-color-elevation-3-highlight: light-dark(var(--white), var(--belt-neutral-9));
+  --belt-color-elevation-3-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-1));
+  --belt-color-elevation-3-foreground-subtle: light-dark(var(--belt-neutral-8), var(--belt-neutral-2));
+  --belt-color-elevation-3-foreground-strong: light-dark(var(--belt-neutral-12), var(--belt-neutral-1));
+
+
+  --belt-color-border: light-dark(color-mix(in oklch, var(--belt-neutral-14) 20%, transparent), color-mix(in oklch, var(--belt-neutral-1) 20%, transparent));
+  --belt-color-border-subtle: light-dark(color-mix(in oklch, var(--belt-neutral-14) 10%, transparent), color-mix(in oklch, var(--belt-neutral-1) 10%, transparent));
+  --belt-color-border-strong: light-dark(color-mix(in oklch, var(--belt-neutral-14) 30%, transparent), color-mix(in oklch, var(--belt-neutral-1) 30%, transparent));
+
   --belt-color-focus: light-dark(var(--blush-6), var(--blush-6));
-  --belt-color-primary: light-dark(color-mix(in oklch, var(--iris-6) 10%, transparent), color-mix(in oklch, var(--iris-6) 20%, transparent));
+
+  --belt-color-primary: light-dark(color-mix(in oklch, var(--iris-5) 20%, transparent), color-mix(in oklch, var(--iris-6) 20%, transparent));
   --belt-color-primary-foreground: light-dark(var(--iris-10), var(--iris-3));
   --belt-color-primary-foreground-subtle: light-dark(var(--iris-8), var(--iris-5));
   --belt-color-primary-foreground-strong: light-dark(var(--iris-12), var(--iris-1));
   --belt-color-primary-control: light-dark(var(--iris-5), var(--iris-6));
-  --belt-color-primary-control-hover: light-dark(var(--iris-6), var(--iris-7));
+  --belt-color-primary-control-hover: light-dark(var(--iris-6), var(--iris-5));
   --belt-color-primary-control-active: light-dark(var(--iris-6), var(--iris-7));
-  --belt-color-primary-control-foreground: light-dark(var(--iris-10), var(--iris-10));
-  --belt-color-primary-control-foreground-subtle: light-dark(var(--iris-13), var(--iris-8));
-  --belt-color-primary-control-foreground-strong: light-dark(var(--iris-14), var(--iris-12));
-  --belt-color-info: light-dark(color-mix(in oklch, var(--ocean-6) 10%, transparent), color-mix(in oklch, var(--ocean-6) 20%, transparent));
+  --belt-color-primary-control-highlight: light-dark(var(--iris-2), var(--iris-3));
+  --belt-color-primary-control-foreground: light-dark(var(--iris-10), var(--iris-11));
+  --belt-color-primary-control-foreground-subtle: light-dark(var(--iris-8), var(--iris-9));
+  --belt-color-primary-control-foreground-strong: light-dark(var(--iris-13), var(--iris-14));
+  --belt-color-primary-control-border: light-dark(var(--iris-8), var(--iris-14));
+
+  --belt-color-info: light-dark(color-mix(in oklch, var(--ocean-5) 20%, transparent), color-mix(in oklch, var(--ocean-6) 20%, transparent));
   --belt-color-info-foreground: light-dark(var(--ocean-10), var(--ocean-3));
   --belt-color-info-foreground-subtle: light-dark(var(--ocean-8), var(--ocean-5));
   --belt-color-info-foreground-strong: light-dark(var(--ocean-12), var(--ocean-1));
   --belt-color-info-control: light-dark(var(--ocean-5), var(--ocean-6));
-  --belt-color-info-control-hover: light-dark(var(--ocean-6), var(--ocean-7));
+  --belt-color-info-control-hover: light-dark(var(--ocean-6), var(--ocean-5));
   --belt-color-info-control-active: light-dark(var(--ocean-6), var(--ocean-7));
-  --belt-color-info-control-foreground: light-dark(var(--ocean-10), var(--ocean-10));
-  --belt-color-info-control-foreground-subtle: light-dark(var(--ocean-13), var(--ocean-8));
-  --belt-color-info-control-foreground-strong: light-dark(var(--ocean-14), var(--ocean-12));
-  --belt-color-success: light-dark(color-mix(in oklch, var(--pistachio-6) 10%, transparent), color-mix(in oklch, var(--pistachio-6) 20%, transparent));
+  --belt-color-info-control-highlight: light-dark(var(--ocean-2), var(--ocean-3));
+  --belt-color-info-control-foreground: light-dark(var(--ocean-10), var(--ocean-11));
+  --belt-color-info-control-foreground-subtle: light-dark(var(--ocean-8), var(--ocean-9));
+  --belt-color-info-control-foreground-strong: light-dark(var(--ocean-13), var(--ocean-14));
+  --belt-color-info-control-border: light-dark(var(--ocean-8), var(--ocean-14));
+
+  --belt-color-success: light-dark(color-mix(in oklch, var(--pistachio-5) 20%, transparent), color-mix(in oklch, var(--pistachio-6) 20%, transparent));
   --belt-color-success-foreground: light-dark(var(--pistachio-10), var(--pistachio-3));
   --belt-color-success-foreground-subtle: light-dark(var(--pistachio-8), var(--pistachio-5));
   --belt-color-success-foreground-strong: light-dark(var(--pistachio-12), var(--pistachio-1));
   --belt-color-success-control: light-dark(var(--pistachio-5), var(--pistachio-6));
-  --belt-color-success-control-hover: light-dark(var(--pistachio-6), var(--pistachio-7));
+  --belt-color-success-control-hover: light-dark(var(--pistachio-6), var(--pistachio-5));
   --belt-color-success-control-active: light-dark(var(--pistachio-6), var(--pistachio-7));
-  --belt-color-success-control-foreground: light-dark(var(--pistachio-10), var(--pistachio-10));
-  --belt-color-success-control-foreground-subtle: light-dark(var(--pistachio-13), var(--pistachio-8));
-  --belt-color-success-control-foreground-strong: light-dark(var(--pistachio-14), var(--pistachio-12));
-  --belt-color-warning: light-dark(color-mix(in oklch, var(--ochre-6) 10%, transparent), color-mix(in oklch, var(--ochre-6) 20%, transparent));
+  --belt-color-success-control-highlight: light-dark(var(--pistachio-2), var(--pistachio-3));
+  --belt-color-success-control-foreground: light-dark(var(--pistachio-10), var(--pistachio-11));
+  --belt-color-success-control-foreground-subtle: light-dark(var(--pistachio-8), var(--pistachio-9));
+  --belt-color-success-control-foreground-strong: light-dark(var(--pistachio-13), var(--pistachio-14));
+  --belt-color-success-control-border: light-dark(var(--pistachio-8), var(--pistachio-14));
+
+  --belt-color-warning: light-dark(color-mix(in oklch, var(--ochre-5) 20%, transparent), color-mix(in oklch, var(--ochre-6) 20%, transparent));
   --belt-color-warning-foreground: light-dark(var(--ochre-10), var(--ochre-3));
   --belt-color-warning-foreground-subtle: light-dark(var(--ochre-8), var(--ochre-5));
   --belt-color-warning-foreground-strong: light-dark(var(--ochre-12), var(--ochre-1));
   --belt-color-warning-control: light-dark(var(--ochre-5), var(--ochre-6));
-  --belt-color-warning-control-hover: light-dark(var(--ochre-6), var(--ochre-7));
+  --belt-color-warning-control-hover: light-dark(var(--ochre-6), var(--ochre-5));
   --belt-color-warning-control-active: light-dark(var(--ochre-6), var(--ochre-7));
-  --belt-color-warning-control-foreground: light-dark(var(--ochre-10), var(--ochre-10));
-  --belt-color-warning-control-foreground-subtle: light-dark(var(--ochre-13), var(--ochre-8));
-  --belt-color-warning-control-foreground-strong: light-dark(var(--ochre-14), var(--ochre-12));
-  --belt-color-danger: light-dark(color-mix(in oklch, var(--strawberry-6) 10%, transparent), color-mix(in oklch, var(--strawberry-6) 20%, transparent));
+  --belt-color-warning-control-highlight: light-dark(var(--ochre-2), var(--ochre-3));
+  --belt-color-warning-control-foreground: light-dark(var(--ochre-10), var(--ochre-11));
+  --belt-color-warning-control-foreground-subtle: light-dark(var(--ochre-8), var(--ochre-9));
+  --belt-color-warning-control-foreground-strong: light-dark(var(--ochre-13), var(--ochre-14));
+  --belt-color-warning-control-border: light-dark(var(--ochre-8), var(--ochre-14));
+
+  --belt-color-danger: light-dark(color-mix(in oklch, var(--strawberry-5) 20%, transparent), color-mix(in oklch, var(--strawberry-6) 20%, transparent));
   --belt-color-danger-foreground: light-dark(var(--strawberry-10), var(--strawberry-3));
   --belt-color-danger-foreground-subtle: light-dark(var(--strawberry-8), var(--strawberry-5));
   --belt-color-danger-foreground-strong: light-dark(var(--strawberry-12), var(--strawberry-1));
   --belt-color-danger-control: light-dark(var(--strawberry-5), var(--strawberry-6));
-  --belt-color-danger-control-hover: light-dark(var(--strawberry-6), var(--strawberry-7));
+  --belt-color-danger-control-hover: light-dark(var(--strawberry-6), var(--strawberry-5));
   --belt-color-danger-control-active: light-dark(var(--strawberry-6), var(--strawberry-7));
-  --belt-color-danger-control-foreground: light-dark(var(--strawberry-10), var(--strawberry-10));
-  --belt-color-danger-control-foreground-subtle: light-dark(var(--strawberry-13), var(--strawberry-8));
-  --belt-color-danger-control-foreground-strong: light-dark(var(--strawberry-14), var(--strawberry-12));
+  --belt-color-danger-control-highlight: light-dark(var(--strawberry-2), var(--strawberry-3));
+  --belt-color-danger-control-foreground: light-dark(var(--strawberry-10), var(--strawberry-11));
+  --belt-color-danger-control-foreground-subtle: light-dark(var(--strawberry-8), var(--strawberry-9));
+  --belt-color-danger-control-foreground-strong: light-dark(var(--strawberry-13), var(--strawberry-14));
+  --belt-color-danger-control-border: light-dark(var(--strawberry-8), var(--strawberry-14));
+
   --belt-space: 0.25rem;
-  --belt-space-0: 0;
-  --belt-space-1: calc(var(--belt-space) * 1);
-  --belt-space-2: calc(var(--belt-space) * 2);
-  --belt-space-3: calc(var(--belt-space) * 3);
-  --belt-space-4: calc(var(--belt-space) * 4);
-  --belt-space-5: calc(var(--belt-space) * 5);
-  --belt-space-6: calc(var(--belt-space) * 6);
-  --belt-space-8: calc(var(--belt-space) * 8);
-  --belt-space-10: calc(var(--belt-space) * 10);
-  --belt-space-12: calc(var(--belt-space) * 12);
-  --belt-radius-inner: 4px;
-  --belt-radius: 6px;
+
+  --belt-radius-inner: 2px;
+  --belt-radius: 4px;
   --belt-radius-outer: 8px;
+
   --belt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --belt-font-feature-settings: "calt" 1, "dlig" 1, "case" 1, "ccmp" 1, "zero" 1, "ss01" 1, "ss02" 1, "ss07" 1, "ss08" 1, "cv06" 1, "cv11" 1;
   --belt-font-variant-alternates: styleset(ss01) styleset(ss02) styleset(ss07) styleset(ss08) character-variant(cv06) character-variant(cv11);
@@ -448,79 +474,70 @@
   --belt-font-variant-numeric: slashed-zero;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]) {
-  --belt-surface-bg: var(--belt-color-elevation-3);
-  --belt-surface-inner-bg: var(--belt-color-elevation-3);
-  --belt-surface-border: var(--belt-color-border-subtle);
-  --belt-surface-border-focused: color-mix(in oklch, var(--belt-color-focus) 50%, transparent);
-  --belt-surface-highlight: color-mix(in oklch, var(--white) 50%, transparent);
-  --belt-surface-depth: color-mix(in oklch, var(--neutral-14) 10%, transparent);
-  --belt-surface-recess: color-mix(in oklch, var(--neutral-14) 15%, transparent);
-  --belt-surface-radius: var(--belt-radius-outer);
-  --belt-surface-inner-radius: var(--belt-radius);
-  --belt-surface-highlight-offset: 1px;
-  --belt-surface-highlight-border: transparent;
-  --belt-surface-highlight-shadow: inset 0 0 0 1px var(--belt-surface-highlight), inset 0 1px 0 var(--belt-surface-highlight);
-  --belt-surface-root-shadow: none;
-  --belt-surface-inner-shadow: 0 1px 3px 0 var(--belt-surface-depth), 0 1px 2px -1px var(--belt-surface-depth);
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-  background-color: var(--belt-surface-bg);
+:where(.belt-surface) {
+  /* Root */
+  --belt-surface-root-bg: var(--belt-color-elevation-1-inset);
+  --belt-surface-radius: var(--belt-radius);
+  --belt-surface-foreground: var(--belt-color-elevation-1-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-elevation-1-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-elevation-1-foreground-strong);
+
+  /* Recess */
+  --belt-surface-recess: color-mix(in oklch, var(--belt-neutral-14) 15%, transparent);
+
+  /* Highlight */
+  --belt-surface-highlight: var(--belt-color-elevation-1-highlight);
+  --belt-surface-highlight-shadow: inset 0 0 0 1px var(--belt-surface-highlight), inset 0 1px 0 var(--belt-surface-highlight);
+
+  /* Surface */
+  --belt-surface-bg: var(--belt-color-elevation-1);
+  --belt-surface-border: color-mix(in oklch, var(--belt-neutral-14) 20%, transparent);
+
+  /* Shadow */
+  --belt-surface-border-focused: color-mix(in oklch, var(--belt-color-focus) 50%, transparent);
+  --belt-surface-shadow: color-mix(in oklch, var(--belt-neutral-14) 15%, transparent);
+
+  background-color: var(--belt-surface-root-bg);
   border-radius: var(--belt-surface-radius);
+  color: var(--belt-surface-foreground);
   box-sizing: border-box;
   isolation: isolate;
   outline: none;
   position: relative;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before,
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::after {
+:where(.belt-surface)::before,
+:where(.belt-surface)::after {
   content: "";
   pointer-events: none;
   position: absolute;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::before {
+:where(.belt-surface)::before {
   border-radius: var(--belt-surface-radius);
   box-shadow: inset 0 0.5px 1px 1px var(--belt-surface-recess);
   inset: 0;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])::after {
-  border-bottom: 1px solid var(--belt-surface-highlight-border);
-  border-radius: var(--belt-surface-inner-radius);
-  box-shadow: var(--belt-surface-highlight-shadow);
-  inset: var(--belt-surface-highlight-offset);
+:where(.belt-surface)::after {
+  border-radius: calc(var(--belt-surface-radius) - 1px);
+  box-shadow: inset 0px 0px 0px 1px color-mix(in oklch, var(--belt-surface-highlight) 40%, transparent), inset 0px 1px 0px color-mix(in oklch, var(--belt-surface-highlight) 100%, transparent);
+  inset: 1px;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-placement="absolute"], [data-belt-placement="absolute"]) {
-  position: absolute;
-}
-
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-placement="relative"], [data-belt-placement="relative"]) {
-  position: relative;
-}
-
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within) {
-  box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 10%, transparent), var(--belt-surface-root-shadow);
-}
-
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within)::before {
-  box-shadow: inset 0 0.5px 1px 1px color-mix(in oklch, var(--belt-color-focus) 30%, transparent);
-}
-
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-focused="true"], :focus-within) > :where(.belt-surface__inner, [data-belt-surface-inner]) {
-  border-color: var(--belt-surface-border-focused);
-  box-shadow: 0 1px 3px 0 color-mix(in oklch, var(--belt-color-focus) 30%, transparent), 0 1px 2px -1px color-mix(in oklch, var(--belt-color-focus) 30%, transparent);
-}
-
-:where(.belt-surface__inner, [data-belt-surface-inner]) {
+:where(.belt-surface__inner) {
   background-clip: padding-box;
-  background-color: var(--belt-surface-inner-bg);
-  border: 0.5px solid var(--belt-surface-border);
-  border-radius: var(--belt-surface-inner-radius);
-  box-shadow: var(--belt-surface-inner-shadow);
+  background-color: var(--belt-surface-bg);
+  border: 1px solid var(--belt-surface-border);
+  border-radius: var(--belt-surface-radius);
+  box-shadow: 0 1px 3px 0 var(--belt-surface-shadow), 0 1px 2px -1px var(--belt-surface-shadow);
   box-sizing: border-box;
-  color: var(--belt-color-foreground);
   height: 100%;
   min-width: 0;
   outline: none;
@@ -528,56 +545,305 @@
   position: relative;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-surface-size="control-sm"], [data-belt-surface-size="control-default"], [data-belt-surface-size="control-lg"]) {
-  --belt-surface-radius: 4px;
-  --belt-surface-inner-radius: 4px;
+:where(.belt-surface:has([data-control]:focus-visible)) {
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 20%, transparent);
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-surface-size="control-sm"], [data-belt-surface-size="control-default"], [data-belt-surface-size="control-lg"])::after {
-  border-radius: 3px;
+:where(.belt-surface[data-placement="absolute"], [data-belt-placement="absolute"]) {
+  position: absolute;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"] {
-  --belt-surface-radius: 5px;
-  --belt-surface-inner-radius: 5px;
+:where(.belt-surface[data-placement="relative"], [data-belt-placement="relative"]) {
+  position: relative;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"]::before,
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-sm"]::after {
-  border-radius: 4px;
-}
-
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"] {
+:where(.belt-surface[data-radius="outer"]) {
   --belt-surface-radius: var(--belt-radius-outer);
-  --belt-surface-inner-radius: var(--belt-radius-outer);
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"]::before,
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-default"]::after {
+:where(.belt-surface[data-radius="inner"]) {
+  --belt-surface-radius: var(--belt-radius-inner);
+}
+
+
+:where(.belt-surface[data-elevation="2"]) {
+  --belt-surface-bg: var(--belt-color-elevation-2);
+  --belt-surface-foreground: var(--belt-color-elevation-2-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-elevation-2-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-elevation-2-foreground-strong);
+}
+
+:where(.belt-surface[data-elevation="3"]) {
+  --belt-surface-bg: var(--belt-color-elevation-3);
+  --belt-surface-foreground: var(--belt-color-elevation-3-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-elevation-3-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-elevation-3-foreground-strong);
+}
+
+
+:where(.belt-surface[data-tone="primary"]) {
+  --belt-surface-bg: var(--belt-color-primary-control);
+  --belt-surface-highlight: var(--belt-color-primary-control-highlight);
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-primary-control-border) 20%, transparent);
+  --belt-surface-foreground: var(--belt-color-primary-control-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-primary-control-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-primary-control-foreground-strong);
+}
+
+:where(.belt-surface[data-tone="info"]) {
+  --belt-surface-bg: var(--belt-color-info-control);
+  --belt-surface-highlight: var(--belt-color-info-control-highlight);
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-info-control-border) 20%, transparent);
+  --belt-surface-foreground: var(--belt-color-info-control-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-info-control-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-info-control-foreground-strong);
+}
+
+:where(.belt-surface[data-tone="success"]) {
+  --belt-surface-bg: var(--belt-color-success-control);
+  --belt-surface-highlight: var(--belt-color-success-control-highlight);
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-success-control-border) 20%, transparent);
+  --belt-surface-foreground: var(--belt-color-success-control-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-success-control-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-success-control-foreground-strong);
+}
+
+:where(.belt-surface[data-tone="warning"]) {
+  --belt-surface-bg: var(--belt-color-warning-control);
+  --belt-surface-highlight: var(--belt-color-warning-control-highlight);
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-warning-control-border) 20%, transparent);
+  --belt-surface-foreground: var(--belt-color-warning-control-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-warning-control-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-warning-control-foreground-strong);
+}
+
+:where(.belt-surface[data-tone="danger"]) {
+  --belt-surface-bg: var(--belt-color-danger-control);
+  --belt-surface-highlight: var(--belt-color-danger-control-highlight);
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-danger-control-border) 20%, transparent);
+  --belt-surface-foreground: var(--belt-color-danger-control-foreground);
+  --belt-surface-foreground-subtle: var(--belt-color-danger-control-foreground-subtle);
+  --belt-surface-foreground-strong: var(--belt-color-danger-control-foreground-strong);
+}
+
+:where(.belt-surface:has([data-control]:focus-visible), belt-surface[data-tone="primary"]:has([data-control]:focus-visible), belt-surface[data-tone="info"]:has([data-control]:focus-visible), belt-surface[data-tone="success"]:has([data-control]:focus-visible), belt-surface[data-tone="warning"]:has([data-control]:focus-visible), belt-surface[data-tone="danger"]:has([data-control]:focus-visible)) {
+  --belt-surface-border: color-mix(in oklch, var(--belt-color-focus) 60%, transparent);
+}
+
+:where(.belt-button) {
+  --belt-button-bg-from: color-mix(in oklch, var(--belt-surface-highlight) 15%, transparent);
+  --belt-button-bg-via: color-mix(in oklch, var(--belt-surface-bg) 0%, transparent);
+  --belt-button-bg-to: color-mix(in oklch, var(--belt-surface-highlight) 30%, transparent);
+  --belt-button-bg-hover: var(--belt-color-elevation-1-hover);
+  --belt-button-icon-color: var(--belt-surface-foreground-subtle);
+  /* --belt-button-text-shadow-color: light-dark(transparent, color-mix(in oklch, var(--belt-neutral-14) 25%, transparent)); */
+
+  appearance: none;
+  background: linear-gradient(to bottom, var(--belt-button-bg-from), var(--belt-button-bg-via), var(--belt-button-bg-via), var(--belt-button-bg-to));
+  border: none;
+  color: var(--belt-surface-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--belt-space);
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  width: 100%;
+  height: calc(var(--belt-space) * 6);
+  padding: var(--belt-space) calc(var(--belt-space) * 2);
+  /* text-shadow: 0 1px 1px var(--belt-button-text-shadow-color); */
+}
+
+:where(.belt-button:disabled) {
+  cursor: not-allowed;
+}
+
+:where(.belt-button:not([aria-busy]):disabled) {
+  opacity: 0.5;
+}
+
+:where(.belt-button:not(:disabled):hover) {
+  --belt-button-icon-color: var(--belt-surface-foreground);
+  background-color: var(--belt-button-bg-hover);
+}
+
+:where([data-tone="primary"] .belt-button) {
+  --belt-button-bg-hover: var(--belt-color-primary-control-hover);
+}
+
+:where([data-tone="info"] .belt-button) {
+  --belt-button-bg-hover: var(--belt-color-info-control-hover);
+}
+
+:where([data-tone="success"] .belt-button) {
+  --belt-button-bg-hover: var(--belt-color-success-control-hover);
+}
+
+:where([data-tone="warning"] .belt-button) {
+  --belt-button-bg-hover: var(--belt-color-warning-control-hover);
+}
+
+:where([data-tone="danger"] .belt-button) {
+  --belt-button-bg-hover: var(--belt-color-danger-control-hover);
+}
+
+:where(.belt-button__start-icon),
+:where(.belt-button__end-icon),
+:where(.belt-button__icon) {
+  width: calc(var(--belt-space) * 4);
+  height: calc(var(--belt-space) * 4);
+}
+
+:where(.belt-button__icon) {
+  color: var(--belt-button-text-color);
+}
+
+:where(.belt-button__start-icon),
+:where(.belt-button__end-icon) {
+  color: var(--belt-button-icon-color);
+}
+
+:where(.belt-button__start-icon) {
+  margin-left: calc(var(--belt-space) * -0.5);
+}
+
+:where(.belt-button__end-icon) {
+  margin-right: calc(var(--belt-space) * -0.5);
+}
+
+:where(.belt-button__icon) {
+  margin-left: calc(var(--belt-space) * -1);
+  margin-right: calc(var(--belt-space) * -1);
+}
+
+:where(.belt-button__start-icon svg),
+:where(.belt-button__end-icon svg),
+:where(.belt-button__icon svg) {
+  width: 100%;
+  height: 100%;
+}
+
+:where([aria-busy] .belt-button__start-icon svg),
+:where([aria-busy] .belt-button__end-icon svg),
+:where([aria-busy] .belt-button__icon svg) {
+  animation: spin 1s linear infinite;
+}
+
+
+:where(.belt-ghost-button) {
+  --belt-ghost-button-text-color: var(--belt-color-elevation-1-foreground);
+  --belt-ghost-button-icon-color: var(--belt-color-elevation-1-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-elevation-1-hover);
+  --belt-ghost-button-focus: var(--belt-color-focus);
+
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--belt-ghost-button-text-color);
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  height: calc(var(--belt-space) * 6);
+  gap: var(--belt-space);
+  padding: var(--belt-space) calc(var(--belt-space) * 2);
+  border: 1px solid transparent;
   border-radius: var(--belt-radius);
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-lg"] {
-  --belt-surface-radius: 10px;
-  --belt-surface-inner-radius: 10px;
+:where(.belt-ghost-button:disabled) {
+  cursor: not-allowed;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel])[data-belt-surface-size="surface-lg"]::after {
-  border-radius: 9px;
+:where(.belt-ghost-button:not([aria-busy]):disabled) {
+  opacity: 0.5;
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="1"], [data-belt-surface-elevation="1"]) {
-  --belt-surface-bg: var(--belt-color-elevation-1);
-  --belt-surface-inner-bg: var(--belt-color-elevation-1);
+:where(.belt-ghost-button:not(:disabled):hover),
+:where(.belt-ghost-button:focus-visible) {
+  background-color: var(--belt-ghost-button-bg-hover);
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="2"], [data-belt-surface-elevation="2"]) {
-  --belt-surface-bg: var(--belt-color-elevation-2);
-  --belt-surface-inner-bg: var(--belt-color-elevation-2);
+:where(.belt-ghost-button:focus-visible) {
+  border: 1px solid color-mix(in oklch, var(--belt-ghost-button-focus) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-ghost-button-focus) 20%, transparent);
 }
 
-:where(.belt-surface, .belt-panel, [data-belt-surface], [data-belt-panel]):where([data-belt-elevation="3"], [data-belt-surface-elevation="3"]) {
-  --belt-surface-bg: var(--belt-color-elevation-3);
-  --belt-surface-inner-bg: var(--belt-color-elevation-3);
-  --belt-surface-highlight: color-mix(in oklch, var(--white) 65%, transparent);
+:where(.belt-ghost-button[data-tone="primary"]:hover),
+:where(.belt-ghost-button[data-tone="primary"]:focus-visible) {
+  --belt-ghost-button-text-color: var(--belt-color-primary-foreground-subtle);
+  --belt-ghost-button-icon-color: var(--belt-color-primary-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-primary);
+}
+
+:where(.belt-ghost-button[data-tone="info"]:hover),
+:where(.belt-ghost-button[data-tone="info"]:focus-visible) {
+  --belt-ghost-button-text-color: var(--belt-color-info-foreground-subtle);
+  --belt-ghost-button-icon-color: var(--belt-color-info-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-info);
+}
+
+:where(.belt-ghost-button[data-tone="success"]:hover),
+:where(.belt-ghost-button[data-tone="success"]:focus-visible) {
+  --belt-ghost-button-text-color: var(--belt-color-success-foreground-subtle);
+  --belt-ghost-button-icon-color: var(--belt-color-success-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-success);
+}
+
+:where(.belt-ghost-button[data-tone="warning"]:hover),
+:where(.belt-ghost-button[data-tone="warning"]:focus-visible) {
+  --belt-ghost-button-text-color: var(--belt-color-warning-foreground-subtle);
+  --belt-ghost-button-icon-color: var(--belt-color-warning-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-warning);
+}
+
+:where(.belt-ghost-button[data-tone="danger"]:hover),
+:where(.belt-ghost-button[data-tone="danger"]:focus-visible) {
+  --belt-ghost-button-text-color: var(--belt-color-danger-foreground-subtle);
+  --belt-ghost-button-icon-color: var(--belt-color-danger-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-danger);
+}
+
+:where(.belt-ghost-button__start-icon),
+:where(.belt-ghost-button__end-icon),
+:where(.belt-ghost-button__icon) {
+  width: calc(var(--belt-space) * 4);
+  height: calc(var(--belt-space) * 4);
+}
+
+:where(.belt-ghost-button__icon) {
+  color: var(--belt-button-text-color);
+}
+
+:where(.belt-ghost-button__start-icon),
+:where(.belt-ghost-button__end-icon) {
+  color: var(--belt-button-icon-color);
+}
+
+:where(.belt-ghost-button__start-icon) {
+  margin-left: calc(var(--belt-space) * -0.5);
+}
+
+:where(.belt-ghost-button__end-icon) {
+  margin-right: calc(var(--belt-space) * -0.5);
+}
+
+:where(.belt-ghost-button__icon) {
+  margin-left: calc(var(--belt-space) * -1);
+  margin-right: calc(var(--belt-space) * -1);
+}
+
+:where(.belt-ghost-button__start-icon svg),
+:where(.belt-ghost-button__end-icon svg),
+:where(.belt-ghost-button__icon svg) {
+  width: 100%;
+  height: 100%;
+}
+
+:where([aria-busy] .belt-ghost-button__start-icon svg),
+:where([aria-busy] .belt-ghost-button__end-icon svg),
+:where([aria-busy] .belt-ghost-button__icon svg) {
+  animation: spin 1s linear infinite;
 }

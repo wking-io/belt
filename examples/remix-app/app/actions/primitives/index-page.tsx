@@ -165,14 +165,14 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
     gap: "8px"
   },
   ".preview-title": {
-    color: "var(--belt-color-foreground-strong)",
+    color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "28px",
     fontWeight: 650,
     lineHeight: 1.1,
     margin: 0
   },
   ".preview-note": {
-    color: "var(--belt-color-foreground-subtle)",
+    color: "var(--belt-color-elevation-1-foreground-subtle)",
     fontSize: "14px",
     lineHeight: 1.5,
     margin: 0,
@@ -183,7 +183,7 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
     gap: "12px"
   },
   ".preview-section-title": {
-    color: "var(--belt-color-foreground-strong)",
+    color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "13px",
     fontWeight: 650,
     letterSpacing: 0,
@@ -205,7 +205,7 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
     gridTemplateColumns: "96px 1fr"
   },
   ".preview-palette-label": {
-    color: "var(--belt-color-foreground-subtle)",
+    color: "var(--belt-color-elevation-1-foreground-subtle)",
     fontSize: "12px",
     fontWeight: 600,
     lineHeight: 1,
@@ -356,14 +356,6 @@ function panelGrid() {
           </div>
         </Panel>
       ))}
-      {elevations.map((elevation) => (
-        <Panel elevation={elevation} focused>
-          <div className="preview-panel-content">
-            <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Elevation {elevation}</span>
-            <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Focused surface.</span>
-          </div>
-        </Panel>
-      ))}
     </div>
   );
 }
@@ -375,20 +367,41 @@ function buttonGrid() {
         {tones.map((tone) => (
           <Button tone={tone}>{tone}</Button>
         ))}
-      </div>
-      <div className="preview-row">
         {tones.map((tone) => (
           <GhostButton tone={tone}>{tone}</GhostButton>
         ))}
       </div>
       <div className="preview-row">
-        <Button loading tone="primary">
-          Loading
-        </Button>
-        <Button disabled>Disabled</Button>
-        <Button startIcon={<Glyph name="add" />} tone="success">
-          With Icon
-        </Button>
+        {tones.map((tone) => (
+          <Button tone={tone} startIcon="add" endIcon="close">{tone}</Button>
+        ))}
+        {tones.map((tone) => (
+          <GhostButton tone={tone} startIcon="add" endIcon="close">{tone}</GhostButton>
+        ))}
+      </div>
+      <div className="preview-row">
+        {tones.map((tone) => (
+          <Button tone={tone} loading>{tone}</Button>
+        ))}
+        {tones.map((tone) => (
+          <GhostButton tone={tone} loading>{tone}</GhostButton>
+        ))}
+      </div>
+      <div className="preview-row">
+        {tones.map((tone) => (
+          <Button tone={tone} disabled>{tone}</Button>
+        ))}
+        {tones.map((tone) => (
+          <GhostButton tone={tone} disabled>{tone}</GhostButton>
+        ))}
+      </div>
+      <div className="preview-row">
+        {tones.map((tone) => (
+          <Button tone={tone} icon="add" />
+        ))}
+        {tones.map((tone) => (
+          <GhostButton tone={tone} icon="add" />
+        ))}
       </div>
     </div>
   );

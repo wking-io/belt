@@ -1,10 +1,13 @@
 // @jsxRuntime classic
 // @jsx createElement
+// @jsxFrag Fragment
 // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
-import { createElement, css, type CSSMixinDescriptor, type Handle, type MixInput, type Props, type RemixNode } from "@remix-run/ui";
+import { createElement, css, Fragment, type CSSMixinDescriptor, type Handle, type MixInput, type Props, type RemixNode } from "@remix-run/ui";
 import * as RemixCombobox from "@remix-run/ui/combobox";
+import { Glyph } from "@remix-run/ui/glyph";
 import * as RemixMenu from "@remix-run/ui/menu";
 import * as RemixSelect from "@remix-run/ui/select";
+import type { GlyphName } from "@repo/glyphs";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
 type Elevation = 1 | 2 | 3;
@@ -116,19 +119,13 @@ export function iconStyle(options: {
 export type PanelProps = Props<"div"> & {
   readonly children?: RemixNode;
   readonly elevation?: Elevation;
-  readonly focused?: boolean;
-  readonly innerClassName?: string;
-  readonly innerMix?: MixInput;
 };
 
 export function Panel(handle: Handle<PanelProps>) {
   return () => {
     const {
       children,
-      elevation = 3,
-      focused = false,
-      innerClassName,
-      innerMix,
+      elevation = 1,
       mix,
       className,
       ...rootProps
@@ -137,16 +134,12 @@ export function Panel(handle: Handle<PanelProps>) {
     return (
       <div
         {...rootProps}
-        className={classNames("belt-surface belt-panel", className)}
-        data-belt-panel=""
-        data-belt-surface=""
-        data-belt-elevation={String(elevation)}
-        data-belt-surface-elevation={String(elevation)}
-        data-belt-surface-size="surface-default"
-        data-focused={focused ? "true" : undefined}
+        className={classNames("belt-surface", className)}
+        data-elevation={String(elevation)}
+        data-radius="outer"
         mix={mix}
       >
-        <div className={classNames("belt-surface__inner", innerClassName)} data-belt-surface-inner="" mix={innerMix}>
+        <div className={classNames("belt-surface__inner")}>
           {children}
         </div>
       </div>
@@ -156,10 +149,12 @@ export function Panel(handle: Handle<PanelProps>) {
 
 export type ButtonProps = Omit<Props<"button">, "children"> & {
   readonly children?: RemixNode;
-  readonly endIcon?: RemixNode;
+  readonly endIcon?: GlyphName;
   readonly loading?: boolean;
-  readonly startIcon?: RemixNode;
+  readonly startIcon?: GlyphName;
+  readonly icon?: GlyphName;
   readonly tone?: IntentTone;
+  readonly elevation?: Elevation;
 };
 
 export function Button(handle: Handle<ButtonProps>) {
@@ -169,30 +164,48 @@ export function Button(handle: Handle<ButtonProps>) {
       disabled,
       endIcon,
       loading = false,
-      mix,
+      icon,
       startIcon,
       tone = "neutral",
-      type,
+      elevation = 1,
+      type = "button",
+      class: classes,
       ...buttonProps
     } = handle.props;
 
+    const resolvedStartIcon = loading ? "spinner" : startIcon;
+
     return (
-      <button
-        {...buttonProps}
-        aria-busy={loading || undefined}
-        disabled={disabled || loading}
-        type={type ?? "button"}
-        mix={composeMix(buttonBaseStyle, buttonToneStyle(tone), mix)}
-      >
-        {startIcon ? <span mix={composeMix(buttonIconSlotStyle)}>{startIcon}</span> : null}
-        {children !== undefined ? <span mix={composeMix(buttonLabelStyle)}>{children}</span> : null}
-        {endIcon ? <span mix={composeMix(buttonIconSlotStyle)}>{endIcon}</span> : null}
-      </button>
+      <div className={classNames("belt-surface", classes)} data-tone={tone}>
+        <div className={classNames("belt-surface__inner")}>
+          <button
+            {...buttonProps}
+            className={classNames("belt-button")}
+            data-elevation={elevation}
+            aria-busy={loading || undefined}
+            disabled={disabled || loading}
+            type={type}
+            data-control
+          >
+            {icon ? (
+              <span className={classNames("belt-button__icon")}><Glyph name={icon} /></span>
+            ) : (
+              <>
+                {resolvedStartIcon ? <span className={classNames("belt-button__start-icon")}><Glyph name={resolvedStartIcon} /></span> : null}
+                {children !== undefined ? <span>{children}</span> : null}
+                {endIcon ? <span className={classNames("belt-button__end-icon")}><Glyph name={endIcon} /></span> : null}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     );
   };
 }
 
-export type GhostButtonProps = ButtonProps;
+export type GhostButtonProps = ButtonProps & {
+  readonly variant?: "default" | "icon";
+};
 
 export function GhostButton(handle: Handle<GhostButtonProps>) {
   return () => {
@@ -201,24 +214,37 @@ export function GhostButton(handle: Handle<GhostButtonProps>) {
       disabled,
       endIcon,
       loading = false,
+      icon,
       mix,
       startIcon,
       tone = "neutral",
-      type,
+      type = "button",
+      class: classes,
       ...buttonProps
     } = handle.props;
+
+    const resolvedStartIcon = loading ? "spinner" : startIcon;
 
     return (
       <button
         {...buttonProps}
+        className={classNames("belt-ghost-button", classes)}
         aria-busy={loading || undefined}
         disabled={disabled || loading}
-        type={type ?? "button"}
-        mix={composeMix(buttonBaseStyle, ghostButtonToneStyle(tone), mix)}
+        type={type}
+        data-tone={tone}
+        data-control
+        mix={mix}
       >
-        {startIcon ? <span mix={composeMix(buttonIconSlotStyle)}>{startIcon}</span> : null}
-        {children !== undefined ? <span mix={composeMix(buttonLabelStyle)}>{children}</span> : null}
-        {endIcon ? <span mix={composeMix(buttonIconSlotStyle)}>{endIcon}</span> : null}
+        {icon ? (
+          <span className={classNames("belt-ghost-button__icon")}><Glyph name={icon} /></span>
+        ) : (
+          <>
+            {resolvedStartIcon ? <span className={classNames("belt-ghost-button__start-icon")}><Glyph name={resolvedStartIcon} /></span> : null}
+            {children !== undefined ? <span>{children}</span> : null}
+            {endIcon ? <span className={classNames("belt-ghost-button__end-icon")}><Glyph name={endIcon} /></span> : null}
+          </>
+        )}
       </button>
     );
   };
@@ -443,55 +469,8 @@ export function ComboboxOption(handle: Handle<ComboboxOptionProps>) {
 export const onComboboxChange = RemixCombobox.onComboboxChange;
 export const ComboboxChangeEvent = RemixCombobox.ComboboxChangeEvent;
 
-export type { GlyphName, GlyphProps } from "@remix-run/ui/glyph";
-export { Glyph } from "@remix-run/ui/glyph";
-
-export const buttonBaseStyle: CSSMixinDescriptor = css({
-  alignItems: "center",
-  appearance: "none",
-  borderRadius: "var(--belt-radius)",
-  boxSizing: "border-box",
-  cursor: "pointer",
-  display: "inline-flex",
-  fontFamily: fontFamilyValue,
-  ...typographyFeatureStyle,
-  fontSize: "0.8125rem",
-  fontWeight: "500",
-  gap: "var(--belt-space-1)",
-  justifyContent: "center",
-  lineHeight: "1",
-  minHeight: "1.875rem",
-  outline: "none",
-  paddingBlock: "0",
-  paddingInline: "var(--belt-space-3)",
-  position: "relative",
-  userSelect: "none",
-  verticalAlign: "top",
-  whiteSpace: "nowrap",
-  "&:focus-visible": {
-    outline: "2px solid var(--belt-color-focus)",
-    outlineOffset: "2px"
-  },
-  "&:disabled": {
-    cursor: "not-allowed",
-    opacity: 0.55
-  }
-});
-
-export const buttonLabelStyle: CSSMixinDescriptor = css({
-  alignItems: "center",
-  display: "inline-flex",
-  minWidth: 0
-});
-
-export const buttonIconSlotStyle: CSSMixinDescriptor = css({
-  alignItems: "center",
-  display: "inline-flex",
-  flexShrink: 0,
-  height: "1em",
-  justifyContent: "center",
-  width: "1em"
-});
+export type { GlyphDefinition, GlyphName, GlyphNode, GlyphProps } from "./glyph.js";
+export { Glyph, glyphDefinitions, glyphIds, glyphNames, GlyphSheet, ToolbarGlyphSheet } from "./glyph.js";
 
 export const statusBannerRowStyle: CSSMixinDescriptor = css({
   alignItems: "center",

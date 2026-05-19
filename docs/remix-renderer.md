@@ -23,7 +23,8 @@ The v1 component set is intentionally small because Belt is a compact dev toolba
 - `Menu`, `MenuItem`, `MenuList`, `Submenu`: thin wrappers over Remix UI menu behavior.
 - `Select`, `SelectOption`: thin wrappers over Remix UI select behavior.
 - `Combobox`, `ComboboxOption`: thin wrappers over Remix UI combobox behavior.
-- `Glyph`: re-exported from Remix UI.
+- `GlyphSheet`: Belt's shared SVG sprite sheet, generated with Remix UI's `createGlyphSheet`.
+- `Glyph`: re-exported from Remix UI and backed by the shared Belt glyph ids.
 
 ## Mixins
 
@@ -42,6 +43,19 @@ The package also exports the component style mixins used internally, such as `bu
 All styles are plain CSS generated through Remix UI mixins and reference the CSS custom properties from `@repo/theme-css`. Colors must use the `--belt-color-*` OKLCH token contract rather than hard-coded color values.
 
 Renderers should import the default theme CSS once at the app boundary, then use these primitives inside the toolbar shell and tool renderers.
+
+Render the glyph sheet once near the app root before rendering `Glyph` instances:
+
+```tsx
+import { Glyph, GlyphSheet } from "@repo/renderer-remix";
+
+<body>
+  <GlyphSheet />
+  <button aria-label="Search">
+    <Glyph name="search" />
+  </button>
+</body>;
+```
 
 ## Visual Review
 

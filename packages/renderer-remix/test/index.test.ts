@@ -7,6 +7,8 @@ import {
   Combobox,
   ComboboxOption,
   Field,
+  Glyph,
+  GlyphSheet,
   GhostButton,
   Input,
   Label,
@@ -26,7 +28,7 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
   const html = await render(
     createElement(
       Panel,
-      { className: "outer-panel", elevation: 2, innerClassName: "inner-panel" },
+      { className: "outer-panel", elevation: 2 },
       createElement(Button, { tone: "primary" }, "Launch"),
       createElement(GhostButton, { tone: "danger" }, "Delete"),
       createElement(
@@ -42,18 +44,16 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
     ),
   );
 
-  assert.match(html, /data-belt-panel/);
-  assert.match(html, /data-belt-surface/);
-  assert.match(html, /data-belt-surface-inner/);
-  assert.match(html, /data-belt-surface-elevation="2"/);
-  assert.match(html, /belt-surface belt-panel outer-panel/);
-  assert.match(html, /belt-surface__inner inner-panel/);
+  assert.match(html, /data-elevation="2"/);
+  assert.match(html, /data-radius="outer"/);
+  assert.match(html, /belt-surface outer-panel/);
+  assert.match(html, /belt-surface__inner/);
   assert.match(html, /outer-panel/);
-  assert.match(html, /inner-panel/);
   assert.match(html, /Launch/);
   assert.match(html, /Delete/);
   assert.match(html, /Unsaved changes/);
-  assert.match(html, /var\(--belt-color-primary-control\)/);
+  assert.match(html, /data-tone="primary"/);
+  assert.match(html, /data-tone="danger"/);
   assert.match(html, /var\(--belt-color-warning\)/);
 });
 
@@ -93,6 +93,22 @@ it("exports thin Remix UI wrappers for composed controls", () => {
   assert.strictEqual(typeof SelectOption, "function");
   assert.strictEqual(typeof Combobox, "function");
   assert.strictEqual(typeof ComboboxOption, "function");
+});
+
+it("renders the shared toolbar glyph sheet through Remix UI", async () => {
+  const sheetHtml = await render(createElement(GlyphSheet, null));
+  const glyphHtml = await render(createElement(Glyph, { name: "search" }));
+  const labelledGlyphHtml = await render(createElement(Glyph, { "aria-label": "Search", name: "search", viewBox: "0 0 20 20", width: "24" }));
+
+  assert.match(sheetHtml, /<svg/);
+  assert.match(sheetHtml, /aria-hidden/);
+  assert.match(sheetHtml, /id="rmx-glyph-add"/);
+  assert.match(sheetHtml, /id="rmx-glyph-trash"/);
+  assert.match(glyphHtml, /aria-hidden/);
+  assert.match(glyphHtml, /#rmx-glyph-search/);
+  assert.match(labelledGlyphHtml, /aria-label="Search"/);
+  assert.match(labelledGlyphHtml, /viewBox="0 0 20 20"/);
+  assert.match(labelledGlyphHtml, /width="24"/);
 });
 
 async function render(node: RemixNode): Promise<string> {
