@@ -36,7 +36,7 @@ Typography tokens are:
 - `--belt-font-variant-ligatures`
 - `--belt-font-variant-numeric`
 
-The default typography contract uses Inter and enables `calt`, `dlig`, `case`, `ccmp`, `zero`, `ss01`, `ss02`, `ss07`, `ss08`, `cv06`, and `cv11`. It also opts into common, discretionary, and contextual ligatures plus slashed zero through `font-variant-*` tokens. The theme CSS defines the family and feature settings, but it does not load font files. Host apps should load Inter however they already manage fonts.
+The default typography contract bundles the official Inter variable font files and enables `calt`, `dlig`, `case`, `ccmp`, `zero`, `ss01`, `ss02`, `ss07`, `ss08`, `cv06`, and `cv11`. It also opts into common, discretionary, and contextual ligatures plus slashed zero through `font-variant-*` tokens. Host apps that import `@repo/theme-css/theme.css` do not need to load Inter separately.
 
 V1 does not include background/surface tokens, selected/highlight tokens, shadows, or a TypeScript spacing helper.
 
@@ -51,9 +51,7 @@ The theme CSS also ships portable surface classes so renderers and future React/
   data-belt-surface-elevation="3"
   data-belt-surface-size="surface-default"
 >
-  <div class="belt-surface__inner" data-belt-surface-inner>
-    ...
-  </div>
+  <div class="belt-surface__inner" data-belt-surface-inner>...</div>
 </div>
 ```
 
@@ -77,7 +75,7 @@ import { defineToolbar } from "@riff-refine/belt";
 
 export default defineToolbar({
   theme: "belt-dark",
-  tools: []
+  tools: [],
 });
 ```
 
@@ -99,12 +97,12 @@ export default defineToolbar({
         extends: "belt-dark",
         variables: {
           "--belt-color-elevation-1": "oklch(18% 0.01 255)",
-          "--belt-color-primary-control": "oklch(70% 0.18 260)"
-        }
-      })
-    ]
+          "--belt-color-primary-control": "oklch(70% 0.18 260)",
+        },
+      }),
+    ],
   },
-  tools: []
+  tools: [],
 });
 ```
 

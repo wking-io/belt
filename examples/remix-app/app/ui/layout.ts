@@ -74,7 +74,7 @@ export function layout(options: {
     title: options.title,
     children: createElement(
       "div",
-      { className: "app-shell" },
+      { className: "app-shell belt" },
       createElement(GlyphSheet),
       createElement(
         "header",

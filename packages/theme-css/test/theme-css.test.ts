@@ -3,6 +3,12 @@ import { fileURLToPath } from "node:url";
 import { assert, it } from "@effect/vitest";
 
 const themeCssPath = fileURLToPath(new URL("../src/theme.css", import.meta.url));
+const interVariablePath = fileURLToPath(
+  new URL("../src/font-files/InterVariable.woff2", import.meta.url),
+);
+const interVariableItalicPath = fileURLToPath(
+  new URL("../src/font-files/InterVariable-Italic.woff2", import.meta.url),
+);
 
 it("exports the v1 theme token contract", async () => {
   const css = await readFile(themeCssPath, "utf8");
@@ -38,7 +44,11 @@ it("exports the v1 theme token contract", async () => {
 it("sets the default font family and OpenType feature contract", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
-  assert.match(css, /--belt-font-family:\s*"Inter"/);
+  assert.match(css, /font-family:\s*"InterVariable"/);
+  assert.match(css, /url\("\.\/font-files\/InterVariable\.woff2"\)/);
+  assert.match(css, /url\("\.\/font-files\/InterVariable-Italic\.woff2"\)/);
+  assert.match(css, /--belt-font-family:\s*"InterVariable",\s*"Inter"/);
+  assert.match(css, /@font-feature-values\s+"InterVariable"/);
 
   for (const feature of [
     "calt",
@@ -61,7 +71,17 @@ it("sets the default font family and OpenType feature contract", async () => {
     /--belt-font-variant-ligatures:\s*common-ligatures discretionary-ligatures contextual/,
   );
   assert.match(css, /--belt-font-variant-numeric:\s*slashed-zero/);
-  assert.match(css, /--belt-font-variant-alternates:.*styleset\(ss01\).*character-variant\(cv11\)/);
+  assert.match(css, /--belt-font-variant-alternates:[\s\S]*styleset\(ss01\)[\s\S]*character-variant\(cv11\)/);
+});
+
+it("ships the bundled Inter variable font files", async () => {
+  const [normal, italic] = await Promise.all([
+    readFile(interVariablePath),
+    readFile(interVariableItalicPath),
+  ]);
+
+  assert.ok(normal.length > 0);
+  assert.ok(italic.length > 0);
 });
 
 it("keeps color tokens in oklch-compatible syntax", async () => {

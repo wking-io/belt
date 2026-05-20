@@ -3,7 +3,6 @@
 // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
 import { createElement, css, type CSSMixinDescriptor, type RemixNode } from "remix/ui";
 import {
-  badgeStyle,
   Button,
   Combobox,
   ComboboxOption,
@@ -273,9 +272,9 @@ export function IndexPage() {
     title: "Belt Remix Primitives",
     children: (
       <main mix={mix(primitivePreviewStyle)}>
-        <header className="preview-header">
-          <h1 className="preview-title">Belt Remix Primitives</h1>
-          <p className="preview-note">
+        <header class="preview-header">
+          <h1 class="preview-title">Belt Remix Primitives</h1>
+          <p class="preview-note">
             Preview rendered from the example app with actual @repo/renderer-remix components and @repo/theme-css tokens.
           </p>
         </header>
@@ -294,8 +293,8 @@ export function IndexPage() {
 
 function section(props: { readonly children?: RemixNode; readonly title: string }) {
   return (
-    <section className="preview-section">
-      <h2 className="preview-section-title">{props.title}</h2>
+    <section class="preview-section">
+      <h2 class="preview-section-title">{props.title}</h2>
       {props.children}
     </section>
   );
@@ -303,15 +302,15 @@ function section(props: { readonly children?: RemixNode; readonly title: string 
 
 function paletteGrid() {
   return (
-    <div className="preview-palette">
+    <div class="preview-palette">
       {paletteGroups.map((group) => (
-        <div className="preview-palette-row">
-          <span className="preview-palette-label">{group}</span>
-          <div className="preview-palette-chips">
+        <div class="preview-palette-row">
+          <span class="preview-palette-label">{group}</span>
+          <div class="preview-palette-chips">
             {paletteSteps.map((step) => (
               <span
                 aria-label={`${group} ${step}`}
-                className="preview-palette-chip"
+                class="preview-palette-chip"
                 style={{ backgroundColor: `var(--${group}-${step})` }}
                 title={`${group}-${step}`}
               />
@@ -325,15 +324,15 @@ function paletteGrid() {
 
 function beltColorGrid() {
   return (
-    <div className="preview-palette">
+    <div class="preview-palette">
       {beltColorGroups.map((group) => (
-        <div className="preview-palette-row">
-          <span className="preview-palette-label">{group.label}</span>
-          <div className="preview-palette-chips">
+        <div class="preview-palette-row">
+          <span class="preview-palette-label">{group.label}</span>
+          <div class="preview-palette-chips">
             {group.tokens.map((token) => (
               <span
                 aria-label={`belt color ${token}`}
-                className="preview-palette-chip"
+                class="preview-palette-chip"
                 style={{ backgroundColor: `var(--belt-color-${token})` }}
                 title={`--belt-color-${token}`}
               />
@@ -347,10 +346,10 @@ function beltColorGrid() {
 
 function panelGrid() {
   return (
-    <div className="preview-grid preview-panel-grid">
+    <div class="preview-grid preview-panel-grid">
       {elevations.map((elevation) => (
         <Panel elevation={elevation}>
-          <div className="preview-panel-content">
+          <div class="preview-panel-content">
             <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Elevation {elevation}</span>
             <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Default surface.</span>
           </div>
@@ -362,8 +361,8 @@ function panelGrid() {
 
 function buttonGrid() {
   return (
-    <div className="preview-stack">
-      <div className="preview-row">
+    <div class="preview-stack">
+      <div class="preview-row">
         {tones.map((tone) => (
           <Button tone={tone}>{tone}</Button>
         ))}
@@ -371,7 +370,7 @@ function buttonGrid() {
           <GhostButton tone={tone}>{tone}</GhostButton>
         ))}
       </div>
-      <div className="preview-row">
+      <div class="preview-row">
         {tones.map((tone) => (
           <Button tone={tone} startIcon="add" endIcon="close">{tone}</Button>
         ))}
@@ -379,7 +378,7 @@ function buttonGrid() {
           <GhostButton tone={tone} startIcon="add" endIcon="close">{tone}</GhostButton>
         ))}
       </div>
-      <div className="preview-row">
+      <div class="preview-row">
         {tones.map((tone) => (
           <Button tone={tone} loading>{tone}</Button>
         ))}
@@ -387,7 +386,7 @@ function buttonGrid() {
           <GhostButton tone={tone} loading>{tone}</GhostButton>
         ))}
       </div>
-      <div className="preview-row">
+      <div class="preview-row">
         {tones.map((tone) => (
           <Button tone={tone} disabled>{tone}</Button>
         ))}
@@ -395,7 +394,7 @@ function buttonGrid() {
           <GhostButton tone={tone} disabled>{tone}</GhostButton>
         ))}
       </div>
-      <div className="preview-row">
+      <div class="preview-row">
         {tones.map((tone) => (
           <Button tone={tone} icon="add" />
         ))}
@@ -409,7 +408,7 @@ function buttonGrid() {
 
 function statusBannerGrid() {
   return (
-    <div className="preview-grid">
+    <div class="preview-grid">
       {tones.map((tone) => (
         <StatusBanner.Root tone={tone === "primary" ? "info" : tone}>
           <StatusBanner.Row>
@@ -427,9 +426,9 @@ function statusBannerGrid() {
 
 function mixinGrid() {
   return (
-    <div className="preview-grid">
+    <div class="preview-grid">
       <Panel>
-        <div className="preview-panel-content">
+        <div class="preview-panel-content">
           <span mix={mix(textStyle({ tone: "strong", size: "md", weight: "semibold" }))}>Strong text</span>
           <span mix={mix(textStyle({ tone: "foreground" }))}>Regular foreground text</span>
           <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Subtle helper text</span>
@@ -437,13 +436,13 @@ function mixinGrid() {
         </div>
       </Panel>
       <Panel>
-        <div className="preview-panel-content">
-          <div className="preview-row">
+        <div class="preview-panel-content">
+          <div class="preview-row">
             {tones.map((tone) => (
-              <span mix={mix(badgeStyle({ tone }))}>{tone}</span>
+              <span class="belt-badge" data-tone={tone}>{tone}</span>
             ))}
           </div>
-          <div className="preview-row">
+          <div class="preview-row">
             <Glyph mix={mix(iconStyle({ tone: "primary", size: "md" }))} name="add" />
             <Glyph mix={mix(iconStyle({ tone: "success", size: "md" }))} name="check" />
             <Glyph mix={mix(iconStyle({ tone: "danger", size: "md" }))} name="trash" />
@@ -451,14 +450,14 @@ function mixinGrid() {
         </div>
       </Panel>
       <Panel>
-        <div className="preview-panel-content">
-          <span className="preview-radius" mix={mix(radiusStyle("inner"))}>
+        <div class="preview-panel-content">
+          <span class="preview-radius" mix={mix(radiusStyle("inner"))}>
             inner
           </span>
-          <span className="preview-radius" mix={mix(radiusStyle())}>
+          <span class="preview-radius" mix={mix(radiusStyle())}>
             default
           </span>
-          <span className="preview-radius" mix={mix(radiusStyle("outer"))}>
+          <span class="preview-radius" mix={mix(radiusStyle("outer"))}>
             outer
           </span>
         </div>
@@ -470,8 +469,8 @@ function mixinGrid() {
 function formPreview() {
   return (
     <Panel>
-      <div className="preview-panel-content">
-        <div className="preview-form">
+      <div class="preview-panel-content">
+        <div class="preview-form">
           <Field>
             <Label for="branch">Branch</Label>
             <Input id="branch" placeholder="feature/new-toolbar" />
@@ -480,7 +479,7 @@ function formPreview() {
             <Label for="volume">Intensity</Label>
             <Slider id="volume" max={100} min={0} value={64} />
           </Field>
-          <label className="preview-row">
+          <label class="preview-row">
             <Switch checked />
             <span mix={mix(textStyle())}>Show dev toolbar</span>
           </label>
@@ -492,9 +491,9 @@ function formPreview() {
 
 function choicePreview() {
   return (
-    <div className="preview-grid">
+    <div class="preview-grid">
       <Panel>
-        <div className="preview-panel-content">
+        <div class="preview-panel-content">
           <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Behavior controls</span>
           <Menu label="Menu">
             <MenuItem id="open" label="Open worktree" name="action" value="open">
@@ -523,9 +522,9 @@ function choicePreview() {
         </div>
       </Panel>
       <Panel>
-        <div className="preview-panel-content">
+        <div class="preview-panel-content">
           <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Menu surface mixins</span>
-          <div className="preview-surface" mix={mix(menuListStyle)}>
+          <div class="preview-surface" mix={mix(menuListStyle)}>
             <div mix={mix([menuItemStyle, staticMenuItemStyle])}>Open worktree</div>
             <div mix={mix([menuItemStyle, staticMenuItemStyle])}>Copy URL</div>
             <div data-highlighted="true" mix={mix([menuItemStyle, staticMenuItemStyle])}>
