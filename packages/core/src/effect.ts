@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Random, Schema } from "effect";
 
 export class BackendPatternError extends Schema.TaggedErrorClass<BackendPatternError>()("BackendPatternError", {
   message: Schema.String
@@ -22,6 +22,20 @@ export class BackendPattern extends Context.Service<BackendPattern, BackendPatte
       }
 
       return `hello ${input.name}`;
+    })
+  });
+}
+
+export type IdGeneratorService = {
+  readonly next: (prefix?: string) => Effect.Effect<string>;
+};
+
+export class IdGenerator extends Context.Service<IdGenerator, IdGeneratorService>()("belt/IdGenerator") {
+  static readonly layer = Layer.succeed(IdGenerator)({
+    next: Effect.fn("IdGenerator.next")(function*(prefix?: string) {
+      const id = yield* Random.nextUUIDv4;
+
+      return prefix ? `${prefix}_${id}` : id;
     })
   });
 }

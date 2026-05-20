@@ -1,6 +1,6 @@
 import { assert, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
-import { BackendPattern, BackendPatternInputSchema } from "../src/index.ts";
+import { BackendPattern, BackendPatternInputSchema, IdGenerator } from "../src/index.ts";
 
 it.effect("runs the baseline Effect service/layer/schema pattern", () =>
   Effect.provide(
@@ -28,4 +28,15 @@ it.effect("uses tagged errors for recoverable backend failures", () =>
       assert.strictEqual(message, "name is required");
     }),
     BackendPattern.layer
+  ));
+
+it.effect("generates shared ids with optional prefixes", () =>
+  Effect.provide(
+    Effect.gen(function*() {
+      const ids = yield* IdGenerator;
+      const id = yield* ids.next("snapshot");
+
+      assert.match(id, /^snapshot_[0-9a-f-]{36}$/);
+    }),
+    IdGenerator.layer
   ));
