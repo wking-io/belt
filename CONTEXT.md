@@ -20,6 +20,94 @@ _Avoid_: Plugin, widget
 The first **Tool**, used to move between Git worktrees for the same application.
 _Avoid_: Branch picker
 
+**Control Panel**:
+A **Tool** that lets application code define live-editable fieldsets, read current values, and save or switch presets.
+_Avoid_: Dial kit, parameter widget, production settings
+
+**Control Field**:
+A typed input definition inside a **Control Fieldset**.
+_Avoid_: Parameter, knob, dial
+
+**Control Fieldset**:
+A named group of **Control Fields** exposed by application code to the **Control Panel**.
+_Avoid_: Folder, panel, form
+
+**Control Fieldset ID**:
+The stable object key that identifies a **Control Fieldset** across **Control Snapshots**.
+_Avoid_: Label, title, generated id
+
+**Active Fieldset**:
+The **Control Fieldset** currently selected in the **Control Panel** UI.
+_Avoid_: Active panel, active group, selected folder
+
+**Control Field ID**:
+The stable object key that identifies a **Control Field** within a **Control Fieldset**.
+_Avoid_: Label, title, generated id
+
+**Control Snapshot**:
+A saved snapshot of values for one **Control Fieldset**.
+_Avoid_: Preset, version, theme, config
+
+**Control Snapshot ID**:
+The generated stable identifier for a **Control Snapshot**.
+_Avoid_: Snapshot name, fieldset id
+
+**Branch Snapshot**:
+Creating a new **Control Snapshot** from the current **Active Fieldset** values.
+_Avoid_: Duplicate, copy
+
+**Discard Changes**:
+Clearing the **Control Draft** for the current **Active Fieldset** and its current base.
+_Avoid_: Reset to defaults, delete snapshot
+
+**Snapshot Store**:
+The project-local backend storage for **Control Snapshots**.
+_Avoid_: Browser storage, source config, database
+
+**Control Draft**:
+Browser-local unsaved values for one **Control Fieldset** and one base defaults or **Control Snapshot** selection.
+_Avoid_: Snapshot, backend state, project artifact
+
+**Defaults Base**:
+The built-in **Control Fieldset** base values from **Control Panel Config**.
+_Avoid_: Default snapshot
+
+**Internal Field Default**:
+The built-in default value used when a **Control Field** does not declare a default value.
+_Avoid_: Missing value, undefined
+
+**Control Config Hash**:
+A deterministic identifier for the current **Control Panel Config** shape.
+_Avoid_: Version number, timestamp
+
+**Control Session**:
+The active editable **Control State**, assembled from fieldset defaults, **Control Snapshots**, and **Control Drafts**.
+_Avoid_: Preset session, draft config
+
+**Control State**:
+Temporary live values created by **Control Fieldsets** for application experimentation.
+_Avoid_: App state, persisted settings, form state
+
+**Control Context**:
+The frontend context that exposes load-aware active **Control State** from the **Control Panel** to application code.
+_Avoid_: Global store, renderer config
+
+**Control Config Type Inference**:
+The TypeScript pattern where application code types **Control Context** values from `typeof` a shared **Control Panel Config**.
+_Avoid_: Generated types, hand-written types, runtime-only values
+
+**Control Runtime**:
+The renderer-neutral API that manages **Control Fieldsets**, **Control State**, and **Control Snapshots** for the **Control Panel**.
+_Avoid_: React hook, renderer adapter
+
+**Control Panel Core**:
+The adapter-agnostic implementation of **Control Panel** config, validation, state, snapshots, and Tool routes.
+_Avoid_: Remix implementation, React implementation, adapter-specific control panel
+
+**Control Panel Config**:
+The frontend-safe **Control Panel**-specific declaration of available **Control Fieldsets**.
+_Avoid_: Toolbar Config, renderer config, app settings
+
 **Process Management**:
 Starting, stopping, installing for, or supervising development servers.
 _Avoid_: Switching
@@ -31,6 +119,14 @@ _Avoid_: frontend toolbar implementation, process management
 **Remix 3 Component**:
 The first UI rendering target for toolbar and tool rendering.
 _Avoid_: React package, React component package
+
+**Product Package Name**:
+A published package name optimized for user-facing ergonomics rather than internal package taxonomy.
+_Avoid_: Workspace Package Name
+
+**Product Facade**:
+A user-facing package export surface that re-exports capabilities owned by internal package categories.
+_Avoid_: Internal package boundary
 
 **Adapter**:
 A package that enables the **Toolbar Server** or toolbar platform to run in a specific language, framework, runtime, or host environment.
@@ -148,6 +244,18 @@ _Avoid_: Auto-discovery, package scanning
 The explicit configuration module that defines **Tool Registration** for a toolbar instance.
 _Avoid_: Plugin manifest, package metadata
 
+**Toolbar Definition**:
+A frontend-safe exported value that carries **Tool Registration**, renderer setup, and typed renderer helpers for a toolbar instance.
+_Avoid_: Config object, renderer instance
+
+**Toolbar Root**:
+The provider component exposed by a **Toolbar Definition** that owns toolbar runtime context for an application subtree.
+_Avoid_: Toolbar Shell, panel
+
+**Toolbar Panel**:
+The visible **Toolbar Shell** component exposed by a **Toolbar Definition**.
+_Avoid_: Provider, root
+
 **Config Discovery**:
 The convention-based lookup that finds a **Toolbar Config** without requiring the host app to pass a path.
 _Avoid_: Auto-discovery of tools
@@ -201,6 +309,23 @@ _Avoid_: Fetch adapter package
 - The **Toolbar Shell** provides global launcher, panel, navigation, slots, and the **Theme** boundary.
 - A **Toolbar Wrapper** uses **Tool Registration** to determine which **Tools** it hosts.
 - A **Toolbar Config** can provide **Tool Registration** for direct JavaScript use or sidecar use.
+- A **Toolbar Definition** can provide **Tool Registration** to **Config Discovery**.
+- A **Toolbar Definition** can be rendered by application code and can expose typed tool hooks.
+- A Remix **Toolbar Definition** exposes route handlers for **Explicit Route Mounting**.
+- Server/client route-handler boundaries in product packages are internal packaging concerns, not user-facing import splits.
+- A **Toolbar Definition** provides frontend **Control Panel Config** to **Control Panel** Renderers.
+- A **Toolbar Definition** only exposes typed tool hooks for registered **Tools**.
+- Typed hooks on a **Toolbar Definition** throw clear runtime errors when used outside that rendered **Toolbar Definition**.
+- A **Toolbar Definition** exposes `Root` for provider setup and `Panel` for the visible **Toolbar Shell**.
+- `Toolbar.Root` is required for typed hooks to read toolbar state in application UI.
+- `Toolbar.Root` should wrap the root of the application tree.
+- `Toolbar.Root` renders children while tool state loads.
+- `Toolbar.Panel` must render under the same `Toolbar.Root` as the application UI that reads typed hooks.
+- `Toolbar.Panel` preserves **Rendered Tool Composition** by rendering explicit tool content children.
+- Tool renderer components can be exposed on the **Toolbar Definition** for registered **Tools**.
+- v1 **Control Panel** renderer component on a **Toolbar Definition** is zero-config.
+- Missing rendered tool content for a registered **Tool** produces development **Tool Registration Drift** warnings, not runtime failures.
+- The **Control Panel** v1 typed hooks are `useControlPanel()` and `useControlFieldset(id)`.
 - **Config Discovery** may find a **Toolbar Config**, but it does not discover **Tools** from installed packages.
 - The **Config Package** owns **Config Discovery** and **Module Config** loading.
 - v1 **Toolbar Config** files are **Module Config** files.
@@ -208,7 +333,103 @@ _Avoid_: Fetch adapter package
 - The v1 **Package Runtime** is Node.js 20 or newer.
 - Toolbar is a **Working Name** until the final product identity is chosen.
 - v1 workspace packages use private `@repo/*` **Workspace Package Names**.
+- Published renderer packages may use ergonomic **Product Package Names** such as `@toolbar/remix` and `@toolbar/react`.
+- **Product Facades** may re-export Tool, Renderer, and config helpers so users can import from one package.
+- **Product Facades** for different frontend targets should expose consistent public helper names when they support the same capabilities.
+- The **Control Panel** ships as part of base product packages such as `@toolbar/remix` and `@toolbar/react`, not as a separate user install.
 - The **Worktree Switcher** is a **Tool**.
+- The **Control Panel** is a **Tool**.
+- The **Control Panel** is dev-only and is not a production settings or feature-flag system.
+- The **Toolbar Shell** shows the **Control Panel** as one **Tool** entry.
+- v1 has one **Control Panel** per **Toolbar Wrapper**.
+- **Control Field** UI belongs to framework-specific **Renderers**.
+- v1 **Control Field** types are text, number, boolean, select, color, range, vector2, and vector3.
+- v1 does not support custom **Control Field** types.
+- v1 select **Control Fields** use static options.
+- v1 select **Control Field** option values are strings.
+- **Control Fields** may omit default values and use **Internal Field Defaults**.
+- v1 color **Control Fields** use CSS `oklch(...)` strings without alpha.
+- **Internal Field Defaults** are empty string for text, zero for number, false for boolean, `oklch(0% 0 0)` for color, zero for range, zero vectors for vector2 and vector3, and the first option for select.
+- v1 number **Control Fields** default to zero and do not define internal min, max, or step constraints.
+- v1 range **Control Fields** default to min `0`, max `1`, and step `0.01`.
+- v1 rejects invalid **Control Panel Config** instead of silently clamping invalid defaults.
+- v1 **Control Field** metadata includes label, description, and unit.
+- vector2 **Control Fields** use `{ x, y }` values.
+- vector3 **Control Fields** use `{ x, y, z }` values.
+- v1 vector2 and vector3 **Control Fields** do not define min, max, or step constraints.
+- A **Control Fieldset** contains one or more **Control Fields**.
+- A **Control Fieldset ID** identifies a **Control Fieldset** in **Control Panel Config** and **Control Snapshots**.
+- A **Control Field ID** identifies a **Control Field** inside its **Control Fieldset**.
+- **Control Fieldset IDs** and **Control Field IDs** are distinct from display labels.
+- **Control Fieldsets** are declared in shared **Control Panel Config**.
+- **Control Panel Config** uses plain fieldset objects and field builder functions.
+- **Control Panel Config** declares fieldsets under a `fieldsets` property.
+- v1 **Control Panel Config** does not include a panel label.
+- v1 **Control Fieldsets** may define label and description metadata.
+- v1 **Control Panel Config** may declare zero **Control Fieldsets**.
+- `defineControlPanel` validates **Control Fieldset IDs** and **Control Field IDs**.
+- **Control Fieldsets** display in **Control Panel Config** declaration order by default.
+- The first declared **Control Fieldset** is the default **Active Fieldset** when no persisted active fieldset exists.
+- v1 **Control Fieldsets** contain flat **Control Fields** and do not support nested fieldsets.
+- **Control Fieldsets** create **Control State** for experimentation rather than exposing existing application state by default.
+- The **Control Panel** UI can switch between **Control Fieldsets** by changing the **Active Fieldset**.
+- The **Control Panel** UI shows an empty state when no **Control Fieldsets** exist.
+- The **Control Runtime** is renderer-neutral.
+- **Control Panel Core** owns adapter-agnostic **Control Panel** behavior.
+- Framework **Adapters** and product **Renderers** build on **Control Panel Core** rather than reimplementing **Control Panel** behavior.
+- The frontend **Control Runtime** owns live **Control Session** values while the user edits controls.
+- The backend owns **Control Panel Config** and persisted **Control Snapshots**.
+- The backend persists active IDs for **Active Fieldset** and active **Control Snapshot** selection per **Control Fieldset** across reloads.
+- The backend learns active IDs from frontend **Control Panel** selection updates.
+- Backend **Control Panel** state update routes validate **Control Fieldset IDs** against **Control Panel Config**.
+- Backend **Control Panel** state update routes validate **Control Snapshot IDs** against the **Snapshot Store** and their **Control Fieldset ID**.
+- Frontend **Control Runtime** sanitizes stale persisted active IDs before creating **Control Context**.
+- Frontend **Control Runtime** posts sanitized active IDs back to the backend after stale persisted state is corrected.
+- The frontend persists unsaved **Control Draft** values per **Control Fieldset** and base defaults or **Control Snapshot** selection for same-user reload continuity.
+- Switching **Active Fieldset** restores that fieldset's matching **Control Draft** when one exists.
+- Switching a **Control Fieldset** between **Defaults Base** and **Control Snapshots** preserves drafts for other bases.
+- Switching a **Control Fieldset** between **Defaults Base** and **Control Snapshots** restores the matching **Control Draft** for the newly selected base when one exists.
+- A **Control Draft** is restored only when its **Control Config Hash**, **Control Fieldset ID**, and base defaults or **Control Snapshot** still match the current session.
+- A stale **Control Draft** is discarded instead of overlaid onto changed **Control Panel Config** or changed **Control Snapshot** data.
+- If backend **Control Snapshot** loading fails, only **Control Drafts** based on **Defaults Base** may be applied.
+- **Control Panel** Renderers provide framework-specific developer experience over the **Control Runtime**.
+- **Control Panel** Renderers receive **Control Panel Config** from the **Toolbar Definition** before providing active **Control State**.
+- Applications read the whole active **Control State** value tree through read-only **Control Context**.
+- **Control Context** applies all matching per-fieldset **Control Drafts** to the active value tree.
+- **Control Context** is status-aware and does not expose active values until it is ready.
+- **Control Panel** v1 typed hooks use `status: "loading" | "ready"` as their discriminant.
+- **Control Panel** v1 typed hooks expose optional errors alongside ready values instead of blocking value reads.
+- v1 application-facing **Control Panel** hooks expose values, not active IDs or dirty state.
+- **Control Context** values are typed through **Control Config Type Inference**.
+- v1 application code cannot mutate **Control State** or **Control Snapshots** through **Control Context**.
+- The **Control Panel** UI shows retry affordances when backend persistence is unavailable.
+- Backend persistence failures do not prevent local live editing or application reads of fallback **Control State**.
+- **Active Fieldset** affects **Control Panel** UI navigation, not which values **Control Context** exposes.
+- Multiple **Control Fieldsets** may each have their own active **Control Snapshot** at the same time.
+- A **Control Session** may contain unsaved live edits without an active **Control Snapshot**.
+- A **Control Session** tracks whether active **Control State** differs from its starting defaults or **Control Snapshot**.
+- **Defaults Base** is not a **Control Snapshot** and cannot be overwritten by save changes.
+- Returning to **Defaults Base** is done by selecting it as the current base, not by a separate reset action.
+- The **Control Panel** stores **Control Snapshots** through the **Toolbar API**, not renderer-local browser state.
+- v1 **Control Snapshots** are local development artifacts stored in a project-local ignored **Snapshot Store**.
+- **Control Snapshot** names are unique per **Control Fieldset**.
+- **Control Snapshot IDs** identify **Control Snapshots** independently from their names.
+- v1 **Control Snapshot** actions are save changes, branch snapshot, discard changes, and delete snapshot.
+- v1 **Control Snapshot** actions apply only to the **Active Fieldset**.
+- **Branch Snapshot** creates a new **Control Snapshot** from the current **Active Fieldset** values.
+- **Branch Snapshot** is the only action that creates a **Control Snapshot** from **Defaults Base**.
+- Save changes is unavailable for **Defaults Base**.
+- **Discard Changes** clears the **Control Draft** for the **Active Fieldset** and current base without changing the base.
+- **Discard Changes** on **Defaults Base** restores current **Control Field** defaults for the **Active Fieldset**.
+- Successful **Control Snapshot** save or branch actions clear only the **Control Draft** for the **Active Fieldset** and previous base.
+- Deleting a **Control Snapshot** clears browser-local **Control Drafts** based on that **Control Snapshot**.
+- Deleting an active **Control Snapshot** switches that **Control Fieldset** to **Defaults Base**.
+- A **Control Snapshot** stores values for exactly one **Control Fieldset** at save time.
+- Loading a **Control Snapshot** overlays saved values onto its **Control Fieldset** in the current **Control Panel Config**.
+- Missing saved **Control Fields** use current defaults when a **Control Snapshot** is loaded.
+- Unknown saved **Control Fields** are ignored when a **Control Snapshot** is loaded.
+- Saved **Control Fields** with incompatible current types use current defaults when a **Control Snapshot** is loaded.
+- **Control Snapshots** for removed **Control Fieldsets** are not deleted automatically.
 - A **Tool** may define extension points implemented by **Extensions**.
 - An **Adapter** connects the toolbar platform to a specific runtime or host framework.
 - The **Remix Adapter** is distinct from the **Vite Adapter**.
