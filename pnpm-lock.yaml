@@ -87,6 +87,15 @@ importers:
         specifier: ^22.15.18
         version: 22.19.19
 
+  packages/control-panel-core:
+    dependencies:
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
+
   packages/core:
     dependencies:
       effect:
@@ -132,6 +141,9 @@ importers:
 
   packages/tool-worktrees-extension-portless:
     dependencies:
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
       '@repo/tool-worktrees':
         specifier: workspace:*
         version: link:../tool-worktrees

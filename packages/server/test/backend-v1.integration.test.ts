@@ -176,7 +176,11 @@ function request(pathname: string): Request {
 }
 
 function json(response: Response) {
-  return Effect.promise(() => response.json() as Promise<unknown>);
+  return Effect.promise(async (): Promise<unknown> => response.json());
+}
+
+function testViteServer(middlewares: ViteDevServer["middlewares"]): ViteDevServer {
+  return Object.assign(Object.create(null), { middlewares });
 }
 
 const assertRootResponse = Effect.fn("assertRootResponse")(function*(fetchResponse: () => Promise<Response>) {
@@ -207,13 +211,11 @@ function mountToolbarVite(config: Parameters<typeof toolbarVite>[0]) {
     throw new Error("Vite plugin did not expose configureServer");
   }
 
-  plugin.configureServer({
-    middlewares: {
-      use: (_mountPath: string, nextHandler: Connect.NextHandleFunction) => {
-        handler = nextHandler;
-      }
+  plugin.configureServer(testViteServer({
+    use: (_mountPath: string, nextHandler: Connect.NextHandleFunction) => {
+      handler = nextHandler;
     }
-  } as ViteDevServer);
+  }));
 
   if (!handler) {
     throw new Error("Vite plugin did not register middleware");

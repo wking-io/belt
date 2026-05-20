@@ -1,5 +1,5 @@
 {
-  "name": "@repo/tool-worktrees-extension-portless",
+  "name": "@repo/control-panel-core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@repo/core": "workspace:*",
-    "@repo/tool-worktrees": "workspace:*",
     "effect": "4.0.0-beta.66"
   },
   "engines": {

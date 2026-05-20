@@ -50,5 +50,5 @@ function request(pathname: string): Request {
 }
 
 function json(response: Response) {
-  return Effect.promise(() => response.json() as Promise<unknown>);
+  return Effect.promise(async (): Promise<unknown> => response.json());
 }

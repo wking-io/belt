@@ -1,4 +1,4 @@
-import type { ToolbarConfig as ToolbarConfigData } from "@repo/core";
+import { validateToolbarConfig, type ToolbarConfig as ToolbarConfigData } from "@repo/core";
 import { Context, Effect, FileSystem, Layer, Path, Schema } from "effect";
 
 export const toolbarConfigFilenames = [
@@ -121,30 +121,18 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
         );
 
         const loaded = yield* Effect.tryPromise({
-          try: () => import(configUrl.href) as Promise<{ default?: unknown }>,
+          try: () => import(configUrl.href),
           catch: (cause) => new ToolbarConfigModuleLoadError({ path: configPath, cause })
         });
 
-        const config = loaded.default;
-
-        if (!isToolbarConfig(config)) {
-          return yield* new InvalidToolbarConfigExportError({ path: configPath });
-        }
-
-        return config;
+        return yield* validateToolbarConfig(loaded.default).pipe(
+          Effect.mapError(() => new InvalidToolbarConfigExportError({ path: configPath }))
+        );
       });
 
       return ToolbarConfigService.of({ find, load });
     })
   );
-}
-
-function isToolbarConfig(value: unknown): value is ToolbarConfigData {
-  if (!value || typeof value !== "object") return false;
-
-  const candidate = value as { tools?: unknown };
-
-  return Array.isArray(candidate.tools);
 }
 
 function isSupportedConfigPath(path: Path.Path, filePath: string, filenames: readonly string[]): boolean {
