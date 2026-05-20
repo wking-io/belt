@@ -180,7 +180,9 @@ export function createWorktreesClient(options?: { basePath?: string }) {
         throw new Error(`Failed to load worktrees: ${response.status}`);
       }
 
-      return response.json() as Promise<{ worktrees: WorktreeEntry[] }>;
+      const body: { worktrees: WorktreeEntry[] } = await response.json();
+
+      return body;
     }
   };
 }

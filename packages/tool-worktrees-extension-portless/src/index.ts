@@ -1,7 +1,6 @@
+import { NonEmptyStringSchema } from "@repo/core";
 import type { WorktreeUrlResolver } from "@repo/tool-worktrees";
 import { Schema } from "effect";
-
-const NonEmptyStringSchema = Schema.String.check(Schema.isMinLength(1));
 
 export const PortlessDestinationOptionsSchema = Schema.Struct({
   id: Schema.optionalKey(NonEmptyStringSchema),

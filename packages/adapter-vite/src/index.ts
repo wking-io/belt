@@ -1,5 +1,4 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { Readable } from "node:stream";
 import { toolbarApiBasePath, type ToolbarConfig } from "@repo/core";
 import { createToolbarServer, type ToolbarServer } from "@repo/server";
 import type { Connect, Plugin } from "vite";
@@ -57,17 +56,29 @@ async function toFetchRequest(req: IncomingMessage, options: Required<ToolbarVit
     }
   }
 
-  const init: RequestInit = {
+  const init: RequestInit & { duplex?: "half" } = {
     headers,
     method
   };
 
   if (method !== "GET" && method !== "HEAD") {
-    init.body = Readable.toWeb(req) as BodyInit;
-    (init as RequestInit & { duplex: "half" }).duplex = "half";
+    init.body = await readIncomingBody(req);
+    init.duplex = "half";
   }
 
   return new Request(url, init);
+}
+
+async function readIncomingBody(req: IncomingMessage): Promise<ArrayBuffer> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : Buffer.from(chunk));
+  }
+
+  const body = Buffer.concat(chunks);
+
+  return body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength);
 }
 
 async function writeFetchResponse(res: ServerResponse, response: Response) {

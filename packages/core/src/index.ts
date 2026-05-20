@@ -1,9 +1,11 @@
 import { Effect, Schema } from "effect";
 import type { SchemaError } from "effect/Schema";
+import { NonEmptyStringSchema } from "./schemas.js";
 
 export * from "./effect.js";
 export * from "./http-api.js";
 export * from "./protocol.js";
+export * from "./schemas.js";
 
 export class DuplicateToolbarToolIdError extends Schema.TaggedErrorClass<DuplicateToolbarToolIdError>()(
   "DuplicateToolbarToolIdError",
@@ -27,7 +29,6 @@ export type ToolRouteHandler<Success = unknown, Failure = unknown, Requirements 
 
 export type ToolbarToolRoutes<Requirements = never> = Readonly<Record<string, ToolRouteHandler<unknown, unknown, Requirements>>>;
 
-const NonEmptyStringSchema = Schema.String.check(Schema.isMinLength(1));
 const BeltCssVariableNameSchema = Schema.declare<string>(
   (value): value is string => typeof value === "string" && value.startsWith("--belt-")
 );

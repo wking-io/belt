@@ -2,17 +2,29 @@ import { Schema } from "effect";
 
 export const toolbarApiBasePath = "/__toolbar";
 
-export const toolbarApiRoutes = {
+export type ToolbarApiRoutes = {
+  readonly root: "/__toolbar";
+  readonly tools: "/__toolbar/tools";
+  readonly tool: "/__toolbar/tools/:toolId";
+  readonly toolRoute: "/__toolbar/tools/:toolId/*routePath";
+};
+
+export const toolbarApiRoutes: ToolbarApiRoutes = {
   root: "/__toolbar",
   tools: "/__toolbar/tools",
   tool: "/__toolbar/tools/:toolId",
   toolRoute: "/__toolbar/tools/:toolId/*routePath"
-} as const;
+};
 
-export const toolbarApiRelativeRoutes = {
+export type ToolbarApiRelativeRoutes = {
+  readonly tool: "/tools/:toolId";
+  readonly toolRoute: "/tools/:toolId/*";
+};
+
+export const toolbarApiRelativeRoutes: ToolbarApiRelativeRoutes = {
   tool: "/tools/:toolId",
   toolRoute: "/tools/:toolId/*"
-} as const;
+};
 
 export function toolbarApiToolPath(toolId: string): string {
   return `${toolbarApiBasePath}${toolbarApiToolRelativePath(toolId)}`;

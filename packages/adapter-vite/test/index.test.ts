@@ -92,14 +92,12 @@ function mountToolbarVite() {
     throw new Error("Vite plugin did not expose configureServer");
   }
 
-  plugin.configureServer({
-    middlewares: {
-      use: (mountPath: string, nextHandler: Connect.NextHandleFunction) => {
-        path = mountPath;
-        handler = nextHandler;
-      }
+  plugin.configureServer(testViteServer({
+    use: (mountPath: string, nextHandler: Connect.NextHandleFunction) => {
+      path = mountPath;
+      handler = nextHandler;
     }
-  } as ViteDevServer);
+  }));
 
   if (!handler) {
     throw new Error("Vite plugin did not register middleware");
@@ -140,5 +138,9 @@ async function waitForListening(server: ReturnType<typeof createServer>) {
 }
 
 function json(response: Response) {
-  return Effect.promise(() => response.json() as Promise<unknown>);
+  return Effect.promise(async (): Promise<unknown> => response.json());
+}
+
+function testViteServer(middlewares: ViteDevServer["middlewares"]): ViteDevServer {
+  return Object.assign(Object.create(null), { middlewares });
 }
