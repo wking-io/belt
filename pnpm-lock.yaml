@@ -89,6 +89,9 @@ importers:
 
   packages/control-panel-core:
     dependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
       '@repo/core':
         specifier: workspace:*
         version: link:../core
