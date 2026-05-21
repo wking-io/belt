@@ -27,24 +27,9 @@ importers:
 
   examples/remix-app:
     dependencies:
-      '@repo/adapter-remix':
+      '@riff-refine/belt':
         specifier: workspace:*
-        version: link:../../packages/adapter-remix
-      '@repo/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@repo/renderer-remix':
-        specifier: workspace:*
-        version: link:../../packages/renderer-remix
-      '@repo/tool-worktrees':
-        specifier: workspace:*
-        version: link:../../packages/tool-worktrees
-      '@repo/tool-worktrees-extension-portless':
-        specifier: workspace:*
-        version: link:../../packages/tool-worktrees-extension-portless
-      '@repo/tool-worktrees-renderer-remix':
-        specifier: workspace:*
-        version: link:../../packages/tool-worktrees-renderer-remix
+        version: link:../../packages/belt
 
   packages/adapter-remix:
     dependencies:
@@ -70,6 +55,49 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.4.2(@types/node@22.19.19)(yaml@2.9.0)
+
+  packages/belt:
+    dependencies:
+      '@repo/adapter-remix':
+        specifier: workspace:*
+        version: link:../adapter-remix
+      '@repo/adapter-vite':
+        specifier: workspace:*
+        version: link:../adapter-vite
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../config
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
+      '@repo/renderer-react':
+        specifier: workspace:*
+        version: link:../renderer-react
+      '@repo/renderer-remix':
+        specifier: workspace:*
+        version: link:../renderer-remix
+      '@repo/server':
+        specifier: workspace:*
+        version: link:../server
+      '@repo/theme-css':
+        specifier: workspace:*
+        version: link:../theme-css
+      '@repo/tool-worktrees':
+        specifier: workspace:*
+        version: link:../tool-worktrees
+      '@repo/tool-worktrees-extension-portless':
+        specifier: workspace:*
+        version: link:../tool-worktrees-extension-portless
+      '@repo/tool-worktrees-renderer-remix':
+        specifier: workspace:*
+        version: link:../tool-worktrees-renderer-remix
+    devDependencies:
+      '@effect/platform-node':
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66(effect@4.0.0-beta.66)(ioredis@5.10.1)
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
 
   packages/config:
     dependencies:
@@ -102,6 +130,12 @@ importers:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
 
+  packages/renderer-react:
+    dependencies:
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/renderer-remix:
     dependencies:
       '@repo/core':
@@ -122,6 +156,8 @@ importers:
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
+
+  packages/theme-css: {}
 
   packages/tool-worktrees:
     dependencies:

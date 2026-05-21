@@ -8,6 +8,7 @@
     "check": "pnpm -r --filter './packages/*' check",
     "ci": "pnpm lint && pnpm test && pnpm build",
     "lint": "pnpm check",
+    "pack:belt": "pnpm --filter @riff-refine/belt pack:npm",
     "test": "vitest run",
     "test:backend": "vitest run"
   },

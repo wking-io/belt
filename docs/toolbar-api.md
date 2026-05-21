@@ -122,7 +122,7 @@ Tool route conventions:
 
 ## Effect Schemas
 
-The initial Effect v4 schemas live in `@repo/core`:
+The initial Effect v4 schemas live in `@riff-refine/belt`:
 
 ```txt
 ToolbarErrorCodeSchema
@@ -135,4 +135,4 @@ ToolbarToolDataSchema
 ToolbarSuccessEnvelopeSchema
 ```
 
-These schemas are the JavaScript implementation's source of truth for request and response payloads. `@repo/core` also exports the shared Effect HTTP `ToolbarApi` definition, while `@repo/server` provides the JavaScript Fetch implementation.
+These schemas are the JavaScript implementation's source of truth for request and response payloads. `@riff-refine/belt` also exports the shared Effect HTTP `ToolbarApi` definition, while `@riff-refine/belt/server` provides the JavaScript Fetch implementation.

@@ -1,6 +1,6 @@
-import { defineToolbar } from "@repo/core";
-import { worktreesTool } from "@repo/tool-worktrees";
-import { portlessResolver } from "@repo/tool-worktrees-extension-portless";
+import { defineToolbar } from "@riff-refine/belt";
+import { worktreesTool } from "@riff-refine/belt/worktrees";
+import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
 
 export default defineToolbar({
   tools: [

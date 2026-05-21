@@ -1,6 +1,7 @@
 node_modules
 dist
 packages/*/dist
+packages/belt/npm
 .DS_Store
 *.tsbuildinfo
 .env

@@ -6,12 +6,7 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/adapter-remix": "workspace:*",
-    "@repo/core": "workspace:*",
-    "@repo/renderer-remix": "workspace:*",
-    "@repo/tool-worktrees": "workspace:*",
-    "@repo/tool-worktrees-extension-portless": "workspace:*",
-    "@repo/tool-worktrees-renderer-remix": "workspace:*"
+    "@riff-refine/belt": "workspace:*"
   },
   "engines": {
     "node": ">=24.3.0"
