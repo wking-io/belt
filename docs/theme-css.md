@@ -3,7 +3,7 @@
 Toolbar renderers use a target-neutral theme contract made from plain CSS custom properties. Host apps can import the default CSS and override variables without adopting a styling library.
 
 ```ts
-import "@repo/theme-css/theme.css";
+import "@riff-refine/belt/theme.css";
 ```
 
 When no theme is configured, Toolbar defaults to `system`, which resolves to the built-in `belt-light` or `belt-dark` theme in frontend renderers.
@@ -35,7 +35,7 @@ V1 does not include background/surface tokens, selected/highlight tokens, shadow
 Theme registration lives in Toolbar config. A string selects the initial built-in or registered theme:
 
 ```ts
-import { defineToolbar } from "@repo/core";
+import { defineToolbar } from "@riff-refine/belt";
 
 export default defineToolbar({
   theme: "belt-dark",
@@ -48,7 +48,7 @@ Omitting `theme` is equivalent to `theme: "system"`.
 Custom themes are partial and inherit from another theme:
 
 ```ts
-import { defineTheme, defineToolbar } from "@repo/core";
+import { defineTheme, defineToolbar } from "@riff-refine/belt";
 
 export default defineToolbar({
   theme: {

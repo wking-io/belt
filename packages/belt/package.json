@@ -1,0 +1,77 @@
+{
+  "name": "@riff-refine/belt",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./config": {
+      "types": "./src/config.ts",
+      "default": "./src/config.ts"
+    },
+    "./remix": {
+      "types": "./src/remix.ts",
+      "default": "./src/remix.ts"
+    },
+    "./react": {
+      "types": "./src/react.ts",
+      "default": "./src/react.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    },
+    "./theme": {
+      "types": "./src/theme.ts",
+      "default": "./src/theme.ts"
+    },
+    "./theme.css": "./src/theme.css",
+    "./vite": {
+      "types": "./src/vite.ts",
+      "default": "./src/vite.ts"
+    },
+    "./worktrees": {
+      "types": "./src/worktrees.ts",
+      "default": "./src/worktrees.ts"
+    },
+    "./worktrees/portless": {
+      "types": "./src/worktrees-portless.ts",
+      "default": "./src/worktrees-portless.ts"
+    },
+    "./worktrees/remix": {
+      "types": "./src/worktrees-remix.ts",
+      "default": "./src/worktrees-remix.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json",
+    "pack:npm": "pnpm --dir ../.. build && node scripts/stage-npm-package.mjs"
+  },
+  "dependencies": {
+    "@repo/adapter-remix": "workspace:*",
+    "@repo/adapter-vite": "workspace:*",
+    "@repo/config": "workspace:*",
+    "@repo/core": "workspace:*",
+    "@repo/renderer-remix": "workspace:*",
+    "@repo/renderer-react": "workspace:*",
+    "@repo/server": "workspace:*",
+    "@repo/theme-css": "workspace:*",
+    "@repo/tool-worktrees": "workspace:*",
+    "@repo/tool-worktrees-extension-portless": "workspace:*",
+    "@repo/tool-worktrees-renderer-remix": "workspace:*"
+  },
+  "devDependencies": {
+    "@effect/platform-node": "4.0.0-beta.66",
+    "effect": "4.0.0-beta.66"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -7,9 +7,9 @@ Backend v1 covers the server-side Toolbar API, explicit Tool Registration, frame
 Create a `toolbar.config.ts` module at the host app root:
 
 ```ts
-import { defineToolbar } from "@repo/core";
-import { worktreesTool } from "@repo/tool-worktrees";
-import { portlessResolver } from "@repo/tool-worktrees-extension-portless";
+import { defineToolbar } from "@riff-refine/belt";
+import { worktreesTool } from "@riff-refine/belt/worktrees";
+import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
 
 export default defineToolbar({
   tools: [
@@ -71,14 +71,14 @@ Error responses use:
 }
 ```
 
-`@repo/core` owns the protocol schemas, route constants, path builders, and the shared Effect HTTP `ToolbarApi` definition. `@repo/server` implements that protocol as a JavaScript Fetch server using Effect HTTP.
+`@riff-refine/belt` owns the protocol schemas, route constants, path builders, and the shared Effect HTTP `ToolbarApi` definition. `@riff-refine/belt/server` implements that protocol as a JavaScript Fetch server using Effect HTTP.
 
 ## Direct Fetch Server
 
-Use `@repo/server` directly when the host already works with standard `Request` and `Response` objects:
+Use `@riff-refine/belt/server` directly when the host already works with standard `Request` and `Response` objects:
 
 ```ts
-import { createToolbarServer } from "@repo/server";
+import { createToolbarServer } from "@riff-refine/belt/server";
 import toolbarConfig from "./toolbar.config";
 
 const toolbarServer = createToolbarServer(toolbarConfig);
@@ -98,7 +98,7 @@ Create a shared route handler:
 
 ```ts
 // app/toolbar.server.ts
-import { createToolbarRouteHandler } from "@repo/adapter-remix";
+import { createToolbarRouteHandler } from "@riff-refine/belt/remix";
 import toolbarConfig from "../toolbar.config";
 
 export const toolbarRouteHandler = createToolbarRouteHandler(toolbarConfig);
@@ -122,7 +122,7 @@ Vite apps install the middleware adapter:
 
 ```ts
 // vite.config.ts
-import { toolbarVite } from "@repo/adapter-vite";
+import { toolbarVite } from "@riff-refine/belt/vite";
 import { defineConfig } from "vite";
 import toolbarConfig from "./toolbar.config";
 
@@ -137,7 +137,7 @@ The adapter mounts `/__toolbar` by default, translates Node middleware requests 
 
 ## Worktree Switcher Backend
 
-`@repo/tool-worktrees` registers the `worktrees` Tool. Its backend route is:
+`@riff-refine/belt/worktrees` registers the `worktrees` Tool. Its backend route is:
 
 ```txt
 GET /__toolbar/tools/worktrees
@@ -149,7 +149,7 @@ The v1 Worktree Switcher does not start, stop, install dependencies for, or supe
 
 ## Portless Extension
 
-`@repo/tool-worktrees-extension-portless` is a Worktree Switcher URL Resolver Extension. It converts each discovered worktree into one or more Portless-style destinations:
+`@riff-refine/belt/worktrees/portless` is a Worktree Switcher URL Resolver Extension. It converts each discovered worktree into one or more Portless-style destinations:
 
 ```ts
 portlessResolver({

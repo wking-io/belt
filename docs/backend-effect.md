@@ -10,7 +10,7 @@ Use Effect in backend packages for:
 - **Validation schemas** with `Schema.Struct` and related Schema constructors
 - **Tests** with `@effect/vitest`
 
-The baseline example lives in `@repo/core`:
+The baseline example lives in `@riff-refine/belt`:
 
 - `BackendPattern` demonstrates the service and layer shape
 - `BackendPatternError` demonstrates tagged recoverable failures
