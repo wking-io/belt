@@ -4,15 +4,31 @@ import {
   controlField,
   controlPanelTool,
   controlPanelToolId,
+  controlSnapshotActions,
+  CannotSaveDefaultsBaseError,
+  branchControlSnapshot,
+  createControlPanelState,
+  defaultsBase,
   defineControlPanel,
+  deleteControlSnapshot,
+  discardControlChanges,
   DuplicateControlSelectOptionValueError,
+  DuplicateControlSnapshotIdError,
+  DuplicateControlSnapshotNameError,
   EmptyControlSelectOptionsError,
   getControlConfigHash,
+  getCurrentFieldsetValues,
+  getActiveControlBase,
   getControlPanelDefaults,
   InvalidControlFieldIdError,
   InvalidControlRangeError,
   InvalidControlSelectDefaultError,
+  restoreControlSnapshot,
+  saveControlSnapshot,
+  selectActiveFieldset,
+  selectControlBase,
   validateControlPanel,
+  type ControlSnapshot,
   type ControlPanelValues
 } from "../src/index.ts";
 
@@ -315,4 +331,232 @@ it("throws for invalid range constraints", () => {
       }),
     InvalidControlRangeError
   );
+});
+
+it("creates active state with defaults base separate from active fieldset", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text({ default: "Hello" })
+        }
+      },
+      camera: {
+        fields: {
+          zoom: controlField.number({ default: 2 })
+        }
+      }
+    }
+  });
+  const state = createControlPanelState(config);
+  const next = selectActiveFieldset(state, config, "camera");
+
+  assert.strictEqual(state.activeFieldsetId, "scene");
+  assert.deepStrictEqual(getActiveControlBase(state, "scene"), defaultsBase);
+  assert.deepStrictEqual(getActiveControlBase(state, "camera"), defaultsBase);
+  assert.strictEqual(next.activeFieldsetId, "camera");
+  assert.deepStrictEqual(getCurrentFieldsetValues(next, config), { zoom: 2 });
+});
+
+it("branches snapshots scoped to one fieldset and tracks active bases per fieldset", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text()
+        }
+      },
+      camera: {
+        fields: {
+          zoom: controlField.number()
+        }
+      }
+    }
+  });
+  const initial = createControlPanelState(config);
+  const withSceneSnapshot = branchControlSnapshot(initial, config, "scene", {
+    id: "scene-a",
+    name: "Scene A",
+    values: { title: "Draft" }
+  });
+  const withCameraSnapshot = branchControlSnapshot(withSceneSnapshot, config, "camera", {
+    id: "camera-a",
+    name: "Camera A",
+    values: { zoom: 4 }
+  });
+
+  assert.deepStrictEqual(getActiveControlBase(withCameraSnapshot, "scene"), {
+    type: "snapshot",
+    snapshotId: "scene-a"
+  });
+  assert.deepStrictEqual(getActiveControlBase(withCameraSnapshot, "camera"), {
+    type: "snapshot",
+    snapshotId: "camera-a"
+  });
+  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "scene"), { title: "Draft" });
+  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "camera"), { zoom: 4 });
+});
+
+it("restores snapshots with missing, unknown, and incompatible values falling back to defaults", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text({ default: "Untitled" }),
+          enabled: controlField.boolean({ default: true }),
+          density: controlField.select({
+            default: "comfortable",
+            options: [
+              { label: "Compact", value: "compact" },
+              { label: "Comfortable", value: "comfortable" }
+            ]
+          }),
+          position: controlField.vector2({ default: { x: 1, y: 2 } })
+        }
+      }
+    }
+  });
+  const snapshot: ControlSnapshot = {
+    id: "snapshot-a",
+    name: "Snapshot A",
+    fieldsetId: "scene",
+    values: {
+      enabled: "yes",
+      density: "stale",
+      position: { x: 9 },
+      unknown: "ignored"
+    }
+  };
+
+  assert.deepStrictEqual(restoreControlSnapshot(config, snapshot), {
+    title: "Untitled",
+    enabled: true,
+    density: "comfortable",
+    position: { x: 1, y: 2 }
+  });
+});
+
+it("saves changes only when a snapshot base is active", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text()
+        }
+      }
+    }
+  });
+  const state = createControlPanelState(config);
+
+  assert.throws(() => saveControlSnapshot(state, config, "scene", { title: "Saved" }), CannotSaveDefaultsBaseError);
+
+  const branched = branchControlSnapshot(state, config, "scene", {
+    id: "scene-a",
+    name: "Scene A",
+    values: { title: "Draft" }
+  });
+  const saved = saveControlSnapshot(branched, config, "scene", { title: "Saved", unknown: "ignored" });
+
+  assert.deepStrictEqual(getCurrentFieldsetValues(saved, config, "scene"), { title: "Saved" });
+});
+
+it("deletes active snapshots by returning only that fieldset to defaults", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text({ default: "Default scene" })
+        }
+      },
+      camera: {
+        fields: {
+          zoom: controlField.number({ default: 1 })
+        }
+      }
+    }
+  });
+  const state = branchControlSnapshot(
+    branchControlSnapshot(createControlPanelState(config), config, "scene", {
+      id: "scene-a",
+      name: "Scene A",
+      values: { title: "Snapshot scene" }
+    }),
+    config,
+    "camera",
+    {
+      id: "camera-a",
+      name: "Camera A",
+      values: { zoom: 5 }
+    }
+  );
+  const next = deleteControlSnapshot(state, "scene-a");
+
+  assert.deepStrictEqual(getActiveControlBase(next, "scene"), defaultsBase);
+  assert.deepStrictEqual(getActiveControlBase(next, "camera"), {
+    type: "snapshot",
+    snapshotId: "camera-a"
+  });
+  assert.deepStrictEqual(getCurrentFieldsetValues(next, config, "scene"), { title: "Default scene" });
+  assert.deepStrictEqual(getCurrentFieldsetValues(next, config, "camera"), { zoom: 5 });
+});
+
+it("discards changes by returning current base values without changing base selection", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text({ default: "Default" })
+        }
+      }
+    }
+  });
+  const state = branchControlSnapshot(createControlPanelState(config), config, "scene", {
+    id: "scene-a",
+    name: "Scene A",
+    values: { title: "Snapshot" }
+  });
+  const defaults = selectControlBase(state, config, "scene", defaultsBase);
+
+  assert.deepStrictEqual(discardControlChanges(state, config, "scene"), { title: "Snapshot" });
+  assert.deepStrictEqual(discardControlChanges(defaults, config, "scene"), { title: "Default" });
+});
+
+it("rejects duplicate snapshot ids and duplicate snapshot names per fieldset", () => {
+  const config = defineControlPanel({
+    fieldsets: {
+      scene: {
+        fields: {
+          title: controlField.text()
+        }
+      }
+    }
+  });
+  const state = branchControlSnapshot(createControlPanelState(config), config, "scene", {
+    id: "scene-a",
+    name: "Scene A",
+    values: { title: "A" }
+  });
+
+  assert.throws(
+    () =>
+      branchControlSnapshot(state, config, "scene", {
+        id: "scene-a",
+        name: "Scene B",
+        values: { title: "B" }
+      }),
+    DuplicateControlSnapshotIdError
+  );
+  assert.throws(
+    () =>
+      branchControlSnapshot(state, config, "scene", {
+        id: "scene-b",
+        name: "Scene A",
+        values: { title: "B" }
+      }),
+    DuplicateControlSnapshotNameError
+  );
+});
+
+it("models the v1 snapshot actions", () => {
+  assert.deepStrictEqual(controlSnapshotActions, ["saveChanges", "branchSnapshot", "discardChanges", "deleteSnapshot"]);
 });
