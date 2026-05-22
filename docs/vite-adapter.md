@@ -17,6 +17,8 @@ export default defineConfig({
 });
 ```
 
+`toolbarVite` accepts either a plain Toolbar Config from `defineToolbar` or a Toolbar Definition from a renderer package's `createToolbar`.
+
 The Toolbar API is mounted at `/__toolbar` by default:
 
 ```txt

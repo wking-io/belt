@@ -3,8 +3,11 @@ import { Effect, Schema } from "effect";
 import {
   defineTheme,
   defineToolbar,
+  defineToolbarDefinition,
   defineTool,
   DuplicateToolbarToolIdError,
+  extractToolbarConfig,
+  isToolbarDefinition,
   ToolbarThemeConfigSchema,
   ToolbarThemeSchema,
   ToolDefinitionSchema,
@@ -178,6 +181,17 @@ it("preserves configured theme registration from defineToolbar", () => {
       }
     ]
   });
+});
+
+it("extracts backend config from a Toolbar Definition", () => {
+  const definition = defineToolbarDefinition({
+    toolbarConfig: {
+      tools: [{ id: "worktrees", label: "Worktrees" }]
+    }
+  });
+
+  assert.strictEqual(isToolbarDefinition(definition), true);
+  assert.deepStrictEqual(extractToolbarConfig(definition).tools, [{ id: "worktrees", label: "Worktrees" }]);
 });
 
 it("derives tool metadata from Effect HTTP API endpoints", () => {

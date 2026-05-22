@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { toolbarApiBasePath, type ToolbarConfig } from "@repo/core";
+import { toolbarApiBasePath, type ToolbarConfigSource } from "@repo/core";
 import { createToolbarServer, type ToolbarServer } from "@repo/server";
 import type { Connect, Plugin } from "vite";
 
@@ -7,7 +7,7 @@ export type ToolbarViteOptions = {
   readonly mountPath?: string;
 };
 
-export function toolbarVite(config: ToolbarConfig, options: ToolbarViteOptions = {}): Plugin {
+export function toolbarVite(config: ToolbarConfigSource, options: ToolbarViteOptions = {}): Plugin {
   const server = createToolbarServer(config);
   const mountPath = normalizeMountPath(options.mountPath ?? toolbarApiBasePath);
 

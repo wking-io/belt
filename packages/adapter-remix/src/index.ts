@@ -1,4 +1,4 @@
-import type { ToolbarConfig } from "@repo/core";
+import type { ToolbarConfigSource } from "@repo/core";
 import { createToolbarServer, type ToolbarServer } from "@repo/server";
 
 export type RemixToolbarRouteArgs = {
@@ -16,7 +16,7 @@ export type RemixToolbarRouteHandler = {
  *
  * Use this when you want to export the same function from a Remix loader and action.
  */
-export function createToolbarRouteHandler(config: ToolbarConfig): RemixToolbarRouteHandler {
+export function createToolbarRouteHandler(config: ToolbarConfigSource): RemixToolbarRouteHandler {
   const server = createToolbarServer(config);
   const route = (args: RemixToolbarRouteArgs) => server.fetch(args.request);
 

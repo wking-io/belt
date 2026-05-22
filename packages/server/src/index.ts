@@ -9,11 +9,12 @@ import {
   ToolbarApi,
   ToolbarErrorEnvelopeSchema,
   ToolbarToolIdSchema,
+  extractToolbarConfig,
   type ToolbarError,
   type ToolbarResponseEnvelope,
   type ToolbarToolData,
   type ToolDefinition,
-  type ToolbarConfig as ToolbarConfigData
+  type ToolbarConfigSource
 } from "@repo/core";
 import { ToolbarConfig } from "@repo/config";
 import { Context, Effect, Layer, Schema } from "effect";
@@ -30,8 +31,9 @@ const ToolbarToolIdParamsSchema = Schema.Struct({
   toolId: ToolbarToolIdSchema
 });
 
-export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
-  const app = createToolbarRouter(config);
+export function createToolbarServer(config: ToolbarConfigSource): ToolbarServer {
+  const toolbarConfig = extractToolbarConfig(config);
+  const app = createToolbarRouter(toolbarConfig);
 
   const { handler, dispose } = HttpRouter.toWebHandler(app.pipe(
     Layer.provide(HttpServer.layerServices)
@@ -43,16 +45,17 @@ export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
   };
 }
 
-export function createToolbarRouter(config: ToolbarConfigData): Layer.Layer<never, any, any> {
+export function createToolbarRouter(config: ToolbarConfigSource): Layer.Layer<never, any, any> {
+  const toolbarConfig = extractToolbarConfig(config);
   const baseRoutes: Layer.Layer<never, any, any> = ToolbarApiRoutes;
-  const toolbarRoutes = config.tools.reduce<Layer.Layer<never, any, any>>(
+  const toolbarRoutes = toolbarConfig.tools.reduce<Layer.Layer<never, any, any>>(
     (routes, tool) => Layer.mergeAll(routes, createToolApiRoutes(tool)),
     baseRoutes
   );
 
   return Layer.mergeAll(toolbarRoutes, ToolMetadataRoutes, NotFoundRoutes).pipe(
     Layer.provide(ToolbarToolDispatch.layer),
-    Layer.provide(ToolbarConfig.layer(config))
+    Layer.provide(ToolbarConfig.layer(toolbarConfig))
   );
 }
 
