@@ -129,7 +129,8 @@ function createToolApiRoutes(tool: ToolDefinition): Layer.Layer<never, any, any>
       }
 
       const rewrittenRequest = rewriteToolApiRequest(webRequest, toolPath);
-      const response = yield* Effect.promise(() => handler(rewrittenRequest, Context.empty() as Context.Context<unknown>));
+      const context = yield* Effect.context<unknown>();
+      const response = yield* Effect.promise(() => handler(rewrittenRequest, context));
 
       return HttpServerResponse.fromWeb(response);
     }));
