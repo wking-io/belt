@@ -109,11 +109,11 @@ function createToolApiRoutes(tool: ToolDefinition): Layer.Layer<never, any, any>
     Layer.provide(tool.apiLayer),
     Layer.provide(HttpServer.layerServices)
   );
-  const { handler } = HttpRouter.toWebHandler(app);
+  const { handler, dispose } = HttpRouter.toWebHandler(app);
   const toolPath = toolbarApiToolPath(tool.id);
   const mountedRoute = `${toolPath}/*` as `/${string}`;
 
-  return HttpRouter.use(Effect.fn(`ToolApiRoutes.${tool.id}`)(function*(router) {
+  const routes = HttpRouter.use(Effect.fn(`ToolApiRoutes.${tool.id}`)(function*(router) {
     yield* router.add("*", mountedRoute, Effect.fn(`ToolApiRoutes.${tool.id}.handle`)(function*(request) {
       const webRequest = yield* HttpServerRequest.toWeb(request);
 
@@ -131,6 +131,11 @@ function createToolApiRoutes(tool: ToolDefinition): Layer.Layer<never, any, any>
       return HttpServerResponse.fromWeb(response);
     }));
   }));
+
+  return Layer.mergeAll(
+    routes,
+    Layer.effectDiscard(Effect.addFinalizer(() => Effect.promise(dispose)))
+  );
 }
 
 function rewriteToolApiRequest(request: Request, toolPath: string): Request {

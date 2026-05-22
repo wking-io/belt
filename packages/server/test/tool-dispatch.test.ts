@@ -55,6 +55,45 @@ describe("ToolbarToolDispatch", () => {
         yield* Effect.promise(() => server.dispose());
       }
     }));
+
+  it.effect("disposes tool-owned Effect HTTP API handler layers", () =>
+    Effect.gen(function*() {
+      let disposed = false;
+      const server = createToolbarServer(defineToolbar({
+        tools: [
+          {
+            api: EchoToolApi,
+            apiLayer: Layer.mergeAll(
+              EchoToolApiHandlers,
+              Layer.effectDiscard(
+                Effect.addFinalizer(() => Effect.sync(() => {
+                  disposed = true;
+                }))
+              )
+            ),
+            id: "echo",
+            label: "Echo"
+          }
+        ]
+      }));
+
+      const response = yield* Effect.promise(() =>
+        server.fetch(new Request(`http://belt.local${toolApiRoutePath("echo", "submit")}`, {
+          method: "POST",
+          body: JSON.stringify({ ok: true }),
+          headers: {
+            "content-type": "application/json"
+          }
+        }))
+      );
+
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(disposed, false);
+
+      yield* Effect.promise(() => server.dispose());
+
+      assert.strictEqual(disposed, true);
+    }));
 });
 
 const EchoRequestSchema = Schema.Struct({
