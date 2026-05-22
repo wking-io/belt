@@ -67,6 +67,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../config
+      '@repo/control-panel-core':
+        specifier: workspace:*
+        version: link:../control-panel-core
       '@repo/core':
         specifier: workspace:*
         version: link:../core
