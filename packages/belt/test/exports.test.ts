@@ -1,5 +1,5 @@
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar } from "@riff-refine/belt";
+import { defineToolbar, toolApiRoutePath } from "@riff-refine/belt";
 import {
   booleanField,
   controlField,
@@ -88,5 +88,50 @@ describe("@riff-refine/belt facade exports", () => {
 
     assert.strictEqual(registration.tool.id, "control-panel");
     assert.strictEqual(panel.fieldsets.scene?.fields.intensity.type, "number");
+  });
+
+  it("provides standard live Control Panel dependencies through Belt server facades", async () => {
+    const registration = controlPanelTool({
+      fieldsets: {
+        scene: {
+          fields: {
+            title: textField({ default: "Preview" })
+          }
+        }
+      }
+    });
+    const config = defineToolbar({
+      tools: [registration.tool]
+    });
+    const server = createToolbarServer(config);
+    const remix = createToolbarRouteHandler(config);
+
+    try {
+      const request = new Request(new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"));
+      const serverResponse = await server.fetch(request);
+      const remixResponse = await remix({
+        request: new Request(new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"))
+      });
+
+      assert.strictEqual(serverResponse.status, 200);
+      assert.strictEqual(remixResponse.status, 200);
+      assert.deepStrictEqual(await serverResponse.json(), {
+        config: registration.config,
+        state: {
+          activeFieldsetId: "scene",
+          activeBaseByFieldset: {
+            scene: { type: "defaults" }
+          },
+          currentValuesByFieldset: {
+            scene: {
+              title: "Preview"
+            }
+          }
+        },
+      });
+    } finally {
+      await server.dispose();
+      await remix.dispose();
+    }
   });
 });

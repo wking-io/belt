@@ -9,7 +9,7 @@ export type ToolbarViteOptions = {
 
 export function toolbarVite(config: ToolbarConfigSource, options: ToolbarViteOptions = {}): Plugin {
   const server = createToolbarServer(config);
-  const mountPath = normalizeMountPath(options.mountPath ?? toolbarApiBasePath);
+  const mountPath = normalizeToolbarMountPath(options.mountPath ?? toolbarApiBasePath);
 
   return {
     name: "toolbar",
@@ -28,7 +28,7 @@ export function createToolbarViteMiddleware(
   server: ToolbarServer,
   options: Required<ToolbarViteOptions>
 ): Connect.NextHandleFunction {
-  const mountPath = normalizeMountPath(options.mountPath);
+  const mountPath = normalizeToolbarMountPath(options.mountPath);
 
   return async (req, res, next) => {
     try {
@@ -90,7 +90,7 @@ async function writeFetchResponse(res: ServerResponse, response: Response) {
   res.end(Buffer.from(await response.arrayBuffer()));
 }
 
-function normalizeMountPath(path: string): string {
+export function normalizeToolbarMountPath(path: string): string {
   const normalizedPath = `/${path.replace(/^\/+|\/+$/g, "")}`;
 
   return normalizedPath === "/" ? toolbarApiBasePath : normalizedPath;
