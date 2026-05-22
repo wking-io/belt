@@ -1,6 +1,8 @@
 import { NodeServices } from "@effect/platform-node";
-import { defineTool, toolbarApiToolPath, type ToolDefinition } from "@repo/core";
+import { defineTool, normalizeRoute, toolApiRoutePath, type ToolDefinition } from "@repo/core";
 import { Context, Effect, Layer, Path, Schema } from "effect";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { ChildProcess } from "effect/unstable/process";
 import { ChildProcessSpawner } from "effect/unstable/process/ChildProcessSpawner";
 
@@ -38,6 +40,26 @@ export type WorktreesToolOptions = {
   resolver: WorktreeUrlResolver;
   cwd?: string;
 };
+
+export const WorktreeDestinationSchema = Schema.Struct({
+  id: Schema.String,
+  label: Schema.String,
+  url: Schema.String,
+  primary: Schema.optionalKey(Schema.Boolean),
+  reachable: Schema.optionalKey(Schema.Boolean)
+});
+
+export const WorktreeEntrySchema = Schema.Struct({
+  id: Schema.String,
+  branch: Schema.String,
+  path: Schema.String,
+  current: Schema.Boolean,
+  destinations: Schema.Array(WorktreeDestinationSchema)
+});
+
+export const WorktreesIndexResponseSchema = Schema.Struct({
+  worktrees: Schema.Array(WorktreeEntrySchema)
+});
 
 export class GitWorktreeCommandError extends Schema.TaggedErrorClass<GitWorktreeCommandError>()(
   "GitWorktreeCommandError",
@@ -151,12 +173,39 @@ export class WorktreeDiscovery extends Context.Service<WorktreeDiscovery, Worktr
 
 export const WorktreeDiscoveryLive = Layer.mergeAll(WorktreeDiscovery.layer, NodeServices.layer);
 
+export class WorktreesToolApiGroup extends HttpApiGroup.make("worktrees")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index"), {
+      success: WorktreesIndexResponseSchema
+    })
+  )
+  .annotateMerge(OpenApi.annotations({
+    title: "Worktrees"
+  }))
+{}
+
+export class WorktreesToolApi extends HttpApi.make("worktrees-tool-api")
+  .add(WorktreesToolApiGroup)
+  .annotateMerge(OpenApi.annotations({
+    title: "Belt Worktrees Tool API"
+  }))
+{}
+
 export function worktreesTool(options: WorktreesToolOptions): ToolDefinition {
   return defineTool({
+    api: WorktreesToolApi,
+    apiLayer: worktreesToolApiLayer(options),
     id: "worktrees",
-    label: "Worktrees",
-    routes: {
-      index: () =>
+    label: "Worktrees"
+  });
+}
+
+export function worktreesToolApiLayer(options: WorktreesToolOptions) {
+  return HttpApiBuilder.group(
+    WorktreesToolApi,
+    "worktrees",
+    (handlers) =>
+      handlers.handle("index", () =>
         Effect.gen(function*() {
           const discovery = yield* WorktreeDiscovery;
           const worktrees = yield* discovery.list(options).pipe(
@@ -164,13 +213,15 @@ export function worktreesTool(options: WorktreesToolOptions): ToolDefinition {
           );
 
           return { worktrees };
-        }).pipe(Effect.provide(WorktreeDiscoveryLive))
-    }
-  });
+        }).pipe(
+          Effect.provide(WorktreeDiscoveryLive),
+          Effect.orDie
+        ))
+  );
 }
 
 export function createWorktreesClient(options?: { basePath?: string }) {
-  const basePath = options?.basePath ?? toolbarApiToolPath("worktrees");
+  const basePath = options?.basePath ?? toolApiRoutePath("worktrees", "index");
 
   return {
     async list(): Promise<{ worktrees: WorktreeEntry[] }> {

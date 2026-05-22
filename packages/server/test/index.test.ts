@@ -1,12 +1,15 @@
 import { assert, describe, it } from "@effect/vitest";
 import {
   defineToolbar,
+  normalizeRoute,
   toolbarApiRoutes,
   toolbarApiToolPath,
   toolbarApiToolRoutePath,
   type ToolbarErrorCode
 } from "@repo/core";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { createToolbarServer } from "../src/index.ts";
 
 describe("Effect HTTP Toolbar Server", () => {
@@ -25,7 +28,7 @@ describe("Effect HTTP Toolbar Server", () => {
             {
               id: "worktrees",
               label: "Worktrees",
-              routes: ["branches/list", "index"]
+              routes: ["index"]
             }
           ]
         }
@@ -47,7 +50,7 @@ describe("Effect HTTP Toolbar Server", () => {
           tool: {
             id: "worktrees",
             label: "Worktrees",
-            routes: ["branches/list", "index"]
+            routes: ["index"]
           }
         }
       });
@@ -59,19 +62,10 @@ describe("Effect HTTP Toolbar Server", () => {
     Effect.gen(function*() {
       const server = createToolbarServer(testConfig);
       const indexResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("worktrees", "/"))));
-      const nestedResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("worktrees", "branches/list"))));
 
+      assert.strictEqual(indexResponse.status, 200);
       assert.deepStrictEqual(yield* json(indexResponse), {
-        ok: true,
-        data: {
-          worktrees: []
-        }
-      });
-      assert.deepStrictEqual(yield* json(nestedResponse), {
-        ok: true,
-        data: {
-          branches: ["main"]
-        }
+        worktrees: []
       });
 
       yield* Effect.promise(() => server.dispose());
@@ -83,42 +77,41 @@ describe("Effect HTTP Toolbar Server", () => {
 
       yield* assertError(server, "/elsewhere", 404, "NOT_FOUND");
       yield* assertError(server, toolbarApiToolPath("missing"), 404, "UNKNOWN_TOOL");
-      yield* assertError(server, toolbarApiToolRoutePath("worktrees", "missing"), 404, "UNKNOWN_TOOL_ROUTE");
-
-      yield* Effect.promise(() => server.dispose());
-    }));
-
-  it.effect("maps tool failures to TOOL_ERROR", () =>
-    Effect.gen(function*() {
-      const server = createToolbarServer(failingConfig);
-
-      yield* assertError(server, toolbarApiToolRoutePath("failing", "/"), 500, "TOOL_ERROR");
 
       yield* Effect.promise(() => server.dispose());
     }));
 });
+
+const WorktreesIndexResponseSchema = Schema.Struct({
+  worktrees: Schema.Array(Schema.Unknown)
+});
+
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index"), {
+      success: WorktreesIndexResponseSchema
+    })
+  )
+{}
+
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
+  .add(WorktreesTestApiGroup)
+{}
+
+const WorktreesTestApiHandlers = HttpApiBuilder.group(
+  WorktreesTestApi,
+  "worktrees-test",
+  (handlers) =>
+    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+);
 
 const testConfig = defineToolbar({
   tools: [
     {
+      api: WorktreesTestApi,
+      apiLayer: WorktreesTestApiHandlers,
       id: "worktrees",
-      label: "Worktrees",
-      routes: {
-        "branches/list": () => Effect.succeed({ branches: ["main"] }),
-        index: () => Effect.succeed({ worktrees: [] })
-      }
-    }
-  ]
-});
-
-const failingConfig = defineToolbar({
-  tools: [
-    {
-      id: "failing",
-      label: "Failing",
-      routes: {
-        index: () => Effect.fail("boom")
-      }
+      label: "Worktrees"
     }
   ]
 });
@@ -156,10 +149,6 @@ function errorMessageFor(code: ToolbarErrorCode): string {
       return "Not found";
     case "UNKNOWN_TOOL":
       return "Unknown tool";
-    case "UNKNOWN_TOOL_ROUTE":
-      return "Unknown tool route";
-    case "TOOL_ERROR":
-      return "Tool route failed";
     default:
       return code;
   }

@@ -46,8 +46,6 @@ INVALID_REQUEST
 NOT_FOUND
 METHOD_NOT_ALLOWED
 UNKNOWN_TOOL
-UNKNOWN_TOOL_ROUTE
-TOOL_ERROR
 INTERNAL_ERROR
 ```
 
@@ -58,8 +56,6 @@ INVALID_REQUEST      400
 NOT_FOUND            404
 METHOD_NOT_ALLOWED   405
 UNKNOWN_TOOL         404
-UNKNOWN_TOOL_ROUTE   404
-TOOL_ERROR           500
 INTERNAL_ERROR       500
 ```
 
@@ -116,9 +112,41 @@ Tool route conventions:
 
 - `routePath` is relative to the tool and must not include the API base path.
 - An empty route path resolves to `index`.
-- Tool route responses are wrapped in the standard success or error envelope by the Toolbar Server.
-- Tool-specific response payloads live under the success envelope's `data` field.
-- Tool failures that are expected and recoverable should become `TOOL_ERROR`; missing tools or routes use `UNKNOWN_TOOL` and `UNKNOWN_TOOL_ROUTE`.
+- Tool-owned Effect HTTP APIs define their own request and response schemas with `HttpApi`, `HttpApiGroup`, and `HttpApiEndpoint`.
+- Tool-owned Effect HTTP APIs are authored with tool-relative paths, then mounted by the server under `/__toolbar/tools/:toolId`.
+- Missing tools use `UNKNOWN_TOOL`; missing tool API routes are handled by the mounted tool API.
+
+JavaScript tools should keep route definitions close to the tool package:
+
+```ts
+import { normalizeRoute } from "@riff-refine/belt";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+
+export class MyToolApiGroup extends HttpApiGroup.make("my-tool")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index"), {
+      success: MyToolIndexResponseSchema
+    }),
+    HttpApiEndpoint.post("save", normalizeRoute("snapshots/save"), {
+      payload: MyToolSaveRequestSchema,
+      success: MyToolSaveResponseSchema
+    })
+  )
+{}
+
+export class MyToolApi extends HttpApi.make("my-tool-api")
+  .add(MyToolApiGroup)
+{}
+```
+
+`normalizeRoute(routePath)` is intentionally thin: it only normalizes a tool-relative route key into the `/${string}` path shape required by Effect HTTP. It does not wrap `HttpApiEndpoint.get`, `HttpApiEndpoint.post`, or any other Effect APIs.
+
+Clients can compose the core Toolbar API client with a tool-owned API:
+
+```ts
+const toolbar = yield* makeToolbarClient({ baseUrl: "/__toolbar" });
+const myTool = yield* toolbar.tool(MyToolApi, "my-tool");
+```
 
 ## Effect Schemas
 

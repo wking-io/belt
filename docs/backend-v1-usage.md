@@ -50,7 +50,7 @@ GET /__toolbar/tools/:toolId
 GET /__toolbar/tools/:toolId/*
 ```
 
-Successful responses use:
+Core Toolbar protocol responses use:
 
 ```json
 {
@@ -72,6 +72,8 @@ Error responses use:
 ```
 
 `@riff-refine/belt` owns the protocol schemas, route constants, path builders, and the shared Effect HTTP `ToolbarApi` definition. `@riff-refine/belt/server` implements that protocol as a JavaScript Fetch server using Effect HTTP.
+
+Tool packages define their own mounted Effect HTTP APIs under `/__toolbar/tools/:toolId/*`. Tool route responses follow the tool-owned `HttpApi` contract rather than the core Toolbar `ok/data` envelope.
 
 ## Direct Fetch Server
 

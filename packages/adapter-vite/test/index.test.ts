@@ -1,8 +1,10 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { once } from "node:events";
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar, toolbarApiBasePath } from "@repo/core";
-import { Effect } from "effect";
+import { defineToolbar, normalizeRoute, toolbarApiBasePath } from "@repo/core";
+import { Effect, Schema } from "effect";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import type { Connect, ViteDevServer } from "vite";
 import { toolbarVite } from "../src/index.ts";
 
@@ -42,10 +44,7 @@ describe("Vite Toolbar adapter", () => {
 
       assert.strictEqual(response.status, 200);
       assert.deepStrictEqual(body, {
-        ok: true,
-        data: {
-          worktrees: []
-        }
+        worktrees: []
       });
 
       mounted.close();
@@ -70,14 +69,36 @@ describe("Vite Toolbar adapter", () => {
     }));
 });
 
+const WorktreesIndexResponseSchema = Schema.Struct({
+  worktrees: Schema.Array(Schema.Unknown)
+});
+
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index"), {
+      success: WorktreesIndexResponseSchema
+    })
+  )
+{}
+
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
+  .add(WorktreesTestApiGroup)
+{}
+
+const WorktreesTestApiHandlers = HttpApiBuilder.group(
+  WorktreesTestApi,
+  "worktrees-test",
+  (handlers) =>
+    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+);
+
 const testConfig = defineToolbar({
   tools: [
     {
+      api: WorktreesTestApi,
+      apiLayer: WorktreesTestApiHandlers,
       id: "worktrees",
-      label: "Worktrees",
-      routes: {
-        index: () => Effect.succeed({ worktrees: [] })
-      }
+      label: "Worktrees"
     }
   ]
 });

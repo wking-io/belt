@@ -39,11 +39,10 @@ export type ControlPanelDefinition<Fieldsets extends ControlFieldsetMap = Contro
   };
 
 export type ControlPanelRegistration<
-  Fieldsets extends ControlFieldsetMap = ControlFieldsetMap,
-  Requirements = never
+  Fieldsets extends ControlFieldsetMap = ControlFieldsetMap
 > = {
   readonly config: ControlPanelDefinition<Fieldsets>;
-  readonly tool: ToolDefinition<Requirements>;
+  readonly tool: ToolDefinition;
 };
 
 export type ControlFieldsetValues<Fieldset extends ControlFieldset> = {

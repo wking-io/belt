@@ -1,33 +1,46 @@
 import { assert, it } from "@effect/vitest";
-import { IdGenerator } from "@repo/core";
-import { Effect, Layer } from "effect";
+import { IdGenerator, normalizeRoute, toolApiRoutePath } from "@repo/core";
+import { Context, Effect, Layer } from "effect";
+import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { HttpApi } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import {
   controlField,
-  controlPanelRouteDefinitions,
   controlPanelRoutePaths,
   controlPanelTool,
+  controlPanelToolId,
+  ControlPanelToolApi,
   ControlSnapshotPersistence,
   ControlSnapshotStore,
+  type ControlPanelRegistration,
+  type ControlPanelConfig,
   type ControlSnapshotStoreData
 } from "../src/index.ts";
 
-it("defines schema-backed route metadata for control panel tool routes", () => {
-  assert.deepStrictEqual(Object.fromEntries(
-    Object.entries(controlPanelRouteDefinitions).map(([key, definition]) => [key, {
-      method: definition.method,
-      path: definition.path
-    }])
-  ), {
-    index: { method: "GET", path: "index" },
-    state: { method: "GET", path: "state" },
-    selectFieldset: { method: "POST", path: "state/select-fieldset" },
-    selectBase: { method: "POST", path: "state/select-base" },
-    snapshots: { method: "GET", path: "snapshots" },
-    readSnapshot: { method: "POST", path: "snapshots/read" },
-    branchSnapshot: { method: "POST", path: "snapshots/branch" },
-    saveSnapshot: { method: "POST", path: "snapshots/save" },
-    deleteSnapshot: { method: "POST", path: "snapshots/delete" }
+it("defines the Control Panel routes as an Effect HTTP API", () => {
+  const endpoints: Array<{ method: string; path: string }> = [];
+
+  HttpApi.reflect(ControlPanelToolApi, {
+    onGroup: () => {},
+    onEndpoint: ({ endpoint }) => {
+      endpoints.push({
+        method: endpoint.method,
+        path: endpoint.path
+      });
+    }
   });
+
+  assert.deepStrictEqual(endpoints, [
+    { method: "GET", path: "/" },
+    { method: "GET", path: "/state" },
+    { method: "POST", path: "/state/select-fieldset" },
+    { method: "POST", path: "/state/select-base" },
+    { method: "GET", path: "/snapshots" },
+    { method: "POST", path: "/snapshots/read" },
+    { method: "POST", path: "/snapshots/branch" },
+    { method: "POST", path: "/snapshots/save" },
+    { method: "POST", path: "/snapshots/delete" }
+  ]);
 });
 
 it.effect("returns config and persisted active state from the index route", () => {
@@ -49,10 +62,17 @@ it.effect("returns config and persisted active state from the index route", () =
       }
     }
   });
-  const route = registration.tool.routes?.[controlPanelRoutePaths.index];
 
   return Effect.gen(function*() {
-    const response = route ? yield* route(request("GET")) : undefined;
+    const server = controlPanelServer(registration, {
+      load: () => Effect.succeed(persisted),
+      save: (data) => Effect.sync(() => {
+        persisted = data;
+      })
+    });
+    const response = yield* json(yield* Effect.promise(() =>
+      server.fetch(request(controlPanelRoutePaths.index, "GET"))
+    ));
 
     assert.deepStrictEqual(response, {
       config: registration.config,
@@ -72,12 +92,8 @@ it.effect("returns config and persisted active state from the index route", () =
       version: 1,
       snapshots: []
     });
-  }).pipe(Effect.provide(testStoreLayer({
-    load: () => Effect.succeed(persisted),
-    save: (data) => Effect.sync(() => {
-      persisted = data;
-    })
-  })));
+    yield* Effect.promise(() => server.dispose());
+  });
 });
 
 it.effect("persists active fieldset selection across route reads", () => {
@@ -99,12 +115,21 @@ it.effect("persists active fieldset selection across route reads", () => {
       }
     }
   });
-  const selectFieldset = registration.tool.routes?.[controlPanelRoutePaths.selectFieldset];
-  const state = registration.tool.routes?.[controlPanelRoutePaths.state];
 
   return Effect.gen(function*() {
-    yield* selectFieldset ? selectFieldset(request("POST", { fieldsetId: "camera" })) : Effect.succeed(undefined);
-    const response = state ? yield* state(request("GET")) : undefined;
+    const server = controlPanelServer(registration, {
+      load: () => Effect.succeed(persisted),
+      save: (data) => Effect.sync(() => {
+        persisted = data;
+      })
+    });
+
+    yield* Effect.promise(() =>
+      server.fetch(request(controlPanelRoutePaths.selectFieldset, "POST", { fieldsetId: "camera" }))
+    );
+    const response = yield* json(yield* Effect.promise(() =>
+      server.fetch(request(controlPanelRoutePaths.state, "GET"))
+    ));
 
     assert.deepStrictEqual(response, {
       state: {
@@ -128,12 +153,8 @@ it.effect("persists active fieldset selection across route reads", () => {
       },
       snapshots: []
     });
-  }).pipe(Effect.provide(testStoreLayer({
-    load: () => Effect.succeed(persisted),
-    save: (data) => Effect.sync(() => {
-      persisted = data;
-    })
-  })));
+    yield* Effect.promise(() => server.dispose());
+  });
 });
 
 it.effect("branches, saves, reads, and deletes snapshots through tool routes", () => {
@@ -150,19 +171,22 @@ it.effect("branches, saves, reads, and deletes snapshots through tool routes", (
       }
     }
   });
-  const branch = registration.tool.routes?.[controlPanelRoutePaths.branchSnapshot];
-  const save = registration.tool.routes?.[controlPanelRoutePaths.saveSnapshot];
-  const read = registration.tool.routes?.[controlPanelRoutePaths.readSnapshot];
-  const remove = registration.tool.routes?.[controlPanelRoutePaths.deleteSnapshot];
 
   return Effect.gen(function*() {
-    const branched = branch ? yield* branch(request("POST", {
+    const server = controlPanelServer(registration, {
+      load: () => Effect.succeed(persisted),
+      save: (data) => Effect.sync(() => {
+        persisted = data;
+      })
+    });
+
+    const branched = yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.branchSnapshot, "POST", {
       fieldsetId: "scene",
       name: "Draft",
       values: {
         title: "Draft title"
       }
-    })) : undefined;
+    }))));
 
     assert.deepStrictEqual(branched, {
       snapshot: {
@@ -189,17 +213,17 @@ it.effect("branches, saves, reads, and deletes snapshots through tool routes", (
       }
     });
 
-    yield* save ? save(request("POST", {
+    yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.saveSnapshot, "POST", {
       fieldsetId: "scene",
       values: {
         title: "Saved title"
       }
-    })) : Effect.succeed(undefined);
+    })));
 
-    assert.deepStrictEqual(read ? yield* read(request("POST", {
+    assert.deepStrictEqual(yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.readSnapshot, "POST", {
       fieldsetId: "scene",
       snapshotId: "snapshot_test-id-1"
-    })) : undefined, {
+    })))), {
       snapshot: {
         id: "snapshot_test-id-1",
         name: "Draft",
@@ -210,10 +234,10 @@ it.effect("branches, saves, reads, and deletes snapshots through tool routes", (
       }
     });
 
-    assert.deepStrictEqual(remove ? yield* remove(request("POST", {
+    assert.deepStrictEqual(yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.deleteSnapshot, "POST", {
       fieldsetId: "scene",
       snapshotId: "snapshot_test-id-1"
-    })) : undefined, {
+    })))), {
       state: {
         activeFieldsetId: "scene",
         activeBaseByFieldset: {
@@ -229,22 +253,58 @@ it.effect("branches, saves, reads, and deletes snapshots through tool routes", (
       },
       snapshots: []
     });
-  }).pipe(Effect.provide(testStoreLayer({
-    load: () => Effect.succeed(persisted),
-    save: (data) => Effect.sync(() => {
-      persisted = data;
-    })
-  })));
+    yield* Effect.promise(() => server.dispose());
+  });
 });
 
-function request(method: string, body?: unknown): Request {
-  return new Request("http://belt.local/__toolbar/tools/control-panel", {
+function request(routePath: string, method: string, body?: unknown): Request {
+  return new Request(new URL(toolApiRoutePath(controlPanelToolId, routePath), "http://belt.local"), {
     method,
     body: body === undefined ? undefined : JSON.stringify(body),
     headers: body === undefined ? undefined : {
       "content-type": "application/json"
     }
   });
+}
+
+function json(response: Response) {
+  return Effect.promise(async (): Promise<unknown> => response.json());
+}
+
+function controlPanelServer(
+  registration: ControlPanelRegistration<ControlPanelConfig["fieldsets"], ControlSnapshotStore>,
+  persistence: {
+    readonly load: () => Effect.Effect<unknown>;
+    readonly save: (data: ControlSnapshotStoreData) => Effect.Effect<void>;
+  }
+) {
+  const api = registration.tool.api;
+  const apiLayer = registration.tool.apiLayer;
+
+  if (!api || !apiLayer) {
+    throw new Error("Control Panel tool API registration is missing");
+  }
+
+  const app = HttpApiBuilder.layer(api).pipe(
+    Layer.provide(apiLayer),
+    Layer.provide(testStoreLayer(persistence)),
+    Layer.provide(HttpServer.layerServices)
+  );
+
+  const { handler, dispose } = HttpRouter.toWebHandler(app);
+
+  return {
+    fetch: (request: Request) => handler(rewriteControlPanelRequest(request), Context.empty() as Context.Context<unknown>),
+    dispose
+  };
+}
+
+function rewriteControlPanelRequest(request: Request): Request {
+  const url = new URL(request.url);
+  const toolPath = `/__toolbar/tools/${controlPanelToolId}`;
+  url.pathname = normalizeRoute(url.pathname.slice(toolPath.length));
+
+  return new Request(url, request);
 }
 
 function testStoreLayer(persistence: {
