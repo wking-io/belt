@@ -58,6 +58,7 @@
     "@repo/adapter-remix": "workspace:*",
     "@repo/adapter-vite": "workspace:*",
     "@repo/config": "workspace:*",
+    "@repo/control-panel-core": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/renderer-remix": "workspace:*",
     "@repo/renderer-react": "workspace:*",

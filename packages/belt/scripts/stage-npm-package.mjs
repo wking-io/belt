@@ -25,6 +25,7 @@ const internalPackages = {
   "@repo/adapter-remix": "adapter-remix",
   "@repo/adapter-vite": "adapter-vite",
   "@repo/config": "config",
+  "@repo/control-panel-core": "control-panel-core",
   "@repo/core": "core",
   "@repo/renderer-react": "renderer-react",
   "@repo/renderer-remix": "renderer-remix",
