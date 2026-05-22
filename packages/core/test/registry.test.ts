@@ -9,21 +9,20 @@ import {
   ToolbarThemeSchema,
   ToolDefinitionSchema,
   ToolbarToolSchema,
+  normalizeRoute,
   toToolbarToolMetadata,
-  validateToolbarConfig,
-  type ToolDefinition
+  validateToolbarConfig
 } from "../src/index.ts";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 
 it.effect("validates explicit tool registration", () =>
   Effect.gen(function*() {
     const config = yield* validateToolbarConfig({
       tools: [
         {
+          api: TestToolApi,
           id: "worktrees",
-          label: "Worktrees",
-          routes: {
-            index: () => Effect.succeed({ worktrees: [] })
-          }
+          label: "Worktrees"
         }
       ]
     });
@@ -86,15 +85,13 @@ it.effect("validates toolbar tool data with the source-of-truth schema", () =>
 it.effect("validates tool definitions with schema-backed reference fields", () =>
   Effect.gen(function*() {
     const tool = yield* Schema.decodeUnknownEffect(ToolDefinitionSchema)({
+      api: TestToolApi,
       id: "worktrees",
-      label: "Worktrees",
-      routes: {
-        index: () => Effect.succeed({ worktrees: [] })
-      }
+      label: "Worktrees"
     });
 
     assert.strictEqual(tool.id, "worktrees");
-    assert.strictEqual(typeof tool.routes?.index, "function");
+    assert.strictEqual(tool.api, TestToolApi);
   }));
 
 it("throws from defineTool for invalid tool definitions", () => {
@@ -183,15 +180,12 @@ it("preserves configured theme registration from defineToolbar", () => {
   });
 });
 
-it("derives tool metadata from route contributions", () => {
-  const tool: ToolDefinition = {
+it("derives tool metadata from Effect HTTP API endpoints", () => {
+  const tool = defineTool({
+    api: TestToolApi,
     id: "worktrees",
-    label: "Worktrees",
-    routes: {
-      "destinations/check": () => Effect.succeed({ ok: true }),
-      index: () => Effect.succeed({ worktrees: [] })
-    }
-  };
+    label: "Worktrees"
+  });
 
   assert.deepStrictEqual(toToolbarToolMetadata(tool), {
     id: "worktrees",
@@ -199,3 +193,14 @@ it("derives tool metadata from route contributions", () => {
     routes: ["destinations/check", "index"]
   });
 });
+
+class TestToolApiGroup extends HttpApiGroup.make("test-tool")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index")),
+    HttpApiEndpoint.get("destinations", normalizeRoute("destinations/check"))
+  )
+{}
+
+class TestToolApi extends HttpApi.make("test-tool-api")
+  .add(TestToolApiGroup)
+{}

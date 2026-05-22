@@ -1,8 +1,10 @@
 import { assert, describe, it } from "@effect/vitest";
 import { ToolbarConfig } from "@repo/config";
-import { defineToolbar } from "@repo/core";
-import { Effect, Layer } from "effect";
-import { ToolbarProtocolError, ToolbarToolDispatch } from "../src/tool-dispatch.ts";
+import { defineToolbar, toolApiRoutePath, normalizeRoute } from "@repo/core";
+import { Effect, Layer, Schema } from "effect";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { ToolbarToolDispatch } from "../src/tool-dispatch.ts";
 import { createToolbarServer } from "../src/index.ts";
 
 describe("ToolbarToolDispatch", () => {
@@ -14,44 +16,26 @@ describe("ToolbarToolDispatch", () => {
       assert.deepStrictEqual(tool, {
         id: "worktrees",
         label: "Worktrees",
-        routes: ["index"]
+        routes: ["submit"]
       });
     }).pipe(Effect.provide(testLayer)));
 
-  it.effect("maps missing routes to protocol errors", () =>
-    Effect.gen(function*() {
-      const dispatch = yield* ToolbarToolDispatch;
-      const error = yield* Effect.flip(dispatch.route("worktrees", "missing", request()));
-
-      assert.ok(error instanceof ToolbarProtocolError);
-      assert.strictEqual(error.status, 404);
-      assert.deepStrictEqual(error.error, {
-        code: "UNKNOWN_TOOL_ROUTE",
-        message: "Unknown tool route"
-      });
-    }).pipe(Effect.provide(testLayer)));
-
-  it.effect("dispatches non-GET tool route requests through the server", () =>
+  it.effect("serves tool-owned Effect HTTP APIs under the runtime tool id", () =>
     Effect.gen(function*() {
       const server = createToolbarServer(defineToolbar({
         tools: [
           {
+            api: EchoToolApi,
+            apiLayer: EchoToolApiHandlers,
             id: "echo",
-            label: "Echo",
-            routes: {
-              submit: (request) =>
-                Effect.promise(async () => ({
-                  method: request.method,
-                  body: await request.json()
-                }))
-            }
+            label: "Echo"
           }
         ]
       }));
 
       try {
         const response = yield* Effect.promise(() =>
-          server.fetch(new Request("http://belt.local/__toolbar/tools/echo/submit", {
+          server.fetch(new Request(`http://belt.local${toolApiRoutePath("echo", "submit")}`, {
             method: "POST",
             body: JSON.stringify({ ok: true }),
             headers: {
@@ -62,12 +46,9 @@ describe("ToolbarToolDispatch", () => {
 
         assert.strictEqual(response.status, 200);
         assert.deepStrictEqual(yield* Effect.promise(() => response.json()), {
-          ok: true,
-          data: {
-            method: "POST",
-            body: {
-              ok: true
-            }
+          method: "POST",
+          body: {
+            ok: true
           }
         });
       } finally {
@@ -76,20 +57,48 @@ describe("ToolbarToolDispatch", () => {
     }));
 });
 
+const EchoRequestSchema = Schema.Struct({
+  ok: Schema.Boolean
+});
+
+const EchoResponseSchema = Schema.Struct({
+  method: Schema.String,
+  body: EchoRequestSchema
+});
+
+class EchoToolApiGroup extends HttpApiGroup.make("echo")
+  .add(
+    HttpApiEndpoint.post("submit", normalizeRoute("submit"), {
+      payload: EchoRequestSchema,
+      success: EchoResponseSchema
+    })
+  )
+{}
+
+class EchoToolApi extends HttpApi.make("echo-tool-api")
+  .add(EchoToolApiGroup)
+{}
+
+const EchoToolApiHandlers = HttpApiBuilder.group(
+  EchoToolApi,
+  "echo",
+  (handlers) =>
+    handlers.handle("submit", ({ payload }) =>
+      Effect.succeed({
+        method: "POST",
+        body: payload
+      }))
+);
+
 const testConfig = defineToolbar({
   tools: [
     {
+      api: EchoToolApi,
+      apiLayer: EchoToolApiHandlers,
       id: "worktrees",
-      label: "Worktrees",
-      routes: {
-        index: () => Effect.succeed({ worktrees: [] })
-      }
+      label: "Worktrees"
     }
   ]
 });
 
 const testLayer = Layer.provide(ToolbarToolDispatch.layer, ToolbarConfig.layer(testConfig));
-
-function request(): Request {
-  return new Request("http://belt.local/__toolbar/tools/worktrees");
-}

@@ -1,5 +1,5 @@
 import { assert, it } from "@effect/vitest";
-import { IdGenerator } from "@repo/core";
+import { IdGenerator, toToolbarToolMetadata } from "@repo/core";
 import { Effect, Layer } from "effect";
 import {
   controlField,
@@ -216,7 +216,7 @@ it.effect("validates control panel config through an Effect API", () =>
     });
   }));
 
-it("registers the control panel as a toolbar tool", async () => {
+it("registers the control panel as a toolbar tool", () => {
   const registration = controlPanelTool({
     fieldsets: {
       layout: {
@@ -227,27 +227,23 @@ it("registers the control panel as a toolbar tool", async () => {
     }
   });
 
-  const route = registration.tool.routes?.index;
-  const response = route ? await Effect.runPromise(route(new Request("http://localhost")).pipe(
-    Effect.provide(emptySnapshotStoreLayer)
-  )) : undefined;
-
   assert.strictEqual(registration.tool.id, controlPanelToolId);
-  assert.deepStrictEqual(response, {
-    config: registration.config,
-    state: {
-      activeFieldsetId: "layout",
-      activeBaseByFieldset: {
-        layout: {
-          type: "defaults"
-        }
-      },
-      currentValuesByFieldset: {
-        layout: {
-          width: 640
-        }
-      }
-    }
+  assert.ok(registration.tool.api);
+  assert.ok(registration.tool.apiLayer);
+  assert.deepStrictEqual(toToolbarToolMetadata(registration.tool), {
+    id: controlPanelToolId,
+    label: "Control Panel",
+    routes: [
+      "index",
+      "snapshots",
+      "snapshots/branch",
+      "snapshots/delete",
+      "snapshots/read",
+      "snapshots/save",
+      "state",
+      "state/select-base",
+      "state/select-fieldset"
+    ]
   });
 });
 

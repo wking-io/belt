@@ -38,39 +38,36 @@ describe("backend v1 integration", () => {
 
         assert.strictEqual(worktreesResponse.status, 200);
         assert.deepStrictEqual(worktreesBody, {
-          ok: true,
-          data: {
-            worktrees: [
-              {
-                id: "main",
-                branch: "main",
-                path: fixture.repoRoot,
-                current: true,
-                destinations: [
-                  {
-                    id: "web",
-                    label: "Web",
-                    primary: true,
-                    url: "https://example.localhost"
-                  }
-                ]
-              },
-              {
-                id: "fix-ui",
-                branch: "fix-ui",
-                path: fixture.worktreeRoot,
-                current: false,
-                destinations: [
-                  {
-                    id: "web",
-                    label: "Web",
-                    primary: true,
-                    url: "https://fix-ui.example.localhost"
-                  }
-                ]
-              }
-            ]
-          }
+          worktrees: [
+            {
+              id: "main",
+              branch: "main",
+              path: fixture.repoRoot,
+              current: true,
+              destinations: [
+                {
+                  id: "web",
+                  label: "Web",
+                  primary: true,
+                  url: "https://example.localhost"
+                }
+              ]
+            },
+            {
+              id: "fix-ui",
+              branch: "fix-ui",
+              path: fixture.worktreeRoot,
+              current: false,
+              destinations: [
+                {
+                  id: "web",
+                  label: "Web",
+                  primary: true,
+                  url: "https://fix-ui.example.localhost"
+                }
+              ]
+            }
+          ]
         });
 
         const missingResponse = yield* Effect.promise(() => remix({ request: request(toolbarApiToolPath("missing")) }));
