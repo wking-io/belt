@@ -3,18 +3,20 @@ import {
   toolbarSuccess,
   toolbarApiBasePath,
   toolbarApiRelativeRoutes,
-  toolbarApiToolRelativePath,
+  toolbarApiToolPath,
+  normalizeRoute,
+  toToolbarToolMetadata,
   ToolbarApi,
   ToolbarErrorEnvelopeSchema,
   ToolbarToolIdSchema,
   type ToolbarError,
   type ToolbarResponseEnvelope,
   type ToolbarToolData,
-  type ToolbarSuccessEnvelope,
+  type ToolDefinition,
   type ToolbarConfig as ToolbarConfigData
 } from "@repo/core";
 import { ToolbarConfig } from "@repo/config";
-import { Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import { HttpRouter, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { ToolbarProtocolError, ToolbarToolDispatch } from "./tool-dispatch.js";
@@ -29,31 +31,26 @@ const ToolbarToolIdParamsSchema = Schema.Struct({
 });
 
 export function createToolbarServer(config: ToolbarConfigData): ToolbarServer {
-  const app = Layer.mergeAll(
-    ToolbarApiRoutes,
-    ToolDispatchRoutes,
-    NotFoundRoutes
-  ).pipe(
-    Layer.provide(ToolbarToolDispatch.layer),
-    Layer.provide(ToolbarConfig.layer(config))
-  );
+  const app = createToolbarRouter(config);
 
   const { handler, dispose } = HttpRouter.toWebHandler(app.pipe(
     Layer.provide(HttpServer.layerServices)
   ));
 
   return {
-    fetch: handler,
+    fetch: (request) => handler(request, Context.empty() as Context.Context<unknown>),
     dispose
   };
 }
 
-export function createToolbarRouter(config: ToolbarConfigData) {
-  return Layer.mergeAll(
-    ToolbarApiRoutes,
-    ToolDispatchRoutes,
-    NotFoundRoutes
-  ).pipe(
+export function createToolbarRouter(config: ToolbarConfigData): Layer.Layer<never, any, any> {
+  const baseRoutes: Layer.Layer<never, any, any> = ToolbarApiRoutes;
+  const toolbarRoutes = config.tools.reduce<Layer.Layer<never, any, any>>(
+    (routes, tool) => Layer.mergeAll(routes, createToolApiRoutes(tool)),
+    baseRoutes
+  );
+
+  return Layer.mergeAll(toolbarRoutes, ToolMetadataRoutes, NotFoundRoutes).pipe(
     Layer.provide(ToolbarToolDispatch.layer),
     Layer.provide(ToolbarConfig.layer(config))
   );
@@ -84,26 +81,69 @@ const ToolbarApiRoutes = HttpApiBuilder.layer(ToolbarApi).pipe(
   Layer.provide(ToolbarApiHandlers)
 );
 
-const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(function*(router_) {
+const ToolMetadataRoutes = HttpRouter.use(Effect.fn("ToolMetadataRoutes")(function*(router_) {
   const toolDispatch = yield* ToolbarToolDispatch;
   const router = router_.prefixed(toolbarApiBasePath);
 
-  yield* router.add("GET", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
+  yield* router.add("*", toolbarApiRelativeRoutes.tool, Effect.fn("ToolMetadataRoutes.handle")(function*(request) {
     const { toolId } = yield* HttpRouter.schemaPathParams(ToolbarToolIdParamsSchema);
-    const routePath = getToolRoutePath(request.url, toolId);
 
-    if (routePath === undefined) {
-      return yield* respond(Effect.map(toolDispatch.tool(toolId), (tool) => toolbarSuccess({ tool })));
+    if (request.method !== "GET") {
+      return yield* errorResponse({ code: "METHOD_NOT_ALLOWED", message: "Method not allowed" }, 405);
     }
 
-    const webRequest = yield* HttpServerRequest.toWeb(request);
-    return yield* respond(Effect.map(toolDispatch.route(toolId, routePath, webRequest), toolbarSuccess));
+    return yield* respond(Effect.map(toolDispatch.tool(toolId), (tool) => toolbarSuccess({ tool })));
   }));
 }));
 
 const NotFoundRoutes = HttpRouter.use(Effect.fn("NotFoundRoutes")(function*(router) {
   yield* router.add("*", "*", notFoundResponse);
 }));
+
+function createToolApiRoutes(tool: ToolDefinition): Layer.Layer<never, any, any> {
+  if (!tool.api || !tool.apiLayer) {
+    return Layer.empty;
+  }
+
+  const app = HttpApiBuilder.layer(tool.api).pipe(
+    Layer.provide(tool.apiLayer),
+    Layer.provide(HttpServer.layerServices)
+  );
+  const { handler, dispose } = HttpRouter.toWebHandler(app);
+  const toolPath = toolbarApiToolPath(tool.id);
+  const mountedRoute = `${toolPath}/*` as `/${string}`;
+
+  const routes = HttpRouter.use(Effect.fn(`ToolApiRoutes.${tool.id}`)(function*(router) {
+    yield* router.add("*", mountedRoute, Effect.fn(`ToolApiRoutes.${tool.id}.handle`)(function*(request) {
+      const webRequest = yield* HttpServerRequest.toWeb(request);
+
+      if (new URL(webRequest.url).pathname === toolPath) {
+        if (request.method !== "GET") {
+          return yield* errorResponse({ code: "METHOD_NOT_ALLOWED", message: "Method not allowed" }, 405);
+        }
+
+        return yield* jsonResponse(toolbarSuccess({ tool: toToolbarToolMetadata(tool) }));
+      }
+
+      const rewrittenRequest = rewriteToolApiRequest(webRequest, toolPath);
+      const response = yield* Effect.promise(() => handler(rewrittenRequest, Context.empty() as Context.Context<unknown>));
+
+      return HttpServerResponse.fromWeb(response);
+    }));
+  }));
+
+  return Layer.mergeAll(
+    routes,
+    Layer.effectDiscard(Effect.addFinalizer(() => Effect.promise(dispose)))
+  );
+}
+
+function rewriteToolApiRequest(request: Request, toolPath: string): Request {
+  const url = new URL(request.url);
+  url.pathname = normalizeRoute(url.pathname.slice(toolPath.length));
+
+  return new Request(url, request);
+}
 
 const notFoundResponse = Effect.fn("ToolbarServer.notFoundResponse")(function*() {
   return yield* errorResponse({ code: "NOT_FOUND", message: "Not found" }, 404);
@@ -118,24 +158,10 @@ const jsonResponse = Effect.fn("ToolbarServer.jsonResponse")(function*<Data>(bod
 });
 
 const respond = Effect.fn("ToolbarServer.respond")(function*<Data>(
-  effect: Effect.Effect<ToolbarSuccessEnvelope<Data>, ToolbarProtocolError>
+  effect: Effect.Effect<{ readonly ok: true; readonly data: Data }, ToolbarProtocolError>
 ) {
   return yield* Effect.matchEffect(effect, {
     onFailure: (error) => errorResponse(error.error, error.status),
     onSuccess: (body) => jsonResponse(body)
   });
 });
-
-function getToolRoutePath(url: string, toolId: string): string | undefined {
-  const pathname = new URL(url, "http://toolbar.local").pathname;
-  const routePrefix = toolbarApiToolRelativePath(toolId);
-  const remainder = pathname.slice(routePrefix.length);
-
-  if (!remainder) {
-    return undefined;
-  }
-
-  const routePath = remainder.replace(/^\/+/, "");
-
-  return routePath || "index";
-}

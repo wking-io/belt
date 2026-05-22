@@ -2,8 +2,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assert, describe, it } from "@effect/vitest";
-import { toolbarApiToolPath } from "@repo/core";
-import { Effect } from "effect";
+import { Context, Effect, Layer } from "effect";
+import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import {
   GitWorktreeParseError,
   WorktreeResolverError,
@@ -131,11 +132,10 @@ describe("worktreesTool", () => {
             resolve: () => []
           }
         });
-        const route = tool.routes?.index;
+        assert.ok(tool.api);
+        assert.ok(tool.apiLayer);
 
-        assert.ok(route);
-
-        const result = yield* route(new Request(new URL(toolbarApiToolPath("worktrees"), "http://localhost")));
+        const result = yield* requestToolIndex(tool);
 
         assert.deepStrictEqual(result, { worktrees: [] });
       } finally {
@@ -145,3 +145,21 @@ describe("worktreesTool", () => {
       }
     }));
 });
+
+function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
+  if (!tool.api || !tool.apiLayer) {
+    return Effect.die(new Error("Worktrees tool API registration is missing"));
+  }
+
+  const app = HttpApiBuilder.layer(tool.api).pipe(
+    Layer.provide(tool.apiLayer),
+    Layer.provide(HttpServer.layerServices)
+  );
+  const { handler, dispose } = HttpRouter.toWebHandler(app);
+
+  return Effect.promise(() => handler(new Request("http://localhost/"), Context.empty() as Context.Context<unknown>))
+    .pipe(
+      Effect.flatMap((response) => Effect.promise(async (): Promise<unknown> => response.json())),
+      Effect.tap(() => Effect.promise(() => dispose()))
+    );
+}

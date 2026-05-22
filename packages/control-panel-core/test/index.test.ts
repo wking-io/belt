@@ -1,5 +1,6 @@
 import { assert, it } from "@effect/vitest";
-import { Effect } from "effect";
+import { IdGenerator, toToolbarToolMetadata } from "@repo/core";
+import { Effect, Layer } from "effect";
 import {
   controlField,
   controlPanelTool,
@@ -28,6 +29,8 @@ import {
   selectActiveFieldset,
   selectControlBase,
   validateControlPanel,
+  ControlSnapshotPersistence,
+  ControlSnapshotStore,
   type ControlSnapshot,
   type ControlPanelValues
 } from "../src/index.ts";
@@ -213,7 +216,7 @@ it.effect("validates control panel config through an Effect API", () =>
     });
   }));
 
-it("registers the control panel as a toolbar tool", async () => {
+it("registers the control panel as a toolbar tool", () => {
   const registration = controlPanelTool({
     fieldsets: {
       layout: {
@@ -224,11 +227,24 @@ it("registers the control panel as a toolbar tool", async () => {
     }
   });
 
-  const route = registration.tool.routes?.index;
-  const response = route ? await Effect.runPromise(route(new Request("http://localhost"))) : undefined;
-
   assert.strictEqual(registration.tool.id, controlPanelToolId);
-  assert.deepStrictEqual(response, { config: registration.config });
+  assert.ok(registration.tool.api);
+  assert.ok(registration.tool.apiLayer);
+  assert.deepStrictEqual(toToolbarToolMetadata(registration.tool), {
+    id: controlPanelToolId,
+    label: "Control Panel",
+    routes: [
+      "index",
+      "snapshots",
+      "snapshots/branch",
+      "snapshots/delete",
+      "snapshots/read",
+      "snapshots/save",
+      "state",
+      "state/select-base",
+      "state/select-fieldset"
+    ]
+  });
 });
 
 it("throws for invalid field ids", () => {
@@ -560,3 +576,19 @@ it("rejects duplicate snapshot ids and duplicate snapshot names per fieldset", (
 it("models the v1 snapshot actions", () => {
   assert.deepStrictEqual(controlSnapshotActions, ["saveChanges", "branchSnapshot", "discardChanges", "deleteSnapshot"]);
 });
+
+const emptySnapshotStoreLayer = Layer.provide(
+  ControlSnapshotStore.layer,
+  Layer.mergeAll(
+    Layer.succeed(ControlSnapshotPersistence)({
+      load: () => Effect.succeed({
+        version: 1,
+        snapshots: []
+      }),
+      save: () => Effect.void
+    }),
+    Layer.succeed(IdGenerator)({
+      next: (prefix) => Effect.succeed(prefix ? `${prefix}_test-id` : "test-id")
+    })
+  )
+);

@@ -1,6 +1,8 @@
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar } from "@repo/core";
-import { Effect } from "effect";
+import { defineToolbar, normalizeRoute } from "@repo/core";
+import { Effect, Schema } from "effect";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { createToolbarRouteHandler } from "../src/index.ts";
 
 describe("Remix Toolbar adapter", () => {
@@ -33,14 +35,36 @@ describe("Remix Toolbar adapter", () => {
     }));
 });
 
+const WorktreesIndexResponseSchema = Schema.Struct({
+  worktrees: Schema.Array(Schema.Unknown)
+});
+
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
+  .add(
+    HttpApiEndpoint.get("index", normalizeRoute("index"), {
+      success: WorktreesIndexResponseSchema
+    })
+  )
+{}
+
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
+  .add(WorktreesTestApiGroup)
+{}
+
+const WorktreesTestApiHandlers = HttpApiBuilder.group(
+  WorktreesTestApi,
+  "worktrees-test",
+  (handlers) =>
+    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+);
+
 const testConfig = defineToolbar({
   tools: [
     {
+      api: WorktreesTestApi,
+      apiLayer: WorktreesTestApiHandlers,
       id: "worktrees",
-      label: "Worktrees",
-      routes: {
-        index: () => Effect.succeed({ worktrees: [] })
-      }
+      label: "Worktrees"
     }
   ]
 });

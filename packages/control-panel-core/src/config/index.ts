@@ -1,4 +1,4 @@
-import { defineTool, NonEmptyStringSchema, type ToolDefinition } from "@repo/core";
+import { NonEmptyStringSchema, type ToolDefinition } from "@repo/core";
 import { Effect, Schema } from "effect";
 import {
   ControlFieldSchema,
@@ -38,7 +38,9 @@ export type ControlPanelDefinition<Fieldsets extends ControlFieldsetMap = Contro
     readonly configHash: string;
   };
 
-export type ControlPanelRegistration<Fieldsets extends ControlFieldsetMap = ControlFieldsetMap> = {
+export type ControlPanelRegistration<
+  Fieldsets extends ControlFieldsetMap = ControlFieldsetMap
+> = {
   readonly config: ControlPanelDefinition<Fieldsets>;
   readonly tool: ToolDefinition;
 };
@@ -61,6 +63,11 @@ export const ControlFieldsetSchema = Schema.Struct({
 
 export const ControlPanelConfigSchema = Schema.Struct({
   fieldsets: Schema.Record(NonEmptyStringSchema, ControlFieldsetSchema)
+});
+
+export const ControlPanelDefinitionSchema = Schema.Struct({
+  ...ControlPanelConfigSchema.fields,
+  configHash: NonEmptyStringSchema
 });
 
 export const validateControlPanel = Effect.fn("validateControlPanel")(function*(config: ControlPanelConfig) {
@@ -86,23 +93,6 @@ export function defineControlPanel(config: ControlPanelConfig): ControlPanelDefi
   return {
     ...normalized,
     configHash: getControlConfigHash(normalized)
-  };
-}
-
-export function controlPanelTool<const Config extends ControlPanelConfig>(
-  config: Config
-): ControlPanelRegistration<Config["fieldsets"]> {
-  const definition = defineControlPanel(config);
-
-  return {
-    config: definition,
-    tool: defineTool({
-      id: controlPanelToolId,
-      label: controlPanelToolLabel,
-      routes: {
-        index: () => Effect.succeed({ config: definition })
-      }
-    })
   };
 }
 

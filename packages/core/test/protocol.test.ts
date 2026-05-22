@@ -9,6 +9,9 @@ import {
   toolbarApiToolPath,
   toolbarApiToolRelativePath,
   toolbarApiToolRoutePath,
+  normalizeToolRoutePath,
+  toolApiRoutePath,
+  normalizeRoute,
   toolbarError,
   toolbarSuccess
 } from "../src/index.ts";
@@ -56,4 +59,15 @@ it("builds concrete API paths from the protocol model", () => {
   assert.strictEqual(toolbarApiToolPath("worktrees"), "/__toolbar/tools/worktrees");
   assert.strictEqual(toolbarApiToolRoutePath("worktrees", "branches/list"), "/__toolbar/tools/worktrees/branches/list");
   assert.strictEqual(toolbarApiToolRoutePath("worktrees", "/branches/list"), "/__toolbar/tools/worktrees/branches/list");
+});
+
+it("normalizes tool-owned route paths separately from Toolbar API mount paths", () => {
+  assert.strictEqual(normalizeToolRoutePath("/"), "index");
+  assert.strictEqual(normalizeToolRoutePath("branches/list/"), "branches/list");
+  assert.strictEqual(normalizeRoute("index"), "/");
+  assert.strictEqual(normalizeRoute("branches/list"), "/branches/list");
+  assert.strictEqual(toolApiRoutePath("worktrees", "index"), "/__toolbar/tools/worktrees/");
+  assert.strictEqual(toolApiRoutePath("worktrees", "branches/list"), "/__toolbar/tools/worktrees/branches/list");
+  assert.throws(() => normalizeToolRoutePath("/__toolbar/tools/worktrees"));
+  assert.throws(() => normalizeToolRoutePath("tools/worktrees"));
 });

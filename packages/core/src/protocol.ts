@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { HttpApi } from "effect/unstable/httpapi";
 
 export const toolbarApiBasePath = "/__toolbar";
 
@@ -40,6 +41,61 @@ export function toolbarApiToolRoutePath(toolId: string, routePath?: string): str
   return `${toolPath}/${routePath.replace(/^\/+/, "")}`;
 }
 
+export function normalizeToolRoutePath(routePath: string): string {
+  const normalized = routePath.trim().replace(/^\/+/, "").replace(/\/+$/, "");
+
+  if (!normalized || normalized === ".") {
+    return "index";
+  }
+
+  if (normalized === toolbarApiBasePath.replace(/^\/+/, "") || normalized.startsWith(`${toolbarApiBasePath.replace(/^\/+/, "")}/`)) {
+    throw new Error("Tool route paths must be relative to the tool");
+  }
+
+  if (normalized === "tools" || normalized.startsWith("tools/")) {
+    throw new Error("Tool route paths must not include the Toolbar tools mount");
+  }
+
+  return normalized;
+}
+
+export function normalizeRoute(routePath: string): `/${string}` {
+  const normalized = normalizeToolRoutePath(routePath);
+
+  if (normalized === "index") {
+    return "/";
+  }
+
+  return `/${normalized}` as `/${string}`;
+}
+
+export function toolApiRoutePath(toolId: string, routePath: string): string {
+  const normalized = normalizeToolRoutePath(routePath);
+
+  if (normalized === "index") {
+    return `${toolbarApiToolPath(toolId)}/`;
+  }
+
+  return toolbarApiToolRoutePath(toolId, normalized);
+}
+
+export function toToolbarToolApiRoutePaths(api: HttpApi.AnyWithProps | undefined): readonly string[] {
+  if (!api) {
+    return [];
+  }
+
+  const routePaths: string[] = [];
+
+  HttpApi.reflect(api, {
+    onGroup: () => {},
+    onEndpoint: ({ endpoint }) => {
+      routePaths.push(normalizeToolRoutePath(endpoint.path));
+    }
+  });
+
+  return routePaths;
+}
+
 export function toolbarApiToolRelativePath(toolId: string): string {
   return `/tools/${encodeURIComponent(toolId)}`;
 }
@@ -53,8 +109,6 @@ export const ToolbarErrorCodeSchema = Schema.Literals([
   "NOT_FOUND",
   "METHOD_NOT_ALLOWED",
   "UNKNOWN_TOOL",
-  "UNKNOWN_TOOL_ROUTE",
-  "TOOL_ERROR",
   "INTERNAL_ERROR"
 ]);
 

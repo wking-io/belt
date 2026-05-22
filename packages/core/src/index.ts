@@ -1,6 +1,9 @@
-import { Effect, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import type { SchemaError } from "effect/Schema";
+import { HttpApi, HttpApiClient } from "effect/unstable/httpapi";
+import { ToolbarApi } from "./http-api.js";
 import { NonEmptyStringSchema } from "./schemas.js";
+import { toToolbarToolApiRoutePaths, toolbarApiBasePath } from "./protocol.js";
 
 export * from "./effect.js";
 export * from "./http-api.js";
@@ -23,11 +26,8 @@ export class InvalidToolbarThemeVariableNameError extends Schema.TaggedErrorClas
 
 export type ToolbarRegistrationError = DuplicateToolbarToolIdError | InvalidToolbarThemeVariableNameError | SchemaError;
 
-export type ToolRouteHandler<Success = unknown, Failure = unknown, Requirements = never> = (
-  request: Request
-) => Effect.Effect<Success, Failure, Requirements>;
-
-export type ToolbarToolRoutes<Requirements = never> = Readonly<Record<string, ToolRouteHandler<unknown, unknown, Requirements>>>;
+export type ToolHttpApi = HttpApi.AnyWithProps;
+export type ToolHttpApiLayer = Layer.Layer<any, unknown, any>;
 
 const BeltCssVariableNameSchema = Schema.declare<string>(
   (value): value is string => typeof value === "string" && value.startsWith("--belt-")
@@ -36,11 +36,12 @@ const BeltCssVariableValueSchema = NonEmptyStringSchema;
 const BeltThemeModeSchema = Schema.Literals(["light", "dark"]);
 const ThemeDefaultSchema = NonEmptyStringSchema;
 
-export const ToolRouteHandlerSchema = Schema.declare<ToolRouteHandler<unknown, unknown, never>>(
-  (value): value is ToolRouteHandler<unknown, unknown, never> => typeof value === "function"
+export const ToolHttpApiSchema = Schema.declare<ToolHttpApi>(
+  (value): value is ToolHttpApi => HttpApi.isHttpApi(value)
 );
-
-export const ToolbarToolRoutesSchema = Schema.Record(Schema.String, ToolRouteHandlerSchema);
+export const ToolHttpApiLayerSchema = Schema.declare<ToolHttpApiLayer>(
+  (value): value is ToolHttpApiLayer => Layer.isLayer(value)
+);
 
 export const ThemeVariablesSchema = Schema.Record(BeltCssVariableNameSchema, BeltCssVariableValueSchema);
 
@@ -77,16 +78,18 @@ export type ToolbarTool = Schema.Schema.Type<typeof ToolbarToolSchema>;
 
 export const ToolDefinitionSchema = Schema.Struct({
   ...ToolbarToolSchema.fields,
-  routes: Schema.optionalKey(ToolbarToolRoutesSchema)
+  api: Schema.optionalKey(ToolHttpApiSchema),
+  apiLayer: Schema.optionalKey(ToolHttpApiLayerSchema)
 });
 
-export type ToolDefinition<Requirements = never> = ToolbarTool & {
-  readonly routes?: ToolbarToolRoutes<Requirements>;
+export type ToolDefinition = ToolbarTool & {
+  readonly api?: ToolHttpApi;
+  readonly apiLayer?: ToolHttpApiLayer;
 };
 
-export type ToolbarConfig<Requirements = never> = {
+export type ToolbarConfig = {
   readonly theme?: ToolbarThemeConfig;
-  readonly tools: readonly ToolDefinition<Requirements>[];
+  readonly tools: readonly ToolDefinition[];
 };
 
 export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function*(config: ToolbarConfig) {
@@ -153,11 +156,42 @@ export function toToolbarToolMetadata(tool: ToolDefinition) {
   return {
     id: tool.id,
     label: tool.label,
-    routes: Object.keys(tool.routes ?? {}).sort()
+    routes: toToolbarToolApiRoutePaths(tool.api).toSorted()
   };
 }
 
-function findDuplicateToolId(tools: readonly ToolDefinition<any>[]): string | undefined {
+export function makeToolbarClient(options?: {
+  readonly baseUrl?: string | URL;
+}) {
+  return Effect.gen(function*() {
+    const baseUrl = options?.baseUrl ?? toolbarApiBasePath;
+    const client = yield* HttpApiClient.make(ToolbarApi, { baseUrl });
+
+    return {
+      ...client,
+      tool: <Api extends ToolHttpApi>(
+        api: Api,
+        toolId: string
+      ) => HttpApiClient.make(api, {
+        baseUrl: toolApiBaseUrl(baseUrl, toolId)
+      })
+    };
+  });
+}
+
+function toolApiBaseUrl(baseUrl: string | URL, toolId: string): string | URL {
+  const toolPath = `tools/${encodeURIComponent(toolId)}/`;
+
+  if (baseUrl instanceof URL) {
+    const next = new URL(baseUrl.href);
+    next.pathname = `${next.pathname.replace(/\/+$/, "")}/${toolPath}`;
+    return next;
+  }
+
+  return `${baseUrl.replace(/\/+$/, "")}/${toolPath}`;
+}
+
+function findDuplicateToolId(tools: readonly ToolDefinition[]): string | undefined {
   const ids = new Set<string>();
 
   for (const tool of tools) {
