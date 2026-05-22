@@ -99,7 +99,9 @@ Error responses use:
 
 Tool packages define their own mounted Effect HTTP APIs under `/__toolbar/tools/:toolId/*`. Tool route responses follow the tool-owned `HttpApi` contract rather than the core Toolbar `ok/data` envelope.
 
-The public Belt server entrypoint assembles standard live dependencies for built-in tools. Host apps register tools in config; they do not need to manually provide built-in tool layers such as the Control Panel snapshot store.
+The public Belt server entrypoint uses Tool-declared default runtime layers for built-in tools. Host apps register tools in config; they do not need to manually provide built-in tool layers such as the Control Panel snapshot store.
+
+Tests and custom hosts can replace a built-in Tool runtime by registering a fully wired Tool definition. In that case, provide the Tool's `apiLayer` with the custom services and omit the Tool's default `runtimeLayer` before passing the config to `createToolbarServer`.
 
 ## Direct Fetch Server
 

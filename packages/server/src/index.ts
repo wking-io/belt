@@ -16,7 +16,7 @@ import {
   type ToolDefinition,
   type ToolbarConfigSource
 } from "@repo/core";
-import { ToolbarConfig } from "@repo/config";
+import { ToolbarConfig as ToolbarConfigService } from "@repo/config";
 import { Context, Effect, Layer, Schema } from "effect";
 import { HttpRouter, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -27,35 +27,42 @@ export type ToolbarServer = {
   readonly dispose: () => Promise<void>;
 };
 
+type ToolbarWebHandlerRequirements =
+  | Layer.Success<typeof HttpServer.layerServices>
+  | HttpRouter.HttpRouter
+  | HttpRouter.Request<"Requires", unknown>
+  | HttpRouter.Request<"GlobalRequires", unknown>
+  | HttpRouter.Request<"Error", unknown>
+  | HttpRouter.Request<"GlobalError", unknown>;
+
 const ToolbarToolIdParamsSchema = Schema.Struct({
   toolId: ToolbarToolIdSchema
 });
 
 export function createToolbarServer(config: ToolbarConfigSource): ToolbarServer {
-  const toolbarConfig = extractToolbarConfig(config);
-  const app = createToolbarRouter(toolbarConfig);
-
-  const { handler, dispose } = HttpRouter.toWebHandler(app.pipe(
+  const router = createToolbarRouter(config);
+  const webHandlerLayer = router.pipe(
     Layer.provide(HttpServer.layerServices)
-  ));
+  ) as Layer.Layer<never, unknown, Exclude<ToolbarWebHandlerRequirements, Layer.Success<typeof HttpServer.layerServices>>>;
+  const { handler, dispose } = HttpRouter.toWebHandler(webHandlerLayer);
+  const context = Context.makeUnsafe<unknown>(new Map());
 
   return {
-    fetch: (request) => handler(request, Context.empty() as Context.Context<unknown>),
+    fetch: (request) => handler(request, context),
     dispose
   };
 }
 
-export function createToolbarRouter(config: ToolbarConfigSource): Layer.Layer<never, any, any> {
+export function createToolbarRouter(config: ToolbarConfigSource): Layer.Layer<never, unknown, unknown> {
   const toolbarConfig = extractToolbarConfig(config);
-  const baseRoutes: Layer.Layer<never, any, any> = ToolbarApiRoutes;
-  const toolbarRoutes = toolbarConfig.tools.reduce<Layer.Layer<never, any, any>>(
+  const toolbarRoutes = toolbarConfig.tools.reduce<Layer.Layer<never, unknown, unknown>>(
     (routes, tool) => Layer.mergeAll(routes, createToolApiRoutes(tool)),
-    baseRoutes
+    ToolbarApiRoutes
   );
 
   return Layer.mergeAll(toolbarRoutes, ToolMetadataRoutes, NotFoundRoutes).pipe(
     Layer.provide(ToolbarToolDispatch.layer),
-    Layer.provide(ToolbarConfig.layer(toolbarConfig))
+    Layer.provide(ToolbarConfigService.layer(toolbarConfig))
   );
 }
 
@@ -103,16 +110,21 @@ const NotFoundRoutes = HttpRouter.use(Effect.fn("NotFoundRoutes")(function*(rout
   yield* router.add("*", "*", notFoundResponse);
 }));
 
-function createToolApiRoutes(tool: ToolDefinition): Layer.Layer<never, any, any> {
+function createToolApiRoutes<const Tool extends ToolDefinition>(tool: Tool): Layer.Layer<never, unknown, unknown> {
   if (!tool.api || !tool.apiLayer) {
     return Layer.empty;
   }
 
-  const app = HttpApiBuilder.layer(tool.api).pipe(
-    Layer.provide(tool.apiLayer),
-    Layer.provide(HttpServer.layerServices)
+  const apiApp = HttpApiBuilder.layer(tool.api).pipe(
+    Layer.provide(tool.apiLayer)
   );
-  const { handler, dispose } = HttpRouter.toWebHandler(app);
+  const app = tool.runtimeLayer
+    ? apiApp.pipe(Layer.provide(tool.runtimeLayer), Layer.provide(HttpServer.layerServices))
+    : apiApp.pipe(Layer.provide(HttpServer.layerServices));
+  const { handler, dispose } = HttpRouter.toWebHandler(app as Layer.Layer<never, unknown, Exclude<
+    ToolbarWebHandlerRequirements,
+    Layer.Success<typeof HttpServer.layerServices>
+  >>);
   const toolPath = toolbarApiToolPath(tool.id);
   const mountedRoute = `${toolPath}/*` as `/${string}`;
 

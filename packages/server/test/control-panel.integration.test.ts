@@ -10,8 +10,7 @@ import {
   toolApiRoutePath,
   type ToolbarConfig
 } from "@repo/core";
-import { Context, Effect, Layer } from "effect";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { Effect, Layer } from "effect";
 import { createToolbarRouteHandler } from "../../adapter-remix/src/index.ts";
 import {
   ControlSnapshotPersistence,
@@ -20,7 +19,7 @@ import {
   controlPanelTool,
   type ControlSnapshotStoreData
 } from "../../control-panel-core/src/index.ts";
-import { createToolbarRouter, type ToolbarServer } from "../src/index.ts";
+import { createToolbarServer } from "../src/index.ts";
 
 describe("Control Panel backend integration", () => {
   it.effect("serves Control Panel metadata through standard Toolbar envelopes", () =>
@@ -342,12 +341,9 @@ function controlPanelHarness(initial: ControlSnapshotStoreData = emptySnapshotSt
       })
   });
   const config = defineToolbar({
-    tools: [registration.tool]
-  });
-  const remixConfig = defineToolbar({
     tools: [
       {
-        ...registration.tool,
+        ...withoutDefaultRuntime(registration.tool),
         apiLayer: Layer.provide(requiredApiLayer(registration.tool), snapshotStoreLayer)
       }
     ]
@@ -357,8 +353,8 @@ function controlPanelHarness(initial: ControlSnapshotStoreData = emptySnapshotSt
     get persisted() {
       return persisted;
     },
-    remix: createToolbarRouteHandler(remixConfig),
-    server: createTestToolbarServer(config, snapshotStoreLayer)
+    remix: createToolbarRouteHandler(config),
+    server: createToolbarServer(config)
   };
 }
 
@@ -401,28 +397,20 @@ function testStoreLayer(persistence: {
   );
 }
 
-function createTestToolbarServer(
-  config: ToolbarConfig,
-  snapshotStoreLayer: Layer.Layer<ControlSnapshotStore>
-): ToolbarServer {
-  const app = createToolbarRouter(config).pipe(
-    Layer.provideMerge(snapshotStoreLayer),
-    Layer.provide(HttpServer.layerServices)
-  );
-  const { handler, dispose } = HttpRouter.toWebHandler(app);
-
-  return {
-    fetch: (request) => handler(request, Context.empty() as Context.Context<unknown>),
-    dispose
-  };
-}
-
 function requiredApiLayer(tool: ToolbarConfig["tools"][number]) {
   if (!tool.apiLayer) {
     throw new Error("Control Panel tool API layer is missing");
   }
 
   return tool.apiLayer;
+}
+
+function withoutDefaultRuntime<Tool extends ToolbarConfig["tools"][number]>(
+  tool: Tool
+): Omit<Tool, "runtimeLayer"> {
+  const { runtimeLayer: _defaultRuntimeLayer, ...toolWithoutDefaultRuntime } = tool;
+
+  return toolWithoutDefaultRuntime;
 }
 
 function request(pathname: string, init?: RequestInit): Request {
@@ -452,7 +440,7 @@ function controlPanelJson(fetchResponse: () => Promise<Response>) {
 }
 
 function json(response: Response) {
-  return Effect.promise(async (): Promise<any> => response.json());
+  return Effect.promise(async (): Promise<unknown> => response.json());
 }
 
 function emptySnapshotStore(): ControlSnapshotStoreData {
