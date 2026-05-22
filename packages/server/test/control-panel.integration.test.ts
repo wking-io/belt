@@ -253,6 +253,55 @@ describe("Control Panel backend integration", () => {
       }
     }));
 
+  it.effect("returns typed Control Panel route errors instead of defects", () =>
+    Effect.gen(function*() {
+      const { server } = controlPanelHarness();
+
+      try {
+        const missingFieldset = yield* Effect.promise(() =>
+          server.fetch(controlPanelRequest("state/select-fieldset", "POST", {
+            fieldsetId: "missing"
+          }))
+        );
+
+        assert.strictEqual(missingFieldset.status, 404);
+        assert.deepStrictEqual(yield* json(missingFieldset), {
+          _tag: "UnknownControlFieldsetError",
+          fieldsetId: "missing"
+        });
+
+        const missingSnapshot = yield* Effect.promise(() =>
+          server.fetch(controlPanelRequest("snapshots/read", "POST", {
+            fieldsetId: "scene",
+            snapshotId: "missing"
+          }))
+        );
+
+        assert.strictEqual(missingSnapshot.status, 404);
+        assert.deepStrictEqual(yield* json(missingSnapshot), {
+          _tag: "UnknownControlSnapshotError",
+          snapshotId: "missing"
+        });
+
+        const saveDefaults = yield* Effect.promise(() =>
+          server.fetch(controlPanelRequest("snapshots/save", "POST", {
+            fieldsetId: "scene",
+            values: {
+              exposure: 2
+            }
+          }))
+        );
+
+        assert.strictEqual(saveDefaults.status, 409);
+        assert.deepStrictEqual(yield* json(saveDefaults), {
+          _tag: "CannotSaveDefaultsBaseError",
+          fieldsetId: "scene"
+        });
+      } finally {
+        yield* Effect.promise(() => server.dispose());
+      }
+    }));
+
   it("keeps framework adapters free of Control Panel-specific behavior", async () => {
     const adapterSources = await Promise.all([
       readFile(join(process.cwd(), "packages/adapter-remix/src/index.ts"), "utf8"),

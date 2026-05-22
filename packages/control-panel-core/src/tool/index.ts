@@ -1,6 +1,6 @@
 import { defineTool, normalizeRoute } from "@repo/core";
 import { Effect, Schema } from "effect";
-import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiError, HttpApiSchema, OpenApi } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import {
   controlPanelToolId,
@@ -16,10 +16,8 @@ import {
   type ControlFieldsetValueMap
 } from "../config/fields.js";
 import {
-  branchControlSnapshot,
   createControlPanelState,
   deleteControlSnapshot,
-  defaultsBase,
   getCurrentFieldsetValues,
   saveControlSnapshot,
   selectActiveFieldset,
@@ -28,6 +26,14 @@ import {
   type ControlPanelState,
   type ControlSnapshot
 } from "../state/index.js";
+import {
+  CannotSaveDefaultsBaseError,
+  ControlSnapshotFieldsetMismatchError,
+  DuplicateControlSnapshotIdError,
+  DuplicateControlSnapshotNameError,
+  UnknownControlFieldsetError,
+  UnknownControlSnapshotError
+} from "../errors.js";
 import {
   ControlBaseSchema,
   ControlSnapshotSchema,
@@ -139,38 +145,66 @@ export const SaveSnapshotRequestSchema = Schema.Struct({
   values: ControlFieldsetValueMapSchema
 });
 
+const ControlPanelToolApiErrorSchemas = [
+  UnknownControlFieldsetError.pipe(HttpApiSchema.status(404)),
+  UnknownControlSnapshotError.pipe(HttpApiSchema.status(404)),
+  ControlSnapshotFieldsetMismatchError.pipe(HttpApiSchema.status(409)),
+  DuplicateControlSnapshotIdError.pipe(HttpApiSchema.status(409)),
+  DuplicateControlSnapshotNameError.pipe(HttpApiSchema.status(409)),
+  CannotSaveDefaultsBaseError.pipe(HttpApiSchema.status(409)),
+  HttpApiError.InternalServerError
+] as const;
+
+type ControlPanelToolApiError =
+  | UnknownControlFieldsetError
+  | UnknownControlSnapshotError
+  | ControlSnapshotFieldsetMismatchError
+  | DuplicateControlSnapshotIdError
+  | DuplicateControlSnapshotNameError
+  | CannotSaveDefaultsBaseError
+  | HttpApiError.InternalServerError;
+
 export class ControlPanelToolApiGroup extends HttpApiGroup.make("control-panel")
   .add(
     HttpApiEndpoint.get("index", normalizeRoute(controlPanelRoutePaths.index), {
+      error: ControlPanelToolApiErrorSchemas,
       success: ControlPanelIndexResponseSchema
     }),
     HttpApiEndpoint.get("state", normalizeRoute(controlPanelRoutePaths.state), {
+      error: ControlPanelToolApiErrorSchemas,
       success: ControlPanelStateResponseSchema
     }),
     HttpApiEndpoint.post("selectFieldset", normalizeRoute(controlPanelRoutePaths.selectFieldset), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: SelectFieldsetRequestSchema,
       success: ControlPanelStateResponseSchema
     }),
     HttpApiEndpoint.post("selectBase", normalizeRoute(controlPanelRoutePaths.selectBase), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: SelectBaseRequestSchema,
       success: ControlPanelStateResponseSchema
     }),
     HttpApiEndpoint.get("snapshots", normalizeRoute(controlPanelRoutePaths.snapshots), {
+      error: ControlPanelToolApiErrorSchemas,
       success: ControlPanelSnapshotsResponseSchema
     }),
     HttpApiEndpoint.post("readSnapshot", normalizeRoute(controlPanelRoutePaths.readSnapshot), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: SnapshotRequestSchema,
       success: ControlPanelSnapshotResponseSchema
     }),
     HttpApiEndpoint.post("branchSnapshot", normalizeRoute(controlPanelRoutePaths.branchSnapshot), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: BranchSnapshotRequestSchema,
       success: ControlPanelSnapshotStateResponseSchema
     }),
     HttpApiEndpoint.post("saveSnapshot", normalizeRoute(controlPanelRoutePaths.saveSnapshot), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: SaveSnapshotRequestSchema,
       success: ControlPanelStateResponseSchema
     }),
     HttpApiEndpoint.post("deleteSnapshot", normalizeRoute(controlPanelRoutePaths.deleteSnapshot), {
+      error: ControlPanelToolApiErrorSchemas,
       payload: SnapshotRequestSchema,
       success: ControlPanelDeleteSnapshotResponseSchema
     })
@@ -212,100 +246,138 @@ export function controlPanelToolApiLayer(definition: ReturnType<typeof defineCon
         .handle("index", () =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
             return {
               config: definition,
               state: toControlPanelRouteState(definition, data)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("state", () =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
             return {
               state: toControlPanelRouteState(definition, data)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("selectFieldset", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
-            const state = selectActiveFieldset(toControlPanelState(definition, data), definition, payload.fieldsetId);
-            const next = yield* store.write(definition, toSnapshotStoreData(data, state));
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
+            const state = yield* syncRoute(() =>
+              selectActiveFieldset(toControlPanelState(definition, data), definition, payload.fieldsetId)
+            );
+            const next = yield* store.write(definition, toSnapshotStoreData(data, state)).pipe(
+              Effect.mapError(toControlPanelToolApiError)
+            );
 
             return {
               state: toControlPanelRouteState(definition, next)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("selectBase", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
-            const state = selectControlBase(toControlPanelState(definition, data), definition, payload.fieldsetId, payload.base);
-            const next = yield* store.write(definition, toSnapshotStoreData(data, state));
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
+            const state = yield* syncRoute(() =>
+              selectControlBase(toControlPanelState(definition, data), definition, payload.fieldsetId, payload.base)
+            );
+            const next = yield* store.write(definition, toSnapshotStoreData(data, state)).pipe(
+              Effect.mapError(toControlPanelToolApiError)
+            );
 
             return {
               state: toControlPanelRouteState(definition, next)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("snapshots", () =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
             return {
               snapshots: data.snapshots
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("readSnapshot", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
-            const snapshot = getSnapshot(data.snapshots, payload.fieldsetId, payload.snapshotId);
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
+            const snapshot = yield* getSnapshot(data.snapshots, payload.fieldsetId, payload.snapshotId);
 
             return {
               snapshot
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("branchSnapshot", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
             const snapshot = yield* store.create(definition, payload.fieldsetId, {
               name: payload.name,
               values: payload.values
-            });
-            const data = yield* store.read(definition);
+            }).pipe(Effect.mapError(toControlPanelToolApiError));
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
 
             return {
               snapshot,
               state: toControlPanelRouteState(definition, data)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("saveSnapshot", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
-            const state = saveControlSnapshot(toControlPanelState(definition, data), definition, payload.fieldsetId, payload.values);
-            const next = yield* store.write(definition, toSnapshotStoreData(data, state));
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
+            const state = yield* syncRoute(() =>
+              saveControlSnapshot(toControlPanelState(definition, data), definition, payload.fieldsetId, payload.values)
+            );
+            const next = yield* store.write(definition, toSnapshotStoreData(data, state)).pipe(
+              Effect.mapError(toControlPanelToolApiError)
+            );
 
             return {
               state: toControlPanelRouteState(definition, next)
             };
-          }).pipe(Effect.orDie))
+          }))
         .handle("deleteSnapshot", ({ payload }) =>
           Effect.gen(function*() {
             const store = yield* ControlSnapshotStore;
-            const data = yield* store.read(definition);
-            getSnapshot(data.snapshots, payload.fieldsetId, payload.snapshotId);
-            const state = deleteControlSnapshot(toControlPanelState(definition, data), payload.snapshotId);
-            const next = yield* store.write(definition, toSnapshotStoreData(data, state, payload.snapshotId));
+            const data = yield* store.read(definition).pipe(Effect.mapError(toControlPanelToolApiError));
+            yield* getSnapshot(data.snapshots, payload.fieldsetId, payload.snapshotId);
+            const state = yield* syncRoute(() =>
+              deleteControlSnapshot(toControlPanelState(definition, data), payload.snapshotId)
+            );
+            const next = yield* store.write(definition, toSnapshotStoreData(data, state, payload.snapshotId)).pipe(
+              Effect.mapError(toControlPanelToolApiError)
+            );
 
             return {
               state: toControlPanelRouteState(definition, next),
               snapshots: next.snapshots
             };
-          }).pipe(Effect.orDie));
+          }));
     })
   );
+}
+
+function syncRoute<A>(evaluate: () => A): Effect.Effect<A, ControlPanelToolApiError> {
+  return Effect.try({
+    try: evaluate,
+    catch: toControlPanelToolApiError
+  });
+}
+
+function toControlPanelToolApiError(cause: unknown): ControlPanelToolApiError {
+  if (
+    cause instanceof UnknownControlFieldsetError ||
+    cause instanceof UnknownControlSnapshotError ||
+    cause instanceof ControlSnapshotFieldsetMismatchError ||
+    cause instanceof DuplicateControlSnapshotIdError ||
+    cause instanceof DuplicateControlSnapshotNameError ||
+    cause instanceof CannotSaveDefaultsBaseError
+  ) {
+    return cause;
+  }
+
+  return new HttpApiError.InternalServerError({});
 }
 
 function toSnapshotStoreData(
@@ -369,12 +441,24 @@ function toControlPanelRouteState(config: ControlPanelConfig, data: ControlSnaps
   };
 }
 
-function getSnapshot(snapshots: readonly ControlSnapshot[], fieldsetId: string, snapshotId: string): ControlSnapshot {
+function getSnapshot(
+  snapshots: readonly ControlSnapshot[],
+  fieldsetId: string,
+  snapshotId: string
+): Effect.Effect<ControlSnapshot, ControlPanelToolApiError> {
   const snapshot = snapshots.find((candidate) => candidate.id === snapshotId);
 
-  if (!snapshot || snapshot.fieldsetId !== fieldsetId) {
-    throw new Error("Unknown control snapshot");
+  if (!snapshot) {
+    return Effect.fail(new UnknownControlSnapshotError({ snapshotId }));
   }
 
-  return snapshot;
+  if (snapshot.fieldsetId !== fieldsetId) {
+    return Effect.fail(new ControlSnapshotFieldsetMismatchError({
+      fieldsetId,
+      snapshotId,
+      snapshotFieldsetId: snapshot.fieldsetId
+    }));
+  }
+
+  return Effect.succeed(snapshot);
 }
