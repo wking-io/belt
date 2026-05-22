@@ -31,6 +31,12 @@ it.effect("reads a missing snapshot store as an empty store", () =>
 
     assert.deepStrictEqual(yield* store.read(config), {
       version: 1,
+      activeFieldsetId: "scene",
+      activeBaseByFieldset: {
+        scene: {
+          type: "defaults"
+        }
+      },
       snapshots: []
     });
   }));
@@ -60,6 +66,13 @@ it.effect("creates snapshots with generated ids and persists the project-local i
     assert.strictEqual(snapshot.id, "snapshot_test-id-1");
     assert.deepStrictEqual(persisted, {
       version: 1,
+      activeFieldsetId: "scene",
+      activeBaseByFieldset: {
+        scene: {
+          type: "snapshot",
+          snapshotId: "snapshot_test-id-1"
+        }
+      },
       snapshots: [
         {
           id: "snapshot_test-id-1",
@@ -140,6 +153,13 @@ it.effect("supports alternate persistence layers", () => {
     });
     assert.deepStrictEqual(persisted, {
       version: 1,
+      activeFieldsetId: "scene",
+      activeBaseByFieldset: {
+        scene: {
+          type: "snapshot",
+          snapshotId: "snapshot_test-id-1"
+        }
+      },
       snapshots: [snapshot]
     });
   }).pipe(Effect.provide(testStoreLayer({
@@ -200,6 +220,12 @@ it.effect("sanitizes stored values against current config without deleting remov
 
     assert.deepStrictEqual(yield* store.read(config), {
       version: 1,
+      activeFieldsetId: "scene",
+      activeBaseByFieldset: {
+        scene: {
+          type: "defaults"
+        }
+      },
       snapshots: [
         {
           id: "snapshot-a",

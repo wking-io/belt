@@ -19,8 +19,10 @@ import {
 } from "../config/fields.js";
 import {
   pickKnownFieldValues,
+  createControlPanelState,
   type ControlSnapshot
 } from "../state/index.js";
+import type { ControlBase } from "../state/index.js";
 
 export type SnapshotStoreWriteOptions = {
   readonly name: string;
@@ -33,6 +35,8 @@ export type ControlSnapshotFileSystemPersistenceOptions = {
 
 export type ControlSnapshotStoreData = {
   readonly version: 1;
+  readonly activeFieldsetId?: string;
+  readonly activeBaseByFieldset?: Readonly<Record<string, ControlBase>>;
   readonly snapshots: readonly ControlSnapshot[];
 };
 
@@ -63,8 +67,21 @@ export const ControlSnapshotSchema = Schema.Struct({
   values: Schema.Record(Schema.String, Schema.Unknown)
 });
 
+export const ControlDefaultsBaseSchema = Schema.Struct({
+  type: Schema.Literal("defaults")
+});
+
+export const ControlSnapshotBaseSchema = Schema.Struct({
+  type: Schema.Literal("snapshot"),
+  snapshotId: NonEmptyStringSchema
+});
+
+export const ControlBaseSchema = Schema.Union([ControlDefaultsBaseSchema, ControlSnapshotBaseSchema]);
+
 export const ControlSnapshotStoreDataSchema = Schema.Struct({
   version: Schema.Literal(1),
+  activeFieldsetId: Schema.optionalKey(NonEmptyStringSchema),
+  activeBaseByFieldset: Schema.optionalKey(Schema.Record(NonEmptyStringSchema, ControlBaseSchema)),
   snapshots: Schema.Array(ControlSnapshotSchema)
 });
 
@@ -116,10 +133,24 @@ export class ControlSnapshotStore extends Context.Service<ControlSnapshotStore, 
             values: snapshotValues
           };
 
-          const next = yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.create", config, {
+          const nextActiveBaseByFieldset: Readonly<Record<string, ControlBase>> = {
+            ...current.activeBaseByFieldset,
+            [fieldsetId]: {
+              type: "snapshot",
+              snapshotId: id
+            }
+          };
+          const nextStore: ControlSnapshotStoreData = {
             version: 1,
+            activeBaseByFieldset: nextActiveBaseByFieldset,
             snapshots: [...current.snapshots, nextSnapshot]
-          });
+          };
+          const next = yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.create", config, current.activeFieldsetId === undefined
+            ? nextStore
+            : {
+              ...nextStore,
+              activeFieldsetId: current.activeFieldsetId
+            });
           yield* persistence.save(next);
 
           return nextSnapshot;
@@ -211,10 +242,25 @@ function validateSnapshotStoreData(
 ): ControlSnapshotStoreData {
   const snapshots = data.snapshots.map((snapshot) => validateStoredSnapshot(config, snapshot));
   assertUniqueStoredSnapshots(snapshots);
+  const stateOptions = {
+    activeBaseByFieldset: sanitizeActiveBaseByFieldset(config, snapshots, data.activeBaseByFieldset),
+    snapshots: snapshots.filter((snapshot) => config.fieldsets[snapshot.fieldsetId])
+  };
+  const activeFieldsetId = data.activeFieldsetId && config.fieldsets[data.activeFieldsetId] ? data.activeFieldsetId : undefined;
+  const state = createControlPanelState(config, activeFieldsetId === undefined ? stateOptions : {
+    ...stateOptions,
+    activeFieldsetId
+  });
 
-  return {
+  const validated: ControlSnapshotStoreData = {
     version: 1,
+    activeBaseByFieldset: state.activeBaseByFieldset,
     snapshots
+  };
+
+  return state.activeFieldsetId === undefined ? validated : {
+    ...validated,
+    activeFieldsetId: state.activeFieldsetId
   };
 }
 
@@ -305,4 +351,28 @@ function assertUniqueStoredSnapshots(snapshots: readonly ControlSnapshot[]): voi
     names.add(snapshot.name);
     namesByFieldset.set(snapshot.fieldsetId, names);
   }
+}
+
+function sanitizeActiveBaseByFieldset(
+  config: ControlPanelConfig,
+  snapshots: readonly ControlSnapshot[],
+  activeBaseByFieldset: Readonly<Record<string, ControlBase>> = {}
+): Readonly<Record<string, ControlBase>> {
+  const sanitized: Record<string, ControlBase> = {};
+
+  for (const fieldsetId of Object.keys(config.fieldsets)) {
+    const activeBase = activeBaseByFieldset[fieldsetId];
+
+    if (
+      activeBase?.type === "snapshot" &&
+      snapshots.some((snapshot) => snapshot.id === activeBase.snapshotId && snapshot.fieldsetId === fieldsetId)
+    ) {
+      sanitized[fieldsetId] = activeBase;
+      continue;
+    }
+
+    sanitized[fieldsetId] = { type: "defaults" };
+  }
+
+  return sanitized;
 }

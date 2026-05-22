@@ -88,11 +88,15 @@ const ToolDispatchRoutes = HttpRouter.use(Effect.fn("ToolDispatchRoutes")(functi
   const toolDispatch = yield* ToolbarToolDispatch;
   const router = router_.prefixed(toolbarApiBasePath);
 
-  yield* router.add("GET", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
+  yield* router.add("*", toolbarApiRelativeRoutes.toolRoute, Effect.fn("ToolDispatchRoutes.handle")(function*(request) {
     const { toolId } = yield* HttpRouter.schemaPathParams(ToolbarToolIdParamsSchema);
     const routePath = getToolRoutePath(request.url, toolId);
 
     if (routePath === undefined) {
+      if (request.method !== "GET") {
+        return yield* errorResponse({ code: "METHOD_NOT_ALLOWED", message: "Method not allowed" }, 405);
+      }
+
       return yield* respond(Effect.map(toolDispatch.tool(toolId), (tool) => toolbarSuccess({ tool })));
     }
 

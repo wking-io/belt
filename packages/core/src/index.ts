@@ -114,7 +114,7 @@ export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function
   return { theme, tools };
 });
 
-export function defineTool(tool: ToolDefinition): ToolDefinition {
+export function defineTool<Requirements = never>(tool: ToolDefinition<Requirements>): ToolDefinition<Requirements> {
   return Schema.decodeUnknownSync(ToolDefinitionSchema)(tool);
 }
 

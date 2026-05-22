@@ -1,5 +1,6 @@
 import { assert, it } from "@effect/vitest";
-import { Effect } from "effect";
+import { IdGenerator } from "@repo/core";
+import { Effect, Layer } from "effect";
 import {
   controlField,
   controlPanelTool,
@@ -28,6 +29,8 @@ import {
   selectActiveFieldset,
   selectControlBase,
   validateControlPanel,
+  ControlSnapshotPersistence,
+  ControlSnapshotStore,
   type ControlSnapshot,
   type ControlPanelValues
 } from "../src/index.ts";
@@ -225,10 +228,27 @@ it("registers the control panel as a toolbar tool", async () => {
   });
 
   const route = registration.tool.routes?.index;
-  const response = route ? await Effect.runPromise(route(new Request("http://localhost"))) : undefined;
+  const response = route ? await Effect.runPromise(route(new Request("http://localhost")).pipe(
+    Effect.provide(emptySnapshotStoreLayer)
+  )) : undefined;
 
   assert.strictEqual(registration.tool.id, controlPanelToolId);
-  assert.deepStrictEqual(response, { config: registration.config });
+  assert.deepStrictEqual(response, {
+    config: registration.config,
+    state: {
+      activeFieldsetId: "layout",
+      activeBaseByFieldset: {
+        layout: {
+          type: "defaults"
+        }
+      },
+      currentValuesByFieldset: {
+        layout: {
+          width: 640
+        }
+      }
+    }
+  });
 });
 
 it("throws for invalid field ids", () => {
@@ -560,3 +580,19 @@ it("rejects duplicate snapshot ids and duplicate snapshot names per fieldset", (
 it("models the v1 snapshot actions", () => {
   assert.deepStrictEqual(controlSnapshotActions, ["saveChanges", "branchSnapshot", "discardChanges", "deleteSnapshot"]);
 });
+
+const emptySnapshotStoreLayer = Layer.provide(
+  ControlSnapshotStore.layer,
+  Layer.mergeAll(
+    Layer.succeed(ControlSnapshotPersistence)({
+      load: () => Effect.succeed({
+        version: 1,
+        snapshots: []
+      }),
+      save: () => Effect.void
+    }),
+    Layer.succeed(IdGenerator)({
+      next: (prefix) => Effect.succeed(prefix ? `${prefix}_test-id` : "test-id")
+    })
+  )
+);
