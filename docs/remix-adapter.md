@@ -16,6 +16,8 @@ import toolbarConfig from "../toolbar.config";
 export const toolbarRouteHandler = createToolbarRouteHandler(toolbarConfig);
 ```
 
+`createToolbarRouteHandler` accepts either a plain Toolbar Config from `defineToolbar` or a Toolbar Definition from a renderer package's `createToolbar`.
+
 Mount it from a Remix route that owns `/__toolbar/*`:
 
 ```ts

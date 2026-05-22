@@ -1,6 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
 import {
   defineToolbar,
+  defineToolbarDefinition,
   normalizeRoute,
   toolbarApiRoutes,
   toolbarApiToolPath,
@@ -52,6 +53,30 @@ describe("Effect HTTP Toolbar Server", () => {
             label: "Worktrees",
             routes: ["index"]
           }
+        }
+      });
+
+      yield* Effect.promise(() => server.dispose());
+    }));
+
+  it.effect("accepts Toolbar Definitions at the server entry point", () =>
+    Effect.gen(function*() {
+      const server = createToolbarServer(defineToolbarDefinition({ toolbarConfig: testConfig }));
+      const response = yield* Effect.promise(() => server.fetch(request(toolbarApiRoutes.root)));
+      const body = yield* json(response);
+
+      assert.strictEqual(response.status, 200);
+      assert.deepStrictEqual(body, {
+        ok: true,
+        data: {
+          apiVersion: 1,
+          tools: [
+            {
+              id: "worktrees",
+              label: "Worktrees",
+              routes: ["index"]
+            }
+          ]
         }
       });
 

@@ -1,6 +1,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { NodeFileSystem, NodePath } from "@effect/platform-node";
 import { assert, it } from "@effect/vitest";
 import { defineToolbar } from "@repo/core";
@@ -45,6 +46,26 @@ it.effect("loads a valid module config through the Effect service", () =>
     })
   )));
 
+it.effect("loads a Toolbar Definition module export through the Effect service", () =>
+  withLive(withTempDir((cwd) =>
+    Effect.gen(function*() {
+      const rendererUrl = pathToFileURL(path.join(process.cwd(), "packages/renderer-react/src/index.ts")).href;
+      yield* writeTempFile(
+        cwd,
+        "toolbar.config.mjs",
+        [
+          `import { createToolbar } from ${JSON.stringify(rendererUrl)};`,
+          "export default createToolbar({ tools: [{ id: 'worktrees', label: 'Worktrees' }] });"
+        ].join("\n")
+      );
+      const configService = yield* ToolbarConfigService;
+
+      const config = yield* configService.load({ cwd });
+
+      assert.deepStrictEqual(config.tools, [{ id: "worktrees", label: "Worktrees" }]);
+    })
+  )));
+
 it.effect("fails with MissingToolbarConfigError when no config exists", () =>
   withLive(withTempDir((cwd) =>
     Effect.gen(function*() {
@@ -63,6 +84,22 @@ it.effect("fails with InvalidToolbarConfigExportError when the default export is
   withLive(withTempDir((cwd) =>
     Effect.gen(function*() {
       yield* writeTempFile(cwd, "toolbar.config.mjs", "export default { nope: true };\n");
+      const configService = yield* ToolbarConfigService;
+
+      const tag = yield* Effect.catchTag(
+        configService.load({ cwd }),
+        "InvalidToolbarConfigExportError",
+        (error) => Effect.succeed(error instanceof InvalidToolbarConfigExportError ? error._tag : "wrong")
+      );
+
+      assert.strictEqual(tag, "InvalidToolbarConfigExportError");
+    })
+  )));
+
+it.effect("fails with InvalidToolbarConfigExportError when a Toolbar Definition contains invalid config", () =>
+  withLive(withTempDir((cwd) =>
+    Effect.gen(function*() {
+      yield* writeTempFile(cwd, "toolbar.config.mjs", "export default { toolbarConfig: { tools: [{ id: 'bad' }] } };\n");
       const configService = yield* ToolbarConfigService;
 
       const tag = yield* Effect.catchTag(

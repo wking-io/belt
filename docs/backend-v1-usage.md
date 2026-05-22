@@ -30,6 +30,30 @@ export default defineToolbar({
 
 Tool Registration is explicit. Installing a Tool package does not make it available; the app must add it to `tools`.
 
+Config discovery can also load a Toolbar Definition produced by a renderer package's `createToolbar`. The backend extracts the same Tool Registration from the definition, so one export can be used by application rendering and backend setup:
+
+```ts
+import { createToolbar } from "@riff-refine/belt/react";
+import { worktreesTool } from "@riff-refine/belt/worktrees";
+import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
+
+export default createToolbar({
+  tools: [
+    worktreesTool({
+      resolver: portlessResolver({
+        destinations: [
+          {
+            id: "web",
+            label: "Web",
+            appName: "myapp"
+          }
+        ]
+      })
+    })
+  ]
+});
+```
+
 The config package can discover conventional module config files:
 
 ```txt

@@ -1,4 +1,10 @@
-import type { ToolbarConfig } from "@repo/core";
+import {
+  defineToolbarDefinition,
+  extractToolbarConfig,
+  type ToolbarConfig,
+  type ToolbarConfigSource,
+  type ToolbarDefinition
+} from "@repo/core";
 
 export type ToolbarRendererModel = {
   tools: Array<{
@@ -7,9 +13,24 @@ export type ToolbarRendererModel = {
   }>;
 };
 
-export function createToolbarRendererModel(config: ToolbarConfig): ToolbarRendererModel {
+export type ToolbarRendererDefinition = ToolbarDefinition & {
+  readonly renderer: ToolbarRendererModel;
+};
+
+export function createToolbar(config: ToolbarConfig): ToolbarRendererDefinition {
+  const definition = defineToolbarDefinition({ toolbarConfig: config });
+
   return {
-    tools: config.tools.map((tool) => ({
+    ...definition,
+    renderer: createToolbarRendererModel(definition)
+  };
+}
+
+export function createToolbarRendererModel(config: ToolbarConfigSource): ToolbarRendererModel {
+  const toolbarConfig = extractToolbarConfig(config);
+
+  return {
+    tools: toolbarConfig.tools.map((tool) => ({
       id: tool.id,
       label: tool.label
     }))

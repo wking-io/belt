@@ -1,5 +1,5 @@
 import { assert, describe, it } from "@effect/vitest";
-import { defineToolbar, normalizeRoute } from "@repo/core";
+import { defineToolbar, defineToolbarDefinition, normalizeRoute } from "@repo/core";
 import { Effect, Schema } from "effect";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -30,6 +30,20 @@ describe("Remix Toolbar adapter", () => {
           ]
         }
       });
+
+      yield* Effect.promise(() => handler.dispose());
+    }));
+
+  it.effect("accepts Toolbar Definitions at the adapter entry point", () =>
+    Effect.gen(function*() {
+      const handler = createToolbarRouteHandler(defineToolbarDefinition({ toolbarConfig: testConfig }));
+      const response = yield* Effect.promise(() =>
+        handler({
+          request: request("/__toolbar")
+        })
+      );
+
+      assert.strictEqual(response.status, 200);
 
       yield* Effect.promise(() => handler.dispose());
     }));

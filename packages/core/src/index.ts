@@ -87,59 +87,98 @@ export type ToolDefinition = ToolbarTool & {
   readonly apiLayer?: ToolHttpApiLayer;
 };
 
-export type ToolbarConfig = {
-  readonly theme?: ToolbarThemeConfig;
-  readonly tools: readonly ToolDefinition[];
+export const ToolbarConfigSchema = Schema.Struct({
+  theme: Schema.optionalKey(ToolbarThemeConfigSchema),
+  tools: Schema.Array(ToolDefinitionSchema)
+});
+
+export type ToolbarConfig = Schema.Schema.Type<typeof ToolbarConfigSchema>;
+
+export type ToolbarDefinition<Config extends ToolbarConfig = ToolbarConfig> = {
+  readonly toolbarConfig: Config;
 };
 
-export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function*(config: ToolbarConfig) {
-  const theme = config.theme === undefined
-    ? undefined
-    : yield* Schema.decodeUnknownEffect(ToolbarThemeConfigSchema)(config.theme);
-  const tools = yield* Schema.decodeUnknownEffect(Schema.Array(ToolDefinitionSchema))(config.tools);
+export type ToolbarConfigSource = ToolbarConfig | ToolbarDefinition;
 
-  const duplicateId = findDuplicateToolId(tools);
+export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function*(config: unknown) {
+  const decoded = yield* Schema.decodeUnknownEffect(ToolbarConfigSchema)(config);
+
+  return yield* validateDecodedToolbarConfig(decoded);
+});
+
+export const validateToolbarConfigExport = Effect.fn("validateToolbarConfigExport")(function*(value: unknown) {
+  const config = getToolbarDefinitionConfig(value) ?? value;
+
+  return yield* validateToolbarConfig(config);
+});
+
+function validateDecodedToolbarConfig(config: ToolbarConfig) {
+  return Effect.gen(function*() {
+    const duplicateId = findDuplicateToolId(config.tools);
+
+    if (duplicateId) {
+      return yield* new DuplicateToolbarToolIdError({ id: duplicateId });
+    }
+
+    const invalidThemeVariableName = config.theme === undefined ? undefined : findInvalidThemeVariableName(config.theme);
+
+    if (invalidThemeVariableName) {
+      return yield* new InvalidToolbarThemeVariableNameError({ name: invalidThemeVariableName });
+    }
+
+    return config;
+  });
+}
+
+function decodeToolbarConfigSync(config: unknown): ToolbarConfig {
+  const decoded = Schema.decodeUnknownSync(ToolbarConfigSchema)(config);
+
+  const duplicateId = findDuplicateToolId(decoded.tools);
 
   if (duplicateId) {
-    return yield* new DuplicateToolbarToolIdError({ id: duplicateId });
+    throw new DuplicateToolbarToolIdError({ id: duplicateId });
   }
 
-  const invalidThemeVariableName = theme === undefined ? undefined : findInvalidThemeVariableName(theme);
+  assertThemeVariableNames(decoded.theme);
 
-  if (invalidThemeVariableName) {
-    return yield* new InvalidToolbarThemeVariableNameError({ name: invalidThemeVariableName });
-  }
-
-  if (theme === undefined) {
-    return { tools };
-  }
-
-  return { theme, tools };
-});
+  return decoded;
+}
 
 export function defineTool(tool: ToolDefinition): ToolDefinition {
   return Schema.decodeUnknownSync(ToolDefinitionSchema)(tool);
 }
 
 export function defineToolbar(config: ToolbarConfig): ToolbarConfig {
-  const theme = config.theme === undefined
-    ? undefined
-    : Schema.decodeUnknownSync(ToolbarThemeConfigSchema)(config.theme);
-  const tools = Schema.decodeUnknownSync(Schema.Array(ToolDefinitionSchema))(config.tools);
+  return decodeToolbarConfigSync(config);
+}
 
-  const duplicateId = findDuplicateToolId(tools);
+export function defineToolbarDefinition<const Config extends ToolbarConfig>(
+  definition: ToolbarDefinition<Config>
+): ToolbarDefinition<ToolbarConfig> {
+  return {
+    ...definition,
+    toolbarConfig: defineToolbar(definition.toolbarConfig)
+  };
+}
 
-  if (duplicateId) {
-    throw new DuplicateToolbarToolIdError({ id: duplicateId });
+export function isToolbarDefinition(value: unknown): value is ToolbarDefinition {
+  return getToolbarDefinitionConfig(value) !== undefined;
+}
+
+export function extractToolbarConfig(source: ToolbarConfigSource): ToolbarConfig {
+  return decodeToolbarConfigSync(getToolbarDefinitionConfig(source) ?? source);
+}
+
+function getToolbarDefinitionConfig(value: unknown): unknown | undefined {
+  if (value === null || (typeof value !== "object" && typeof value !== "function")) {
+    return undefined;
   }
 
-  assertThemeVariableNames(theme);
-
-  if (theme === undefined) {
-    return { tools };
+  if (!Reflect.has(value, "toolbarConfig")) {
+    return undefined;
   }
 
-  return { theme, tools };
+  return Reflect.get(value, "toolbarConfig");
 }
 
 export function defineTheme(theme: ToolbarTheme): ToolbarTheme {

@@ -1,4 +1,4 @@
-import { validateToolbarConfig, type ToolbarConfig as ToolbarConfigData } from "@repo/core";
+import { validateToolbarConfigExport, type ToolbarConfig as ToolbarConfigData } from "@repo/core";
 import { Context, Effect, FileSystem, Layer, Path, Schema } from "effect";
 
 export const toolbarConfigFilenames = [
@@ -125,7 +125,7 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
           catch: (cause) => new ToolbarConfigModuleLoadError({ path: configPath, cause })
         });
 
-        return yield* validateToolbarConfig(loaded.default).pipe(
+        return yield* validateToolbarConfigExport(loaded.default).pipe(
           Effect.mapError(() => new InvalidToolbarConfigExportError({ path: configPath }))
         );
       });
