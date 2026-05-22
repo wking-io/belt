@@ -99,6 +99,8 @@ Error responses use:
 
 Tool packages define their own mounted Effect HTTP APIs under `/__toolbar/tools/:toolId/*`. Tool route responses follow the tool-owned `HttpApi` contract rather than the core Toolbar `ok/data` envelope.
 
+The public Belt server entrypoint assembles standard live dependencies for built-in tools. Host apps register tools in config; they do not need to manually provide built-in tool layers such as the Control Panel snapshot store.
+
 ## Direct Fetch Server
 
 Use `@riff-refine/belt/server` directly when the host already works with standard `Request` and `Response` objects:
