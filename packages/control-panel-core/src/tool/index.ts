@@ -1,4 +1,4 @@
-import { defineTool, normalizeRoute } from "@repo/core";
+import { defineTool, normalizeRoute, type ToolDefinition } from "@repo/core";
 import { Effect, Schema } from "effect";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiError, HttpApiSchema, OpenApi } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -38,6 +38,7 @@ import {
   ControlBaseSchema,
   ControlSnapshotSchema,
   ControlSnapshotStore,
+  ControlSnapshotStoreLive,
   type ControlSnapshotStoreData
 } from "../snapshot-store/index.js";
 
@@ -221,9 +222,15 @@ export class ControlPanelToolApi extends HttpApi.make("control-panel-tool-api")
   }))
 {}
 
+export type ControlPanelToolDefinition = ToolDefinition<
+  typeof ControlPanelToolApi,
+  ReturnType<typeof controlPanelToolApiLayer>,
+  typeof ControlSnapshotStoreLive
+>;
+
 export function controlPanelTool<const Config extends ControlPanelConfig>(
   config: Config
-): ControlPanelRegistration<Config["fieldsets"]> {
+): ControlPanelRegistration<Config["fieldsets"], ControlPanelToolDefinition> {
   const definition = defineControlPanel(config);
 
   return {
@@ -232,7 +239,8 @@ export function controlPanelTool<const Config extends ControlPanelConfig>(
       api: ControlPanelToolApi,
       apiLayer: controlPanelToolApiLayer(definition),
       id: controlPanelToolId,
-      label: controlPanelToolLabel
+      label: controlPanelToolLabel,
+      runtimeLayer: ControlSnapshotStoreLive
     })
   };
 }

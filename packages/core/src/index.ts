@@ -27,7 +27,8 @@ export class InvalidToolbarThemeVariableNameError extends Schema.TaggedErrorClas
 export type ToolbarRegistrationError = DuplicateToolbarToolIdError | InvalidToolbarThemeVariableNameError | SchemaError;
 
 export type ToolHttpApi = HttpApi.AnyWithProps;
-export type ToolHttpApiLayer = Layer.Layer<any, unknown, any>;
+export type ToolHttpApiLayer<ROut = never, E = unknown, RIn = unknown> = Layer.Layer<ROut, E, RIn>;
+export type ToolRuntimeLayer<ROut = never, E = unknown, RIn = unknown> = Layer.Layer<ROut, E, RIn>;
 
 const BeltCssVariableNameSchema = Schema.declare<string>(
   (value): value is string => typeof value === "string" && value.startsWith("--belt-")
@@ -41,6 +42,9 @@ export const ToolHttpApiSchema = Schema.declare<ToolHttpApi>(
 );
 export const ToolHttpApiLayerSchema = Schema.declare<ToolHttpApiLayer>(
   (value): value is ToolHttpApiLayer => Layer.isLayer(value)
+);
+export const ToolRuntimeLayerSchema = Schema.declare<ToolRuntimeLayer>(
+  (value): value is ToolRuntimeLayer => Layer.isLayer(value)
 );
 
 export const ThemeVariablesSchema = Schema.Record(BeltCssVariableNameSchema, BeltCssVariableValueSchema);
@@ -79,12 +83,18 @@ export type ToolbarTool = Schema.Schema.Type<typeof ToolbarToolSchema>;
 export const ToolDefinitionSchema = Schema.Struct({
   ...ToolbarToolSchema.fields,
   api: Schema.optionalKey(ToolHttpApiSchema),
-  apiLayer: Schema.optionalKey(ToolHttpApiLayerSchema)
+  apiLayer: Schema.optionalKey(ToolHttpApiLayerSchema),
+  runtimeLayer: Schema.optionalKey(ToolRuntimeLayerSchema)
 });
 
-export type ToolDefinition = ToolbarTool & {
-  readonly api?: ToolHttpApi;
-  readonly apiLayer?: ToolHttpApiLayer;
+export type ToolDefinition<
+  Api extends ToolHttpApi = ToolHttpApi,
+  ApiLayer extends ToolHttpApiLayer = ToolHttpApiLayer,
+  RuntimeLayer extends ToolRuntimeLayer | undefined = ToolRuntimeLayer | undefined
+> = ToolbarTool & {
+  readonly api?: Api;
+  readonly apiLayer?: ApiLayer;
+  readonly runtimeLayer?: RuntimeLayer;
 };
 
 export const ToolbarConfigSchema = Schema.Struct({
@@ -144,10 +154,13 @@ function decodeToolbarConfigSync(config: unknown): ToolbarConfig {
   return decoded;
 }
 
-export function defineTool(tool: ToolDefinition): ToolDefinition {
-  return Schema.decodeUnknownSync(ToolDefinitionSchema)(tool);
+export function defineTool<const Tool extends ToolDefinition>(tool: Tool): Tool {
+  Schema.decodeUnknownSync(ToolDefinitionSchema)(tool);
+
+  return tool;
 }
 
+export function defineToolbar<const Config extends ToolbarConfig>(config: Config): ToolbarConfig & Config;
 export function defineToolbar(config: ToolbarConfig): ToolbarConfig {
   return decodeToolbarConfigSync(config);
 }

@@ -1,3 +1,5 @@
+import { rm } from "node:fs/promises";
+import { join } from "node:path";
 import { assert, describe, it } from "@effect/vitest";
 import { defineToolbar, toolApiRoutePath } from "@riff-refine/belt";
 import {
@@ -91,6 +93,8 @@ describe("@riff-refine/belt facade exports", () => {
   });
 
   it("provides standard live Control Panel dependencies through Belt server facades", async () => {
+    const storeDirectory = join(process.cwd(), ".toolbar");
+    await rm(storeDirectory, { force: true, recursive: true });
     const registration = controlPanelTool({
       fieldsets: {
         scene: {
@@ -132,6 +136,7 @@ describe("@riff-refine/belt facade exports", () => {
     } finally {
       await server.dispose();
       await remix.dispose();
+      await rm(storeDirectory, { force: true, recursive: true });
     }
   });
 });
