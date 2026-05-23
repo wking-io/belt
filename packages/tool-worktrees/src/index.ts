@@ -198,12 +198,19 @@ export type WorktreesToolClientOptions = {
   readonly baseUrl?: string | URL;
 };
 
-export function worktreesTool(options: WorktreesToolOptions): ToolDefinition {
+export type WorktreesToolDefinition = ToolDefinition<
+  typeof WorktreesToolApi,
+  ReturnType<typeof worktreesToolApiLayer>,
+  typeof WorktreeDiscoveryLive
+>;
+
+export function worktreesTool(options: WorktreesToolOptions): WorktreesToolDefinition {
   return defineTool({
     api: WorktreesToolApi,
     apiLayer: worktreesToolApiLayer(options),
     id: worktreesToolId,
-    label: "Worktrees"
+    label: "Worktrees",
+    runtimeLayer: WorktreeDiscoveryLive
   });
 }
 
@@ -211,19 +218,20 @@ export function worktreesToolApiLayer(options: WorktreesToolOptions) {
   return HttpApiBuilder.group(
     WorktreesToolApi,
     "worktrees",
-    (handlers) =>
-      handlers.handle("index", () =>
+    Effect.fn("WorktreesToolApi.handlers")(function*(handlers) {
+      const discovery = yield* WorktreeDiscovery;
+
+      return handlers.handle("index", () =>
         Effect.gen(function*() {
-          const discovery = yield* WorktreeDiscovery;
           const worktrees = yield* discovery.list(options).pipe(
             Effect.catchTag("NoGitRepositoryError", () => Effect.succeed([]))
           );
 
           return { worktrees };
         }).pipe(
-          Effect.provide(WorktreeDiscoveryLive),
           Effect.orDie
-        ))
+        ));
+    })
   );
 }
 

@@ -17,40 +17,20 @@ import {
   type ToolbarConfigSource
 } from "@repo/core";
 import { ToolbarConfig as ToolbarConfigService } from "@repo/config";
-import { Context, Effect, Layer, Schema } from "effect";
-import { HttpRouter, HttpServer, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
+import { Effect, Layer, Schema } from "effect";
+import { HttpRouter, HttpServerRequest, HttpServerResponse } from "effect/unstable/http";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { toToolbarServer, toToolbarWebHandler, type ToolbarServer } from "./http-handler.js";
 import { ToolbarProtocolError, ToolbarToolDispatch } from "./tool-dispatch.js";
 
-export type ToolbarServer = {
-  readonly fetch: (request: Request) => Promise<Response>;
-  readonly dispose: () => Promise<void>;
-};
-
-type ToolbarWebHandlerRequirements =
-  | Layer.Success<typeof HttpServer.layerServices>
-  | HttpRouter.HttpRouter
-  | HttpRouter.Request<"Requires", unknown>
-  | HttpRouter.Request<"GlobalRequires", unknown>
-  | HttpRouter.Request<"Error", unknown>
-  | HttpRouter.Request<"GlobalError", unknown>;
+export type { ToolbarServer } from "./http-handler.js";
 
 const ToolbarToolIdParamsSchema = Schema.Struct({
   toolId: ToolbarToolIdSchema
 });
 
 export function createToolbarServer(config: ToolbarConfigSource): ToolbarServer {
-  const router = createToolbarRouter(config);
-  const webHandlerLayer = router.pipe(
-    Layer.provide(HttpServer.layerServices)
-  ) as Layer.Layer<never, unknown, Exclude<ToolbarWebHandlerRequirements, Layer.Success<typeof HttpServer.layerServices>>>;
-  const { handler, dispose } = HttpRouter.toWebHandler(webHandlerLayer);
-  const context = Context.makeUnsafe<unknown>(new Map());
-
-  return {
-    fetch: (request) => handler(request, context),
-    dispose
-  };
+  return toToolbarServer(createToolbarRouter(config));
 }
 
 export function createToolbarRouter(config: ToolbarConfigSource): Layer.Layer<never, unknown, unknown> {
@@ -119,12 +99,9 @@ function createToolApiRoutes<const Tool extends ToolDefinition>(tool: Tool): Lay
     Layer.provide(tool.apiLayer)
   );
   const app = tool.runtimeLayer
-    ? apiApp.pipe(Layer.provide(tool.runtimeLayer), Layer.provide(HttpServer.layerServices))
-    : apiApp.pipe(Layer.provide(HttpServer.layerServices));
-  const { handler, dispose } = HttpRouter.toWebHandler(app as Layer.Layer<never, unknown, Exclude<
-    ToolbarWebHandlerRequirements,
-    Layer.Success<typeof HttpServer.layerServices>
-  >>);
+    ? apiApp.pipe(Layer.provide(tool.runtimeLayer))
+    : apiApp;
+  const { handle, dispose } = toToolbarWebHandler(app);
   const toolPath = toolbarApiToolPath(tool.id);
   const mountedRoute = `${toolPath}/*` as `/${string}`;
 
@@ -142,7 +119,7 @@ function createToolApiRoutes<const Tool extends ToolDefinition>(tool: Tool): Lay
 
       const rewrittenRequest = rewriteToolApiRequest(webRequest, toolPath);
       const context = yield* Effect.context<unknown>();
-      const response = yield* Effect.promise(() => handler(rewrittenRequest, context));
+      const response = yield* Effect.promise(() => handle(rewrittenRequest, context));
 
       return HttpServerResponse.fromWeb(response);
     }));

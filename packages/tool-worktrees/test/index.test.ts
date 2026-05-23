@@ -177,12 +177,13 @@ describe("worktreesTool", () => {
 });
 
 function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
-  if (!tool.api || !tool.apiLayer) {
+  if (!tool.api || !tool.apiLayer || !tool.runtimeLayer) {
     return Effect.die(new Error("Worktrees tool API registration is missing"));
   }
 
   const app = HttpApiBuilder.layer(tool.api).pipe(
     Layer.provide(tool.apiLayer),
+    Layer.provide(tool.runtimeLayer),
     Layer.provide(HttpServer.layerServices)
   );
   const { handler, dispose } = HttpRouter.toWebHandler(app);
@@ -198,7 +199,7 @@ function withWorktreesHttpServer<A, E, R>(
   tool: ReturnType<typeof worktreesTool>,
   run: (baseUrl: string) => Effect.Effect<A, E, R>
 ) {
-  if (!tool.api || !tool.apiLayer) {
+  if (!tool.api || !tool.apiLayer || !tool.runtimeLayer) {
     return Effect.die(new Error("Worktrees tool API registration is missing"));
   }
 
@@ -206,6 +207,7 @@ function withWorktreesHttpServer<A, E, R>(
     Effect.promise(async () => {
       const app = HttpApiBuilder.layer(tool.api).pipe(
         Layer.provide(tool.apiLayer),
+        Layer.provide(tool.runtimeLayer),
         Layer.provide(HttpServer.layerServices)
       );
       const { handler, dispose } = HttpRouter.toWebHandler(app);
