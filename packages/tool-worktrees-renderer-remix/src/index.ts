@@ -3,7 +3,7 @@ import type { WorktreeEntry } from "@repo/tool-worktrees";
 
 export type WorktreesRendererModel = {
   current: WorktreeEntry | undefined;
-  worktrees: WorktreeEntry[];
+  worktrees: readonly WorktreeEntry[];
 };
 
 export async function createWorktreesRendererModel(): Promise<WorktreesRendererModel> {
