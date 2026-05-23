@@ -1,6 +1,7 @@
 import { Effect, Layer, Schema } from "effect";
 import type { SchemaError } from "effect/Schema";
 import { HttpApi, HttpApiClient } from "effect/unstable/httpapi";
+import type { HttpApiGroup } from "effect/unstable/httpapi";
 import { ToolbarApi } from "./http-api.js";
 import { NonEmptyStringSchema } from "./schemas.js";
 import { toToolbarToolApiRoutePaths, toolbarApiBasePath } from "./protocol.js";
@@ -221,8 +222,8 @@ export function makeToolbarClient(options?: {
 
     return {
       ...client,
-      tool: <Api extends ToolHttpApi>(
-        api: Api,
+      tool: <ApiId extends string, Groups extends HttpApiGroup.Any>(
+        api: HttpApi.HttpApi<ApiId, Groups>,
         toolId: string
       ) => HttpApiClient.make(api, {
         baseUrl: toolApiBaseUrl(baseUrl, toolId)

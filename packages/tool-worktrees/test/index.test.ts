@@ -1,13 +1,16 @@
+import { createServer, type Server, type ServerResponse } from "node:http";
+import { once } from "node:events";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assert, describe, it } from "@effect/vitest";
 import { Context, Effect, Layer } from "effect";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { FetchHttpClient, HttpRouter, HttpServer } from "effect/unstable/http";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import {
   GitWorktreeParseError,
   WorktreeResolverError,
+  makeWorktreesToolClient,
   parseGitWorktreeList,
   toWorktreeEntries,
   worktreesTool
@@ -144,6 +147,33 @@ describe("worktreesTool", () => {
         });
       }
     }));
+
+  it.effect("calls the index route through the typed Worktrees tool client", () =>
+    Effect.gen(function*() {
+      const cwd = yield* Effect.promise(async () => mkdtemp(join(tmpdir(), "belt-worktrees-")));
+
+      try {
+        const tool = worktreesTool({
+          cwd,
+          resolver: {
+            resolve: () => []
+          }
+        });
+
+        const result = yield* withWorktreesHttpServer(tool, (baseUrl) =>
+          Effect.gen(function*() {
+            const client = yield* makeWorktreesToolClient({ baseUrl });
+
+            return yield* client.worktrees.index();
+          }).pipe(Effect.provide(FetchHttpClient.layer)));
+
+        assert.deepStrictEqual(result, { worktrees: [] });
+      } finally {
+        yield* Effect.promise(async () => {
+          await rm(cwd, { force: true, recursive: true });
+        });
+      }
+    }));
 });
 
 function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
@@ -162,4 +192,82 @@ function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
       Effect.flatMap((response) => Effect.promise(async (): Promise<unknown> => response.json())),
       Effect.tap(() => Effect.promise(() => dispose()))
     );
+}
+
+function withWorktreesHttpServer<A, E, R>(
+  tool: ReturnType<typeof worktreesTool>,
+  run: (baseUrl: string) => Effect.Effect<A, E, R>
+) {
+  if (!tool.api || !tool.apiLayer) {
+    return Effect.die(new Error("Worktrees tool API registration is missing"));
+  }
+
+  return Effect.acquireUseRelease(
+    Effect.promise(async () => {
+      const app = HttpApiBuilder.layer(tool.api).pipe(
+        Layer.provide(tool.apiLayer),
+        Layer.provide(HttpServer.layerServices)
+      );
+      const { handler, dispose } = HttpRouter.toWebHandler(app);
+      const server = createServer(async (req, res) => {
+        try {
+          const incomingUrl = new URL(req.url ?? "/", "http://localhost");
+          const routePath = incomingUrl.pathname.replace(/^\/__toolbar\/tools\/worktrees/, "") || "/";
+          const response = await handler(
+            new Request(new URL(`${routePath}${incomingUrl.search}`, "http://localhost"), {
+              method: req.method
+            }),
+            Context.empty() as Context.Context<unknown>
+          );
+
+          await writeResponse(res, response);
+        } catch (error) {
+          res.statusCode = 500;
+          res.end(error instanceof Error ? error.message : "Request failed");
+        }
+      });
+
+      server.listen(0, "127.0.0.1");
+      await once(server, "listening");
+
+      const address = server.address();
+
+      if (!address || typeof address === "string") {
+        throw new Error("Test server did not bind to a TCP port");
+      }
+
+      return {
+        baseUrl: `http://127.0.0.1:${address.port}/__toolbar`,
+        close: async () => {
+          await dispose();
+          await closeServer(server);
+        }
+      };
+    }),
+    ({ baseUrl }) => run(baseUrl),
+    ({ close }) => Effect.promise(close)
+  );
+}
+
+async function writeResponse(res: ServerResponse, response: Response) {
+  res.statusCode = response.status;
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value);
+  });
+  res.end(Buffer.from(await response.arrayBuffer()));
+}
+
+async function closeServer(server: Server) {
+  if (!server.listening) return;
+
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
 }

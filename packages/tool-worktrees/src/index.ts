@@ -1,6 +1,7 @@
 import { NodeServices } from "@effect/platform-node";
-import { defineTool, normalizeRoute, toolApiRoutePath, type ToolDefinition } from "@repo/core";
+import { defineTool, makeToolbarClient, normalizeRoute, type ToolDefinition } from "@repo/core";
 import { Context, Effect, Layer, Path, Schema } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
 import { ChildProcess } from "effect/unstable/process";
@@ -60,6 +61,7 @@ export const WorktreeEntrySchema = Schema.Struct({
 export const WorktreesIndexResponseSchema = Schema.Struct({
   worktrees: Schema.Array(WorktreeEntrySchema)
 });
+export type WorktreesIndexResponse = Schema.Schema.Type<typeof WorktreesIndexResponseSchema>;
 
 export class GitWorktreeCommandError extends Schema.TaggedErrorClass<GitWorktreeCommandError>()(
   "GitWorktreeCommandError",
@@ -191,11 +193,16 @@ export class WorktreesToolApi extends HttpApi.make("worktrees-tool-api")
   }))
 {}
 
+export const worktreesToolId = "worktrees";
+export type WorktreesToolClientOptions = {
+  readonly baseUrl?: string | URL;
+};
+
 export function worktreesTool(options: WorktreesToolOptions): ToolDefinition {
   return defineTool({
     api: WorktreesToolApi,
     apiLayer: worktreesToolApiLayer(options),
-    id: "worktrees",
+    id: worktreesToolId,
     label: "Worktrees"
   });
 }
@@ -220,21 +227,22 @@ export function worktreesToolApiLayer(options: WorktreesToolOptions) {
   );
 }
 
-export function createWorktreesClient(options?: { basePath?: string }) {
-  const basePath = options?.basePath ?? toolApiRoutePath("worktrees", "index");
+export function makeWorktreesToolClient(options?: WorktreesToolClientOptions) {
+  return Effect.gen(function*() {
+    const toolbar = yield* makeToolbarClient(options);
 
+    return yield* toolbar.tool(WorktreesToolApi, worktreesToolId);
+  });
+}
+
+export function createWorktreesClient(options?: WorktreesToolClientOptions) {
   return {
-    async list(): Promise<{ worktrees: WorktreeEntry[] }> {
-      const response = await fetch(basePath);
-
-      if (!response.ok) {
-        throw new Error(`Failed to load worktrees: ${response.status}`);
-      }
-
-      const body: { worktrees: WorktreeEntry[] } = await response.json();
-
-      return body;
-    }
+    list: (): Promise<WorktreesIndexResponse> =>
+      makeWorktreesToolClient(options).pipe(
+        Effect.flatMap((client) => client.worktrees.index()),
+        Effect.provide(FetchHttpClient.layer),
+        Effect.runPromise
+      )
   };
 }
 

@@ -1,4 +1,4 @@
-import { defineTool, normalizeRoute, type ToolDefinition } from "@repo/core";
+import { defineTool, makeToolbarClient, normalizeRoute, type ToolDefinition } from "@repo/core";
 import { Effect, Layer, Schema } from "effect";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiError, HttpApiSchema, OpenApi } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -53,6 +53,10 @@ export const controlPanelRoutePaths = {
   branchSnapshot: "snapshots/branch",
   saveSnapshot: "snapshots/save",
   deleteSnapshot: "snapshots/delete"
+};
+
+export type ControlPanelToolClientOptions = {
+  readonly baseUrl?: string | URL;
 };
 
 export const ControlFieldsetValueMapSchema = Schema.Record(
@@ -226,6 +230,14 @@ export function controlPanelTool<const Config extends ControlPanelConfig>(
       runtimeLayer: ControlSnapshotStoreLive
     })
   };
+}
+
+export function makeControlPanelToolClient(options?: ControlPanelToolClientOptions) {
+  return Effect.gen(function*() {
+    const toolbar = yield* makeToolbarClient(options);
+
+    return yield* toolbar.tool(ControlPanelToolApi, controlPanelToolId);
+  });
 }
 
 export function controlPanelToolApiLayer(definition: ReturnType<typeof defineControlPanel>) {
