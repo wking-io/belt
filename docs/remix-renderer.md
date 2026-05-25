@@ -4,12 +4,7 @@
 
 ## Shape
 
-The renderer exports two kinds of primitives:
-
-- Component wrappers for behavior or structure that Belt wants to standardize.
-- Mixins for styles that are independent of a specific host element.
-
-Use component wrappers when the primitive owns markup or behavior. Use mixins when the caller should own the element but still use the Belt theme contract.
+The renderer exports component wrappers for behavior or structure that Belt wants to standardize. Styles live in `@repo/theme-css` as portable CSS class and `data-*` hooks so other renderers can reuse the same visual contract.
 
 ## Components
 
@@ -26,21 +21,23 @@ The v1 component set is intentionally small because Belt is a compact dev toolba
 - `GlyphSheet`: Belt's shared SVG sprite sheet, generated with Remix UI's `createGlyphSheet`.
 - `Glyph`: re-exported from Remix UI and backed by the shared Belt glyph ids.
 
-## Mixins
+## CSS Hooks
 
-Style-only needs are mixins instead of components:
+Style-only needs use CSS classes directly:
 
-- `textStyle`
-- `badgeStyle`
-- `iconStyle`
-- `gapStyle`
-- `radiusStyle`
+- `belt-text` with `data-emphasis`, `data-size`, and `data-weight`
+- `belt-badge` with `data-tone`
+- `belt-icon` with intent `data-tone`, `data-emphasis`, and `data-size`
+- `belt-gap` with `data-gap`
+- `belt-radius` with `data-size`
 
-The package also exports the component style mixins used internally, such as `buttonBaseStyle`, `inputStyle`, `menuListStyle`, and `optionStyle`, so downstream tools and agents can compose custom elements without inventing a parallel visual vocabulary.
+Component wrappers emit the same classes and short `data-*` attributes used by React and future renderers.
+
+`Panel` owns the outer surface radius and defaults to `radius="outer"`. `StatusBanner.Root` defaults to `radius="default"` for the common case where it sits inside an outer panel. Controls do not expose a radius prop; `Button`, `GhostButton`, `Input`, and related trigger controls inherit the active child radius from the nearest `data-radius` container.
 
 ## Theme Contract
 
-All styles are plain CSS generated through Remix UI mixins and reference the CSS custom properties from `@repo/theme-css`. Colors must use the `--belt-color-*` OKLCH token contract rather than hard-coded color values.
+All styles are plain CSS in `@repo/theme-css` and reference the `--belt-color-*` OKLCH token contract rather than hard-coded color values.
 
 Renderers should import the default theme CSS once at the app boundary, then use these primitives inside the toolbar shell and tool renderers.
 

@@ -18,16 +18,14 @@ it("exports the v1 theme token contract", async () => {
     "--belt-color-elevation-1-hover",
     "--belt-color-elevation-1-active",
     "--belt-color-elevation-3",
-    "--belt-color-foreground",
-    "--belt-color-foreground-subtle",
-    "--belt-color-foreground-strong",
+    "--belt-color-elevation-1-foreground",
+    "--belt-color-elevation-1-foreground-subtle",
+    "--belt-color-elevation-1-foreground-strong",
     "--belt-color-border",
     "--belt-color-border-subtle",
     "--belt-color-border-strong",
     "--belt-color-focus",
-    "--belt-color-danger-control",
     "--belt-space",
-    "--belt-space-12",
     "--belt-radius-inner",
     "--belt-radius",
     "--belt-radius-outer",
@@ -82,6 +80,67 @@ it("ships the bundled Inter variable font files", async () => {
 
   assert.ok(normal.length > 0);
   assert.ok(italic.length > 0);
+});
+
+it("exports portable component class hooks for renderers", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  for (const className of [
+    "belt-surface",
+    "belt-surface__inner",
+    "belt-button",
+    "belt-ghost-button",
+    "belt-badge",
+    "belt-text",
+    "belt-icon",
+    "belt-radius",
+    "belt-gap",
+    "belt-input",
+    "belt-status-banner",
+    "belt-status-banner__row",
+    "belt-status-banner__message",
+    "belt-field",
+    "belt-label",
+    "belt-slider",
+    "belt-switch",
+    "belt-menu__trigger",
+    "belt-menu__popup",
+    "belt-menu__item",
+    "belt-select__trigger",
+    "belt-select__popup",
+    "belt-select__item",
+    "belt-combobox",
+    "belt-combobox__popup",
+    "belt-combobox__item",
+  ]) {
+    assert.match(css, new RegExp(`\\.${className.replaceAll("_", "\\_")}`));
+  }
+});
+
+it("does not widen the locked token contract", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.ok(!/--belt-color-foreground:/.test(css));
+  assert.ok(!/--belt-color-foreground-subtle:/.test(css));
+  assert.ok(!/--belt-color-foreground-strong:/.test(css));
+  assert.ok(!/--belt-color-[a-z]+-control/.test(css));
+  assert.ok(!/--belt-space-\d+:/.test(css));
+});
+
+it("uses short data attributes for component variants", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  for (const attribute of ["data-tone", "data-emphasis", "data-elevation", "data-radius", "data-size", "data-gap"]) {
+    assert.match(css, new RegExp(`\\[${attribute}`));
+  }
+
+  assert.ok(!/data-belt-surface/.test(css));
+  assert.ok(!/\.belt-text\[data-tone="(?:subtle|strong|foreground)"\]/.test(css));
+  assert.ok(!/\.belt-icon\[data-tone="(?:subtle|strong|foreground)"\]/.test(css));
+  assert.match(css, /\.belt-text\[data-emphasis="subtle"\]/);
+  assert.match(css, /\.belt-text\[data-emphasis="strong"\]/);
+  assert.match(css, /\.belt-icon\[data-emphasis="subtle"\]/);
+  assert.match(css, /\.belt-icon\[data-emphasis="strong"\]/);
 });
 
 it("keeps color tokens in oklch-compatible syntax", async () => {
@@ -152,28 +211,49 @@ it("exports portable surface classes with attribute selector variants", async ()
   for (const selector of [
     ".belt-surface",
     ".belt-surface__inner",
-    "[data-belt-surface]",
-    "[data-belt-surface-inner]",
-    '[data-belt-surface-size="surface-default"]',
-    '[data-belt-surface-elevation="3"]',
+    '[data-elevation="3"]',
+    '[data-radius="outer"]',
+    '[data-placement="absolute"]',
   ]) {
     assert.match(css, new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 
   assert.match(css, /::before/);
   assert.match(css, /::after/);
-  assert.match(css, /:focus-within/);
-  assert.ok(!/transition/.test(css), "surface CSS should not define transitions");
+  assert.match(css, /:has\(\[data-control\]:focus-visible\)/);
   assert.ok(
-    !/elevation-\d-inset/.test(css),
-    "surface CSS should only use the three elevated levels",
-  );
-  assert.ok(
-    !/data-belt-surface-variant/.test(css),
-    "surface CSS should not expose inset/default/elevated variants",
+    !/data-belt-surface/.test(css),
+    "surface CSS should use short data attributes for component variants",
   );
   assert.ok(
     !/&::?/.test(css),
     "surface CSS should be emitted as plain selectors instead of nested mixin syntax",
   );
+});
+
+it("defines inherited container and child radius contexts", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /--belt-container-radius:\s*var\(--belt-radius\)/);
+  assert.match(css, /--belt-child-radius:\s*var\(--belt-radius\)/);
+  assert.match(css, /\[data-radius="inner"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-inner\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/);
+  assert.match(css, /\[data-radius="default"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/);
+  assert.match(css, /\[data-radius="outer"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-outer\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius\)/);
+  assert.match(css, /\.belt-surface[\s\S]*--belt-surface-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
+  assert.match(css, /\.belt-surface\[data-radius="inner"\][\s\S]*--belt-surface-radius:\s*var\(--belt-container-radius\)/);
+  assert.match(css, /\.belt-button[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
+  assert.match(css, /\.belt-ghost-button[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
+  assert.match(css, /\.belt-input[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
+  assert.match(css, /\.belt-status-banner[\s\S]*border-radius:\s*var\(--belt-container-radius,\s*var\(--belt-radius\)\)/);
+});
+
+it("uses matching neutral hover colors for elevated buttons", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /--belt-surface-hover:\s*var\(--belt-color-elevation-1-hover\)/);
+  assert.match(css, /\[data-elevation="2"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-2-hover\)/);
+  assert.match(css, /\[data-elevation="3"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-3-hover\)/);
+  assert.match(css, /--belt-button-bg-hover:\s*var\(--belt-surface-hover\)/);
+  assert.match(css, /\.belt-ghost-button\[data-elevation="2"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-2-hover\)/);
+  assert.match(css, /\.belt-ghost-button\[data-elevation="3"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-3-hover\)/);
 });

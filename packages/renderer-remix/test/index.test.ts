@@ -2,7 +2,6 @@ import { assert, it } from "@effect/vitest";
 import { createElement, type RemixNode } from "@remix-run/ui";
 import { renderToStream } from "@remix-run/ui/server";
 import {
-  badgeStyle,
   Button,
   Combobox,
   ComboboxOption,
@@ -21,7 +20,6 @@ import {
   Slider,
   StatusBanner,
   Switch,
-  textStyle,
 } from "../src/index.tsx";
 
 it("renders the core primitive wrappers through Remix UI server rendering", async () => {
@@ -37,7 +35,7 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
         createElement(
           StatusBanner.Row,
           null,
-          createElement(StatusBanner.Icon, null, "!"),
+          createElement(StatusBanner.Icon, { glyph: "alert" }),
           createElement(StatusBanner.Message, null, "Unsaved changes"),
         ),
       ),
@@ -46,6 +44,7 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
 
   assert.match(html, /data-elevation="2"/);
   assert.match(html, /data-radius="outer"/);
+  assert.match(html, /data-radius="default"/);
   assert.match(html, /belt-surface outer-panel/);
   assert.match(html, /belt-surface__inner/);
   assert.match(html, /outer-panel/);
@@ -54,10 +53,33 @@ it("renders the core primitive wrappers through Remix UI server rendering", asyn
   assert.match(html, /Unsaved changes/);
   assert.match(html, /data-tone="primary"/);
   assert.match(html, /data-tone="danger"/);
-  assert.match(html, /var\(--belt-color-warning\)/);
+  assert.match(html, /belt-status-banner/);
+  assert.match(html, /data-tone="warning"/);
 });
 
-it("renders form primitives and style-only mixins", async () => {
+it("lets containers set radius while controls inherit it", async () => {
+  const html = await render(
+    createElement(
+      Panel,
+      { radius: "default" },
+      createElement(Button, null, "Save"),
+      createElement(
+        StatusBanner.Root,
+        { radius: "outer", tone: "info" },
+        createElement(StatusBanner.Action, null, createElement(GhostButton, null, "Undo")),
+      ),
+    ),
+  );
+
+  assert.match(html, /data-radius="default"[^>]*belt-surface/);
+  assert.match(html, /data-radius="outer"[^>]*belt-status-banner/);
+  assert.match(html, /belt-button/);
+  assert.match(html, /belt-ghost-button/);
+  assert.notMatch(html, /belt-button[^>]*data-radius/);
+  assert.notMatch(html, /belt-ghost-button[^>]*data-radius/);
+});
+
+it("renders form primitives and portable class hooks", async () => {
   const html = await render(
     createElement(
       Field,
@@ -66,8 +88,8 @@ it("renders form primitives and style-only mixins", async () => {
       createElement(Input, { id: "branch", placeholder: "feature/name" }),
       createElement(Slider, { min: 0, max: 10 }),
       createElement(Switch, { checked: true }),
-      createElement("span", { mix: textStyle({ tone: "subtle", size: "xs" }) }, "quiet text"),
-      createElement("span", { mix: badgeStyle({ tone: "success" }) }, "ready"),
+      createElement("span", { class: "belt-text", "data-emphasis": "subtle", "data-size": "xs" }, "quiet text"),
+      createElement("span", { class: "belt-badge", "data-tone": "success" }, "ready"),
     ),
   );
 
@@ -77,12 +99,13 @@ it("renders form primitives and style-only mixins", async () => {
   assert.match(html, /role="switch"/);
   assert.match(html, /quiet text/);
   assert.match(html, /ready/);
-  assert.match(html, /var\(--belt-color-foreground-subtle\)/);
-  assert.match(html, /var\(--belt-color-success\)/);
-  assert.match(html, /var\(--belt-font-family/);
-  assert.match(html, /var\(--belt-font-feature-settings/);
-  assert.match(html, /var\(--belt-font-variant-ligatures/);
-  assert.match(html, /var\(--belt-font-variant-numeric/);
+  assert.match(html, /belt-field/);
+  assert.match(html, /belt-label/);
+  assert.match(html, /belt-input/);
+  assert.match(html, /belt-slider/);
+  assert.match(html, /belt-switch/);
+  assert.match(html, /belt-text/);
+  assert.match(html, /belt-badge/);
 });
 
 it("exports thin Remix UI wrappers for composed controls", () => {

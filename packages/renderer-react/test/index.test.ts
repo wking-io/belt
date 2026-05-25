@@ -1,7 +1,25 @@
 import { assert, it } from "@effect/vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Glyph, GlyphSheet, glyphIds, type GlyphName } from "../src/index.ts";
+import {
+  Button,
+  Field,
+  GhostButton,
+  Glyph,
+  GlyphSheet,
+  Input,
+  Label,
+  Menu,
+  MenuItem,
+  Panel,
+  Select,
+  SelectOption,
+  Slider,
+  StatusBanner,
+  Switch,
+  glyphIds,
+  type GlyphName,
+} from "../src/index.ts";
 
 it("renders a hidden svg sprite sheet with Remix-compatible symbol ids", () => {
   const html = renderToStaticMarkup(createElement(GlyphSheet));
@@ -38,4 +56,83 @@ it("keeps glyph names typed", () => {
   const invalidName: GlyphName = "unknown";
 
   assert.strictEqual(invalidName, "unknown");
+});
+
+it("renders React primitives with the shared CSS class contract", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Panel,
+      { elevation: 2 },
+      createElement(Button, { tone: "primary", startIcon: "add" }, "Launch"),
+      createElement(GhostButton, { tone: "danger" }, "Delete"),
+      createElement(
+        StatusBanner.Root,
+        { tone: "warning" },
+        createElement(
+          StatusBanner.Row,
+          null,
+          createElement(StatusBanner.Icon, null, "!"),
+          createElement(StatusBanner.Message, null, "Unsaved changes"),
+        ),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-surface/);
+  assert.match(html, /data-elevation="2"/);
+  assert.match(html, /data-radius="outer"/);
+  assert.match(html, /belt-button/);
+  assert.match(html, /belt-ghost-button/);
+  assert.match(html, /belt-status-banner/);
+  assert.match(html, /data-radius="default"/);
+  assert.match(html, /data-tone="warning"/);
+});
+
+it("lets React containers set radius while controls inherit it", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Panel,
+      { radius: "default" },
+      createElement(Button, null, "Save"),
+      createElement(
+        StatusBanner.Root,
+        { radius: "outer", tone: "info" },
+        createElement(StatusBanner.Action, null, createElement(GhostButton, null, "Undo")),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-surface[^>]*data-radius="default"|data-radius="default"[^>]*belt-surface/);
+  assert.match(html, /belt-status-banner[^>]*data-radius="outer"|data-radius="outer"[^>]*belt-status-banner/);
+  assert.match(html, /belt-button/);
+  assert.match(html, /belt-ghost-button/);
+  assert.notMatch(html, /belt-button[^>]*data-radius/);
+  assert.notMatch(html, /belt-ghost-button[^>]*data-radius/);
+});
+
+it("renders Base UI-backed form and choice primitives", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Field,
+      null,
+      createElement(Label, null, "Branch"),
+      createElement(Input, { placeholder: "feature/name" }),
+      createElement(Slider, { defaultValue: 4, min: 0, max: 10 }),
+      createElement(Switch, { defaultChecked: true }),
+      createElement(Menu, { label: "Menu" }, createElement(MenuItem, null, "Open worktree")),
+      createElement(
+        Select,
+        { defaultLabel: "Destination" },
+        createElement(SelectOption, { value: "web" }, "Web"),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-field/);
+  assert.match(html, /belt-label/);
+  assert.match(html, /belt-input/);
+  assert.match(html, /belt-slider/);
+  assert.match(html, /belt-switch/);
+  assert.match(html, /belt-menu__trigger/);
+  assert.match(html, /belt-select__trigger/);
 });

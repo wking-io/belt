@@ -16,16 +16,15 @@ The v1 color contract is:
 
 - `--belt-color-elevation-1` through `--belt-color-elevation-3`
 - `--belt-color-elevation-N-hover` and `--belt-color-elevation-N-active`
-- `--belt-color-foreground`, `--belt-color-foreground-subtle`, and `--belt-color-foreground-strong`
+- `--belt-color-elevation-N-foreground`, `--belt-color-elevation-N-foreground-subtle`, and `--belt-color-elevation-N-foreground-strong`
 - `--belt-color-border`, `--belt-color-border-subtle`, and `--belt-color-border-strong`
 - `--belt-color-focus`
 - `--belt-color-primary`, `--belt-color-info`, `--belt-color-success`, `--belt-color-warning`, and `--belt-color-danger`
-- each intent includes `foreground`, `foreground-subtle`, `foreground-strong`, `control`, `control-hover`, `control-active`, `control-foreground`, `control-foreground-subtle`, and `control-foreground-strong`
+- each intent includes `hover`, `active`, `highlight`, `foreground`, `foreground-subtle`, `foreground-strong`, `border`, `overlay`, `overlay-foreground`, `overlay-foreground-subtle`, and `overlay-foreground-strong`
 
 Layout tokens are:
 
 - `--belt-space`
-- numbered spacing variables such as `--belt-space-1`, `--belt-space-2`, and `--belt-space-12`
 - `--belt-radius-inner`, `--belt-radius`, and `--belt-radius-outer`
 
 Typography tokens are:
@@ -45,26 +44,23 @@ V1 does not include background/surface tokens, selected/highlight tokens, shadow
 The theme CSS also ships portable surface classes so renderers and future React/Rails/Laravel integrations can share the same layered panel treatment without translating framework-specific styles.
 
 ```html
-<div
-  class="belt-surface"
-  data-belt-surface
-  data-belt-surface-elevation="3"
-  data-belt-surface-size="surface-default"
->
-  <div class="belt-surface__inner" data-belt-surface-inner>...</div>
+<div class="belt-surface" data-elevation="3" data-radius="outer">
+  <div class="belt-surface__inner">...</div>
 </div>
 ```
 
-`belt-surface` and `belt-surface__inner` are class hooks. The equivalent `data-belt-surface` and `data-belt-surface-inner` attributes are also supported for adapters that prefer attribute-only markup.
+`belt-surface` and `belt-surface__inner` are class hooks shared by every renderer.
 
 Surface styling is selected with attributes:
 
-- `data-belt-surface-elevation="1" | "2" | "3"`
-- `data-belt-surface-size="control-sm" | "control-default" | "control-lg" | "surface-sm" | "surface-default" | "surface-lg"`
+- `data-elevation="1" | "2" | "3"`
+- `data-radius="inner" | "default" | "outer"`
 - `data-focused="true"` or `:focus-within` for the focused treatment
-- `data-belt-placement="absolute" | "relative"` when placement should be encoded in markup
+- `data-placement="absolute" | "relative"` when placement should be encoded in markup
 
-The legacy `belt-panel` and `data-belt-panel` hooks currently alias the surface styles.
+Radius is contextual. A container with `data-radius="default"` gets `--belt-container-radius: var(--belt-radius)` and exposes `--belt-child-radius: var(--belt-radius-inner)` to nested controls. `data-radius="outer"` maps the container to `--belt-radius-outer` and children to `--belt-radius`; `data-radius="inner"` keeps both at `--belt-radius-inner`. Buttons, ghost buttons, inputs, and similar controls read the inherited child radius instead of taking their own radius prop.
+
+Other component classes follow the same short-attribute convention: `belt-text`, `belt-icon`, `belt-badge`, `belt-status-banner`, `belt-field`, `belt-label`, `belt-input`, `belt-slider`, `belt-switch`, `belt-menu__*`, `belt-select__*`, and `belt-combobox__*`.
 
 ## Theme Registration
 
@@ -97,7 +93,7 @@ export default defineToolbar({
         extends: "belt-dark",
         variables: {
           "--belt-color-elevation-1": "oklch(18% 0.01 255)",
-          "--belt-color-primary-control": "oklch(70% 0.18 260)",
+          "--belt-color-primary": "oklch(70% 0.18 260)",
         },
       }),
     ],

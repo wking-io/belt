@@ -3,12 +3,10 @@
 // @jsxFrag Fragment
 // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
 import {
+  // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
   createElement,
-  css,
   Fragment,
-  type CSSMixinDescriptor,
   type Handle,
-  type MixInput,
   type Props,
   type RemixNode,
 } from "@remix-run/ui";
@@ -20,6 +18,7 @@ import type { GlyphName } from "@repo/glyphs";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
 type Elevation = 1 | 2 | 3;
+type Radius = "inner" | "default" | "outer";
 type ForegroundTone = "foreground" | "subtle" | "strong";
 type TextSize = "xs" | "sm" | "md";
 
@@ -28,103 +27,32 @@ type WithClassName = {
 };
 
 type WithMix = {
-  readonly mix?: MixInput;
+  readonly mix?: unknown;
 };
 
 type SurfaceProps = {
   readonly tone?: IntentTone;
   readonly elevation?: Elevation;
-}
+};
 
-const fontFamilyValue =
-  'var(--belt-font-family, "InterVariable", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)';
-const fontFeatureSettingsValue =
-  'var(--belt-font-feature-settings, "calt" 1, "dlig" 1, "case" 1, "ccmp" 1, "zero" 1, "ss01" 1, "ss02" 1, "ss07" 1, "ss08" 1, "cv06" 1, "cv11" 1)';
-const fontVariantAlternatesValue =
-  "var(--belt-font-variant-alternates, styleset(ss01) styleset(ss02) styleset(ss07) styleset(ss08) character-variant(cv06) character-variant(cv11))";
-const fontVariantLigaturesValue =
-  "var(--belt-font-variant-ligatures, common-ligatures discretionary-ligatures contextual)";
-const fontVariantNumericValue = "var(--belt-font-variant-numeric, slashed-zero)";
-
-const typographyFeatureStyle = {
-  fontFeatureSettings: fontFeatureSettingsValue,
-  fontVariantAlternates: fontVariantAlternatesValue,
-  fontVariantLigatures: fontVariantLigaturesValue,
-  fontVariantNumeric: fontVariantNumericValue,
-} as const;
-
-export function gapStyle(step: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12): CSSMixinDescriptor {
-  return css({
-    gap: `var(--belt-space-${step})`,
-  });
-}
-
-export function radiusStyle(size: "inner" | "default" | "outer" = "default"): CSSMixinDescriptor {
-  const variable = size === "default" ? "--belt-radius" : `--belt-radius-${size}`;
-
-  return css({
-    borderRadius: `var(${variable})`,
-  });
-}
-
-export function textStyle(
-  options: {
-    readonly tone?: ForegroundTone;
-    readonly size?: TextSize;
-    readonly weight?: "regular" | "medium" | "semibold";
-  } = {},
-): CSSMixinDescriptor {
-  const tone = options.tone ?? "foreground";
-  const size = options.size ?? "sm";
-  const weight = options.weight ?? "regular";
-
-  return css({
-    color: foregroundColor(tone),
-    fontFamily: fontFamilyValue,
-    ...typographyFeatureStyle,
-    fontSize: textSize(size),
-    fontWeight: fontWeight(weight),
-    lineHeight: "1.35",
-  });
-}
-
-export function iconStyle(
-  options: {
-    readonly tone?: IntentTone | ForegroundTone;
-    readonly size?: "xs" | "sm" | "md";
-  } = {},
-): CSSMixinDescriptor {
-  const tone = options.tone ?? "foreground";
-  const size = options.size ?? "sm";
-
-  return css({
-    color: iconColor(tone),
-    display: "inline-flex",
-    flexShrink: 0,
-    height: iconSize(size),
-    width: iconSize(size),
-    "& > svg": {
-      display: "block",
-      height: "100%",
-      width: "100%",
-    },
-  });
-}
+export type { IntentTone, Elevation, Radius, ForegroundTone, TextSize };
 
 export type PanelProps = Props<"div"> & SurfaceProps & {
   readonly children?: RemixNode;
+  readonly radius?: Radius;
 };
 
 export function Panel(handle: Handle<PanelProps>) {
   return () => {
-    const { children, elevation = 1, mix, className, ...rootProps } = handle.props;
+    const { children, elevation = 1, mix, className, radius = "outer", tone, ...rootProps } = handle.props;
 
     return (
       <div
         {...rootProps}
         class={classNames("belt-surface", className)}
         data-elevation={String(elevation)}
-        data-radius="outer"
+        data-radius={radius}
+        data-tone={tone}
         mix={mix}
       >
         <div class={classNames("belt-surface__inner")}>{children}</div>
@@ -175,7 +103,7 @@ export function Button(handle: Handle<ButtonProps>) {
                 <Glyph name={icon} />
               </span>
             ) : (
-              <>
+              <Fragment>
                 {resolvedStartIcon ? (
                   <span class={classNames("belt-button__start-icon")}>
                     <Glyph name={resolvedStartIcon} />
@@ -187,7 +115,7 @@ export function Button(handle: Handle<ButtonProps>) {
                     <Glyph name={endIcon} />
                   </span>
                 ) : null}
-              </>
+              </Fragment>
             )}
           </button>
         </div>
@@ -208,7 +136,6 @@ export function GhostButton(handle: Handle<GhostButtonProps>) {
       endIcon,
       loading = false,
       icon,
-      mix,
       startIcon,
       elevation = 1,
       tone = "neutral",
@@ -229,14 +156,13 @@ export function GhostButton(handle: Handle<GhostButtonProps>) {
         data-tone={tone}
         data-elevation={elevation}
         data-control
-        mix={mix}
       >
         {icon ? (
           <span class={classNames("belt-ghost-button__icon")}>
             <Glyph name={icon} />
           </span>
         ) : (
-          <>
+          <Fragment>
             {resolvedStartIcon ? (
               <span class={classNames("belt-ghost-button__start-icon")}>
                 <Glyph name={resolvedStartIcon} />
@@ -248,32 +174,28 @@ export function GhostButton(handle: Handle<GhostButtonProps>) {
                 <Glyph name={endIcon} />
               </span>
             ) : null}
-          </>
+          </Fragment>
         )}
       </button>
     );
   };
 }
 
-export type StatusBannerTone = "neutral" | "info" | "success" | "warning" | "danger";
-
-type StatusBannerContextValue = {
-  readonly tone: StatusBannerTone;
-};
 
 export type StatusBannerRootProps = Props<"div"> & {
   readonly children?: RemixNode;
-  readonly tone?: StatusBannerTone;
+  readonly radius?: Radius;
+  readonly tone?: IntentTone;
 };
 
-export function StatusBannerRoot(handle: Handle<StatusBannerRootProps, StatusBannerContextValue>) {
+export function StatusBannerRoot(handle: Handle<StatusBannerRootProps, { tone: IntentTone }>) {
   return () => {
-    const { children, mix, tone = "neutral", ...props } = handle.props;
+    const { children, class: classes, radius = "default", tone = "neutral", ...props } = handle.props;
 
     handle.context.set({ tone });
 
     return (
-      <div {...props} mix={composeMix(statusBannerRootStyle(tone), mix)}>
+      <div {...props} class={classNames("belt-status-banner", classes)} data-radius={radius} data-tone={tone}>
         {children}
       </div>
     );
@@ -282,10 +204,10 @@ export function StatusBannerRoot(handle: Handle<StatusBannerRootProps, StatusBan
 
 export function StatusBannerRow(handle: Handle<Props<"div">>) {
   return () => {
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <div {...props} mix={composeMix(statusBannerRowStyle, mix)}>
+      <div {...props} class={classNames("belt-status-banner__row", classes)}>
         {children}
       </div>
     );
@@ -294,10 +216,10 @@ export function StatusBannerRow(handle: Handle<Props<"div">>) {
 
 export function StatusBannerBody(handle: Handle<Props<"div">>) {
   return () => {
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <div {...props} mix={composeMix(statusBannerBodyStyle, mix)}>
+      <div {...props} class={classNames("belt-status-banner__body", classes)}>
         {children}
       </div>
     );
@@ -306,38 +228,34 @@ export function StatusBannerBody(handle: Handle<Props<"div">>) {
 
 export function StatusBannerMessage(handle: Handle<Props<"span">>) {
   return () => {
-    const context = handle.context.get(StatusBannerRoot);
-    const tone = context?.tone ?? "neutral";
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <span {...props} mix={composeMix(statusBannerMessageStyle(tone), mix)}>
+      <span {...props} class={classNames("belt-status-banner__message", classes)}>
         {children}
       </span>
     );
   };
 }
 
-export function StatusBannerIcon(handle: Handle<Props<"span">>) {
+export function StatusBannerIcon(handle: Handle<Props<"span"> & { readonly glyph: GlyphName }>) {
   return () => {
-    const context = handle.context.get(StatusBannerRoot);
-    const tone = context?.tone ?? "neutral";
-    const { children, mix, ...props } = handle.props;
+    const { class: classes, glyph, ...props } = handle.props;
 
     return (
-      <span {...props} mix={composeMix(statusBannerIconStyle(tone), mix)}>
-        {children}
+      <span {...props} class={classNames("belt-status-banner__icon", classes)}>
+        <Glyph name={glyph} />
       </span>
     );
   };
 }
 
-export function StatusBannerAction(handle: Handle<Props<"div">>) {
+export function StatusBannerActions(handle: Handle<Props<"div">>) {
   return () => {
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <div {...props} mix={composeMix(statusBannerActionStyle, mix)}>
+      <div {...props} class={classNames("belt-status-banner__actions", classes)}>
         {children}
       </div>
     );
@@ -345,7 +263,7 @@ export function StatusBannerAction(handle: Handle<Props<"div">>) {
 }
 
 export const StatusBanner = {
-  Action: StatusBannerAction,
+  Actions: StatusBannerActions,
   Body: StatusBannerBody,
   Icon: StatusBannerIcon,
   Message: StatusBannerMessage,
@@ -357,10 +275,10 @@ export type LabelProps = Props<"label">;
 
 export function Label(handle: Handle<LabelProps>) {
   return () => {
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <label {...props} mix={composeMix(labelStyle, mix)}>
+      <label {...props} class={classNames("belt-label", classes)}>
         {children}
       </label>
     );
@@ -373,10 +291,10 @@ export type FieldProps = Props<"div"> & {
 
 export function Field(handle: Handle<FieldProps>) {
   return () => {
-    const { children, mix, ...props } = handle.props;
+    const { children, class: classes, ...props } = handle.props;
 
     return (
-      <div {...props} mix={composeMix(fieldStyle, mix)}>
+      <div {...props} class={classNames("belt-field", classes)}>
         {children}
       </div>
     );
@@ -385,15 +303,15 @@ export function Field(handle: Handle<FieldProps>) {
 
 export type InputProps = Props<"input"> & SurfaceProps & {
   readonly startIcon?: GlyphName;
-  readonly endIcon?: GlyphName
+  readonly endIcon?: GlyphName;
 };
 
 export function Input() {
-  return ({ tone, elevation, mix, class: classes, ...props }: InputProps) => {
+  return ({ tone, elevation, class: classes, ...props }: InputProps) => {
     return (
       <div class={classNames("belt-surface", classes)} data-tone={tone} data-elevation={elevation}>
         <div class={classNames("belt-surface__inner")}>
-          <input {...props} class="belt-input" mix={composeMix(mix)} />
+          <input {...props} class="belt-input" />
         </div>
       </div>
     );
@@ -404,9 +322,9 @@ export type SliderProps = Omit<Props<"input">, "role" | "type">;
 
 export function Slider(handle: Handle<SliderProps>) {
   return () => {
-    const { mix, ...props } = handle.props;
+    const { class: classes, ...props } = handle.props;
 
-    return <input {...props} type="range" mix={composeMix(sliderStyle, mix)} />;
+    return <input {...props} class={classNames("belt-slider", classes)} type="range" />;
   };
 }
 
@@ -414,9 +332,9 @@ export type SwitchProps = Omit<Props<"input">, "role" | "type">;
 
 export function Switch(handle: Handle<SwitchProps>) {
   return () => {
-    const { mix, ...props } = handle.props;
+    const { class: classes, ...props } = handle.props;
 
-    return <input {...props} type="checkbox" role="switch" mix={composeMix(switchStyle, mix)} />;
+    return <input {...props} class={classNames("belt-switch", classes)} type="checkbox" role="switch" />;
   };
 }
 
@@ -426,22 +344,22 @@ export type SubmenuProps = RemixMenu.SubmenuProps & WithClassName & WithMix;
 export type MenuListProps = RemixMenu.MenuListProps & WithClassName & WithMix;
 
 export function Menu(handle: Handle<MenuProps>) {
-  const wrappedHandle = withMix(handle, [menuButtonStyle]);
+  const wrappedHandle = withClass(handle, "belt-menu__trigger");
   return RemixMenu.Menu(wrappedHandle);
 }
 
 export function MenuItem(handle: Handle<MenuItemProps>) {
-  const wrappedHandle = withMix(handle, [menuItemStyle]);
+  const wrappedHandle = withClass(handle, "belt-menu__item");
   return RemixMenu.MenuItem(wrappedHandle);
 }
 
 export function Submenu(handle: Handle<SubmenuProps>) {
-  const wrappedHandle = withMix(handle, [menuButtonStyle]);
+  const wrappedHandle = withClass(handle, "belt-menu__trigger");
   return RemixMenu.Submenu(wrappedHandle);
 }
 
 export function MenuList(handle: Handle<MenuListProps>) {
-  const wrappedHandle = withMix(handle, [menuListStyle]);
+  const wrappedHandle = withClass(handle, "belt-menu__list");
   return RemixMenu.MenuList(wrappedHandle);
 }
 
@@ -453,12 +371,12 @@ export type SelectProps = RemixSelect.SelectProps & WithClassName & WithMix;
 export type SelectOptionProps = RemixSelect.SelectOptionProps & WithClassName & WithMix;
 
 export function Select(handle: Handle<SelectProps>) {
-  const wrappedHandle = withMix(handle, [selectTriggerStyle]);
+  const wrappedHandle = withClass(handle, "belt-select__trigger");
   return RemixSelect.Select(wrappedHandle);
 }
 
 export function SelectOption(handle: Handle<SelectOptionProps>) {
-  const wrappedHandle = withMix(handle, [optionStyle]);
+  const wrappedHandle = withClass(handle, "belt-select__item");
   return RemixSelect.Option(wrappedHandle);
 }
 
@@ -469,12 +387,12 @@ export type ComboboxProps = RemixCombobox.ComboboxProps & WithClassName & WithMi
 export type ComboboxOptionProps = RemixCombobox.ComboboxOptionProps & WithClassName & WithMix;
 
 export function Combobox(handle: Handle<ComboboxProps>) {
-  const wrappedHandle = withMix(handle, [comboboxRootStyle]);
+  const wrappedHandle = withClass(handle, "belt-combobox");
   return RemixCombobox.Combobox(wrappedHandle);
 }
 
 export function ComboboxOption(handle: Handle<ComboboxOptionProps>) {
-  const wrappedHandle = withMix(handle, [optionStyle]);
+  const wrappedHandle = withClass(handle, "belt-combobox__item");
   return RemixCombobox.ComboboxOption(wrappedHandle);
 }
 
@@ -491,281 +409,18 @@ export {
   ToolbarGlyphSheet,
 } from "./glyph.js";
 
-export const statusBannerRowStyle: CSSMixinDescriptor = css({
-  alignItems: "center",
-  display: "flex",
-  gap: "var(--belt-space-2)",
-  minHeight: "2rem",
-  paddingBlock: "var(--belt-space-1)",
-  paddingInline: "var(--belt-space-3)",
-});
+function withClass<Props_>(handle: Handle<Props_>, className: string): Handle<Props_> {
+  const props = handle.props as Props_ & {
+    readonly class?: string | undefined;
+    readonly className?: string | undefined;
+  };
 
-export const statusBannerBodyStyle: CSSMixinDescriptor = css({
-  padding: "var(--belt-space-3)",
-});
-
-export const statusBannerActionStyle: CSSMixinDescriptor = css({
-  marginInlineStart: "auto",
-});
-
-export const labelStyle: CSSMixinDescriptor = css({
-  color: "var(--belt-color-foreground-strong)",
-  display: "inline-flex",
-  fontFamily: fontFamilyValue,
-  ...typographyFeatureStyle,
-  fontSize: "0.75rem",
-  fontWeight: "600",
-  lineHeight: "1.2",
-});
-
-export const fieldStyle: CSSMixinDescriptor = css({
-  display: "grid",
-  gap: "var(--belt-space-2)",
-});
-
-export const inputStyle: CSSMixinDescriptor = css({
-  appearance: "none",
-  backgroundColor: "var(--belt-color-elevation-2)",
-  border: "0.5px solid var(--belt-color-border)",
-  borderRadius: "var(--belt-radius)",
-  boxSizing: "border-box",
-  color: "var(--belt-color-foreground)",
-  fontFamily: fontFamilyValue,
-  ...typographyFeatureStyle,
-  fontSize: "0.8125rem",
-  lineHeight: "1.2",
-  minHeight: "1.875rem",
-  outline: "none",
-  paddingBlock: "0",
-  paddingInline: "var(--belt-space-3)",
-  width: "100%",
-  "&::placeholder": {
-    color: "var(--belt-color-foreground-subtle)",
-  },
-  "&:focus-visible": {
-    borderColor: "var(--belt-color-focus)",
-    boxShadow: "0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 24%, transparent)",
-  },
-});
-
-export const sliderStyle: CSSMixinDescriptor = css({
-  accentColor: "var(--belt-color-primary-control)",
-  width: "100%",
-});
-
-export const switchStyle: CSSMixinDescriptor = css({
-  accentColor: "var(--belt-color-primary-control)",
-});
-
-export const menuButtonStyle: CSSMixinDescriptor = css({
-  minWidth: "0",
-});
-
-export const menuListStyle: CSSMixinDescriptor = css({
-  backgroundColor: "var(--belt-color-elevation-3)",
-  border: "0.5px solid var(--belt-color-border-subtle)",
-  borderRadius: "var(--belt-radius-outer)",
-  boxShadow: "0 12px 30px color-mix(in oklch, var(--belt-color-foreground) 18%, transparent)",
-  color: "var(--belt-color-foreground)",
-  padding: "var(--belt-space-1)",
-});
-
-export const menuItemStyle: CSSMixinDescriptor = css({
-  borderRadius: "var(--belt-radius)",
-  color: "var(--belt-color-foreground)",
-  '&[data-highlighted="true"]': {
-    backgroundColor: "var(--belt-color-elevation-3-hover)",
-  },
-});
-
-export const optionStyle: CSSMixinDescriptor = css({
-  borderRadius: "var(--belt-radius)",
-  color: "var(--belt-color-foreground)",
-});
-
-export const selectTriggerStyle: CSSMixinDescriptor = css({
-  minWidth: "0",
-});
-
-export const comboboxRootStyle: CSSMixinDescriptor = css({
-  minWidth: "0",
-});
-
-export function panelRootStyle(options: {
-  readonly elevation: Elevation;
-  readonly focused: boolean;
-}): CSSMixinDescriptor {
-  return css({
-    backgroundColor: `var(--belt-color-elevation-${options.elevation})`,
-    borderRadius: "var(--belt-radius-outer)",
-    boxShadow:
-      "0 1px 1px color-mix(in oklch, var(--belt-color-foreground) 10%, transparent), 0 8px 24px color-mix(in oklch, var(--belt-color-foreground) 12%, transparent)",
-    boxSizing: "border-box",
-    outline: options.focused ? "2px solid var(--belt-color-focus)" : "none",
-    outlineOffset: "2px",
-    padding: "1px",
-    position: "relative",
-  });
-}
-
-export function panelInnerStyle(options: { readonly elevation: Elevation }): CSSMixinDescriptor {
-  return css({
-    backgroundColor: `var(--belt-color-elevation-${options.elevation})`,
-    border: "0.5px solid var(--belt-color-border-subtle)",
-    borderRadius: "var(--belt-radius)",
-    boxSizing: "border-box",
-    color: "var(--belt-color-foreground)",
-    minWidth: 0,
-    overflow: "hidden",
-  });
-}
-
-export function buttonToneStyle(tone: IntentTone): CSSMixinDescriptor {
-  if (tone === "neutral") {
-    return css({
-      backgroundColor: "var(--belt-color-elevation-3)",
-      border: "0.5px solid var(--belt-color-border)",
-      boxShadow:
-        "inset 0 1px 0 color-mix(in oklch, var(--belt-color-foreground-strong) 8%, transparent)",
-      color: "var(--belt-color-foreground)",
-      "&:hover": {
-        backgroundColor: "var(--belt-color-elevation-3-hover)",
-      },
-      "&:active": {
-        backgroundColor: "var(--belt-color-elevation-3-active)",
-      },
-    });
-  }
-
-  return css({
-    backgroundColor: `var(--belt-color-${tone}-control)`,
-    border: `0.5px solid color-mix(in oklch, var(--belt-color-${tone}-control-active) 70%, transparent)`,
-    boxShadow: `inset 0 1px 0 color-mix(in oklch, var(--belt-color-${tone}-control-foreground-strong) 14%, transparent)`,
-    color: `var(--belt-color-${tone}-control-foreground)`,
-    "&:hover": {
-      backgroundColor: `var(--belt-color-${tone}-control-hover)`,
-    },
-    "&:active": {
-      backgroundColor: `var(--belt-color-${tone}-control-active)`,
-    },
-  });
-}
-
-export function ghostButtonToneStyle(tone: IntentTone): CSSMixinDescriptor {
-  if (tone === "neutral") {
-    return css({
-      backgroundColor: "transparent",
-      border: "0.5px solid transparent",
-      color: "var(--belt-color-foreground-subtle)",
-      "&:hover": {
-        backgroundColor: "var(--belt-color-elevation-2-hover)",
-        color: "var(--belt-color-foreground)",
-      },
-      "&:active": {
-        backgroundColor: "var(--belt-color-elevation-2-active)",
-        color: "var(--belt-color-foreground-strong)",
-      },
-    });
-  }
-
-  return css({
-    backgroundColor: "transparent",
-    border: "0.5px solid transparent",
-    color: `var(--belt-color-${tone}-foreground)`,
-    "&:hover": {
-      backgroundColor: `color-mix(in oklch, var(--belt-color-${tone}) 70%, transparent)`,
-      color: `var(--belt-color-${tone}-foreground-strong)`,
-    },
-    "&:active": {
-      backgroundColor: `color-mix(in oklch, var(--belt-color-${tone}) 90%, transparent)`,
-    },
-  });
-}
-
-export function statusBannerRootStyle(tone: StatusBannerTone): CSSMixinDescriptor {
-  const neutral = tone === "neutral";
-
-  return css({
-    backgroundColor: neutral ? "var(--belt-color-elevation-2)" : `var(--belt-color-${tone})`,
-    border: `0.5px solid ${neutral ? "var(--belt-color-border-subtle)" : `color-mix(in oklch, var(--belt-color-${tone}-foreground) 24%, transparent)`}`,
-    borderRadius: "var(--belt-radius-outer)",
-    boxShadow: "0 1px 2px color-mix(in oklch, var(--belt-color-foreground) 10%, transparent)",
-    boxSizing: "border-box",
-    color: neutral ? "var(--belt-color-foreground)" : `var(--belt-color-${tone}-foreground)`,
-  });
-}
-
-export function statusBannerMessageStyle(tone: StatusBannerTone): CSSMixinDescriptor {
-  return css({
-    color:
-      tone === "neutral" ? "var(--belt-color-foreground)" : `var(--belt-color-${tone}-foreground)`,
-    flex: "1 1 auto",
-    minWidth: 0,
-  });
-}
-
-export function statusBannerIconStyle(tone: StatusBannerTone): CSSMixinDescriptor {
-  return iconStyle({
-    tone: tone === "neutral" ? "foreground" : tone,
-    size: "sm",
-  });
-}
-
-function foregroundColor(tone: ForegroundTone): string {
-  return tone === "foreground"
-    ? "var(--belt-color-foreground)"
-    : `var(--belt-color-foreground-${tone})`;
-}
-
-function iconColor(tone: IntentTone | ForegroundTone): string {
-  if (tone === "neutral") return "var(--belt-color-foreground)";
-  if (tone === "foreground" || tone === "subtle" || tone === "strong") return foregroundColor(tone);
-  return `var(--belt-color-${tone}-foreground)`;
-}
-
-function textSize(size: TextSize): string {
-  switch (size) {
-    case "xs":
-      return "0.75rem";
-    case "md":
-      return "0.875rem";
-    case "sm":
-      return "0.8125rem";
-  }
-}
-
-function iconSize(size: "xs" | "sm" | "md"): string {
-  switch (size) {
-    case "xs":
-      return "0.75rem";
-    case "md":
-      return "1rem";
-    case "sm":
-      return "0.875rem";
-  }
-}
-
-function fontWeight(weight: "regular" | "medium" | "semibold"): string {
-  switch (weight) {
-    case "medium":
-      return "500";
-    case "semibold":
-      return "600";
-    case "regular":
-      return "400";
-  }
-}
-
-function withMix<Props_ extends WithMix>(
-  handle: Handle<Props_>,
-  styles: readonly CSSMixinDescriptor[],
-): Handle<Props_> {
   return {
     ...handle,
     props: {
-      ...handle.props,
-      mix: [...styles, handle.props.mix],
-    },
+      ...props,
+      class: classNames(className, props.class, props.className),
+    } as Props_,
   };
 }
 
@@ -773,8 +428,4 @@ function classNames(...parts: readonly (string | undefined)[]): string | undefin
   const className = parts.filter(Boolean).join(" ");
 
   return className === "" ? undefined : className;
-}
-
-function composeMix(...parts: readonly unknown[]) {
-  return parts as MixInput;
 }

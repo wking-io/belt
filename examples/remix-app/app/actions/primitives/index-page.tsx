@@ -9,21 +9,16 @@ import {
   Field,
   GhostButton,
   Glyph,
-  iconStyle,
   Input,
   Label,
   Menu,
   MenuItem,
-  menuItemStyle,
-  menuListStyle,
   Panel,
-  radiusStyle,
   Select,
   SelectOption,
   Slider,
   StatusBanner,
-  Switch,
-  textStyle
+  Switch
 } from "@repo/renderer-remix";
 import { layout } from "../../ui/layout.ts";
 
@@ -258,11 +253,6 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   }
 });
 
-const staticMenuItemStyle = css({
-  paddingBlock: "8px",
-  paddingInline: "10px"
-});
-
 function mix(value: CSSMixinDescriptor | readonly CSSMixinDescriptor[]) {
   return value as never;
 }
@@ -350,8 +340,8 @@ function panelGrid() {
       {elevations.map((elevation) => (
         <Panel elevation={elevation}>
           <div class="preview-panel-content">
-            <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Elevation {elevation}</span>
-            <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Default surface.</span>
+            <span class="belt-text" data-emphasis="strong" data-weight="semibold">Elevation {elevation}</span>
+            <span class="belt-text" data-emphasis="subtle" data-size="xs">Default surface.</span>
           </div>
         </Panel>
       ))}
@@ -361,45 +351,60 @@ function panelGrid() {
 
 function buttonGrid() {
   return (
+    <div class="preview-grid">
+      {elevations.map((elevation) => (
+        <Panel elevation={elevation}>
+          <div class="preview-panel-content">
+            <span class="belt-text" data-emphasis="strong" data-weight="semibold">Elevation {elevation}</span>
+            {buttonRows(elevation)}
+          </div>
+        </Panel>
+      ))}
+    </div>
+  );
+}
+
+function buttonRows(elevation: 1 | 2 | 3) {
+  return (
     <div class="preview-stack">
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button tone={tone}>{tone}</Button>
+          <Button elevation={elevation} tone={tone}>{tone}</Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton tone={tone}>{tone}</GhostButton>
-        ))}
-      </div>
-      <div class="preview-row">
-        {tones.map((tone) => (
-          <Button tone={tone} startIcon="add" endIcon="close">{tone}</Button>
-        ))}
-        {tones.map((tone) => (
-          <GhostButton tone={tone} startIcon="add" endIcon="close">{tone}</GhostButton>
+          <GhostButton elevation={elevation} tone={tone}>{tone}</GhostButton>
         ))}
       </div>
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button tone={tone} loading>{tone}</Button>
+          <Button elevation={elevation} tone={tone} startIcon="add" endIcon="close">{tone}</Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton tone={tone} loading>{tone}</GhostButton>
-        ))}
-      </div>
-      <div class="preview-row">
-        {tones.map((tone) => (
-          <Button tone={tone} disabled>{tone}</Button>
-        ))}
-        {tones.map((tone) => (
-          <GhostButton tone={tone} disabled>{tone}</GhostButton>
+          <GhostButton elevation={elevation} tone={tone} startIcon="add" endIcon="close">{tone}</GhostButton>
         ))}
       </div>
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button tone={tone} icon="add" />
+          <Button elevation={elevation} tone={tone} loading>{tone}</Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton tone={tone} icon="add" />
+          <GhostButton elevation={elevation} tone={tone} loading>{tone}</GhostButton>
+        ))}
+      </div>
+      <div class="preview-row">
+        {tones.map((tone) => (
+          <Button elevation={elevation} tone={tone} disabled>{tone}</Button>
+        ))}
+        {tones.map((tone) => (
+          <GhostButton elevation={elevation} tone={tone} disabled>{tone}</GhostButton>
+        ))}
+      </div>
+      <div class="preview-row">
+        {tones.map((tone) => (
+          <Button elevation={elevation} tone={tone} icon="add" />
+        ))}
+        {tones.map((tone) => (
+          <GhostButton elevation={elevation} tone={tone} icon="add" />
         ))}
       </div>
     </div>
@@ -408,15 +413,16 @@ function buttonGrid() {
 
 function statusBannerGrid() {
   return (
-    <div class="preview-grid">
+    <div class="preview-stack">
       {tones.map((tone) => (
-        <StatusBanner.Root tone={tone === "primary" ? "info" : tone}>
+        <StatusBanner.Root tone={tone}>
           <StatusBanner.Row>
-            <StatusBanner.Icon>{tone === "danger" ? "!" : "i"}</StatusBanner.Icon>
+            <StatusBanner.Icon glyph="alert" />
             <StatusBanner.Message>{tone} status message</StatusBanner.Message>
-            <StatusBanner.Action>
-              <GhostButton tone={tone}>Action</GhostButton>
-            </StatusBanner.Action>
+            <StatusBanner.Actions>
+              <GhostButton tone={tone}>cancel</GhostButton>
+              <Button tone={tone} icon="check" />
+            </StatusBanner.Actions>
           </StatusBanner.Row>
         </StatusBanner.Root>
       ))}
@@ -429,10 +435,10 @@ function mixinGrid() {
     <div class="preview-grid">
       <Panel>
         <div class="preview-panel-content">
-          <span mix={mix(textStyle({ tone: "strong", size: "md", weight: "semibold" }))}>Strong text</span>
-          <span mix={mix(textStyle({ tone: "foreground" }))}>Regular foreground text</span>
-          <span mix={mix(textStyle({ tone: "subtle", size: "xs" }))}>Subtle helper text</span>
-          <span mix={mix(textStyle({ tone: "foreground" }))}>office affine efficient 0123456789</span>
+          <span class="belt-text" data-emphasis="strong" data-size="md" data-weight="semibold">Strong text</span>
+          <span class="belt-text">Regular foreground text</span>
+          <span class="belt-text" data-emphasis="subtle" data-size="xs">Subtle helper text</span>
+          <span class="belt-text">office affine efficient 0123456789</span>
         </div>
       </Panel>
       <Panel>
@@ -443,21 +449,21 @@ function mixinGrid() {
             ))}
           </div>
           <div class="preview-row">
-            <Glyph mix={mix(iconStyle({ tone: "primary", size: "md" }))} name="add" />
-            <Glyph mix={mix(iconStyle({ tone: "success", size: "md" }))} name="check" />
-            <Glyph mix={mix(iconStyle({ tone: "danger", size: "md" }))} name="trash" />
+            <Glyph class="belt-icon" data-tone="primary" data-size="md" name="add" />
+            <Glyph class="belt-icon" data-tone="success" data-size="md" name="check" />
+            <Glyph class="belt-icon" data-tone="danger" data-size="md" name="trash" />
           </div>
         </div>
       </Panel>
       <Panel>
         <div class="preview-panel-content">
-          <span class="preview-radius" mix={mix(radiusStyle("inner"))}>
+          <span class="preview-radius belt-radius" data-size="inner">
             inner
           </span>
-          <span class="preview-radius" mix={mix(radiusStyle())}>
+          <span class="preview-radius belt-radius">
             default
           </span>
-          <span class="preview-radius" mix={mix(radiusStyle("outer"))}>
+          <span class="preview-radius belt-radius" data-size="outer">
             outer
           </span>
         </div>
@@ -481,7 +487,7 @@ function formPreview() {
           </Field>
           <label class="preview-row">
             <Switch checked />
-            <span mix={mix(textStyle())}>Show dev toolbar</span>
+            <span class="belt-text">Show dev toolbar</span>
           </label>
         </div>
       </div>
@@ -494,7 +500,7 @@ function choicePreview() {
     <div class="preview-grid">
       <Panel>
         <div class="preview-panel-content">
-          <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Behavior controls</span>
+          <span class="belt-text" data-emphasis="strong" data-weight="semibold">Behavior controls</span>
           <Menu label="Menu">
             <MenuItem id="open" label="Open worktree" name="action" value="open">
               Open worktree
@@ -523,11 +529,11 @@ function choicePreview() {
       </Panel>
       <Panel>
         <div class="preview-panel-content">
-          <span mix={mix(textStyle({ tone: "strong", weight: "semibold" }))}>Menu surface mixins</span>
-          <div class="preview-surface" mix={mix(menuListStyle)}>
-            <div mix={mix([menuItemStyle, staticMenuItemStyle])}>Open worktree</div>
-            <div mix={mix([menuItemStyle, staticMenuItemStyle])}>Copy URL</div>
-            <div data-highlighted="true" mix={mix([menuItemStyle, staticMenuItemStyle])}>
+          <span class="belt-text" data-emphasis="strong" data-weight="semibold">Menu surface classes</span>
+          <div class="preview-surface belt-menu__list">
+            <div class="belt-menu__item">Open worktree</div>
+            <div class="belt-menu__item">Copy URL</div>
+            <div class="belt-menu__item" data-highlighted="true">
               Highlighted item
             </div>
           </div>
