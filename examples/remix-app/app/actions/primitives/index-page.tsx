@@ -1,7 +1,7 @@
 // @jsxRuntime classic
 // @jsx createElement
 // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
-import { createElement, css, type CSSMixinDescriptor, type RemixNode } from "remix/ui";
+import { createElement, css, type CSSMixinDescriptor, type Handle, type RemixNode } from "remix/ui";
 import {
   Button,
   Combobox,
@@ -18,9 +18,8 @@ import {
   SelectOption,
   Slider,
   StatusBanner,
-  Switch
+  Switch,
 } from "@repo/renderer-remix";
-import { layout } from "../../ui/layout.ts";
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
 const elevations = [1, 2, 3] as const;
@@ -46,33 +45,33 @@ const paletteGroups = [
   "fuchsia",
   "blush",
   "plum",
-  "oatmeal"
+  "oatmeal",
 ] as const;
 const paletteSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
 const beltColorGroups = [
   {
     label: "elevation 1",
-    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active"]
+    tokens: ["elevation-1", "elevation-1-hover", "elevation-1-active"],
   },
   {
     label: "elevation 2",
-    tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active"]
+    tokens: ["elevation-2", "elevation-2-hover", "elevation-2-active"],
   },
   {
     label: "elevation 3",
-    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active"]
+    tokens: ["elevation-3", "elevation-3-hover", "elevation-3-active"],
   },
   {
     label: "foreground",
-    tokens: ["foreground", "foreground-subtle", "foreground-strong"]
+    tokens: ["foreground", "foreground-subtle", "foreground-strong"],
   },
   {
     label: "border",
-    tokens: ["border", "border-subtle", "border-strong"]
+    tokens: ["border", "border-subtle", "border-strong"],
   },
   {
     label: "focus",
-    tokens: ["focus"]
+    tokens: ["focus"],
   },
   {
     label: "primary",
@@ -86,8 +85,8 @@ const beltColorGroups = [
       "primary-control-active",
       "primary-control-foreground",
       "primary-control-foreground-subtle",
-      "primary-control-foreground-strong"
-    ]
+      "primary-control-foreground-strong",
+    ],
   },
   {
     label: "info",
@@ -101,8 +100,8 @@ const beltColorGroups = [
       "info-control-active",
       "info-control-foreground",
       "info-control-foreground-subtle",
-      "info-control-foreground-strong"
-    ]
+      "info-control-foreground-strong",
+    ],
   },
   {
     label: "success",
@@ -116,8 +115,8 @@ const beltColorGroups = [
       "success-control-active",
       "success-control-foreground",
       "success-control-foreground-subtle",
-      "success-control-foreground-strong"
-    ]
+      "success-control-foreground-strong",
+    ],
   },
   {
     label: "warning",
@@ -131,8 +130,8 @@ const beltColorGroups = [
       "warning-control-active",
       "warning-control-foreground",
       "warning-control-foreground-subtle",
-      "warning-control-foreground-strong"
-    ]
+      "warning-control-foreground-strong",
+    ],
   },
   {
     label: "danger",
@@ -146,9 +145,9 @@ const beltColorGroups = [
       "danger-control-active",
       "danger-control-foreground",
       "danger-control-foreground-subtle",
-      "danger-control-foreground-strong"
-    ]
-  }
+      "danger-control-foreground-strong",
+    ],
+  },
 ] as const;
 
 const primitivePreviewStyle: CSSMixinDescriptor = css({
@@ -156,91 +155,91 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
   gap: "32px",
   ".preview-header": {
     display: "grid",
-    gap: "8px"
+    gap: "8px",
   },
   ".preview-title": {
     color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "28px",
     fontWeight: 650,
     lineHeight: 1.1,
-    margin: 0
+    margin: 0,
   },
   ".preview-note": {
     color: "var(--belt-color-elevation-1-foreground-subtle)",
     fontSize: "14px",
     lineHeight: 1.5,
     margin: 0,
-    maxWidth: "720px"
+    maxWidth: "720px",
   },
   ".preview-section": {
     display: "grid",
-    gap: "12px"
+    gap: "12px",
   },
   ".preview-section-title": {
     color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "13px",
     fontWeight: 650,
     letterSpacing: 0,
-    margin: 0
+    margin: 0,
   },
   ".preview-grid": {
     display: "grid",
     gap: "12px",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))"
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   },
   ".preview-palette": {
     display: "grid",
-    gap: "14px"
+    gap: "14px",
   },
   ".preview-palette-row": {
     alignItems: "start",
     display: "grid",
     gap: "12px",
-    gridTemplateColumns: "96px 1fr"
+    gridTemplateColumns: "96px 1fr",
   },
   ".preview-palette-label": {
     color: "var(--belt-color-elevation-1-foreground-subtle)",
     fontSize: "12px",
     fontWeight: 600,
     lineHeight: 1,
-    textTransform: "capitalize"
+    textTransform: "capitalize",
   },
   ".preview-palette-chips": {
     display: "grid",
     gap: "8px",
-    gridTemplateColumns: "repeat(auto-fill, minmax(44px, 1fr))"
+    gridTemplateColumns: "repeat(auto-fill, minmax(44px, 1fr))",
   },
   ".preview-palette-chip": {
     aspectRatio: "1",
     border: "0.5px solid color-mix(in oklch, var(--belt-color-border) 65%, transparent)",
     borderRadius: "var(--belt-radius-inner)",
-    minWidth: 0
+    minWidth: 0,
   },
   ".preview-row": {
     alignItems: "center",
     display: "flex",
     flexWrap: "wrap",
-    gap: "8px"
+    gap: "8px",
   },
   ".preview-stack": {
     display: "grid",
-    gap: "10px"
+    gap: "10px",
   },
   ".preview-panel-content": {
     display: "grid",
     gap: "8px",
-    padding: "12px"
+    padding: "12px",
   },
   ".preview-surface": {
     display: "grid",
     gap: "6px",
     padding: "8px",
-    width: "min(260px, 100%)"
+    width: "min(260px, 100%)",
   },
   ".preview-form": {
     display: "grid",
     gap: "12px",
-    maxWidth: "320px"
+    maxWidth: "320px",
   },
   ".preview-radius": {
     alignItems: "center",
@@ -249,8 +248,8 @@ const primitivePreviewStyle: CSSMixinDescriptor = css({
     display: "inline-flex",
     height: "40px",
     justifyContent: "center",
-    minWidth: "92px"
-  }
+    minWidth: "92px",
+  },
 });
 
 function mix(value: CSSMixinDescriptor | readonly CSSMixinDescriptor[]) {
@@ -258,27 +257,33 @@ function mix(value: CSSMixinDescriptor | readonly CSSMixinDescriptor[]) {
 }
 
 export function IndexPage() {
-  return layout({
-    title: "Belt Remix Primitives",
-    children: (
-      <main mix={mix(primitivePreviewStyle)}>
-        <header class="preview-header">
-          <h1 class="preview-title">Belt Remix Primitives</h1>
-          <p class="preview-note">
-            Preview rendered from the example app with actual @repo/renderer-remix components and @repo/theme-css tokens.
-          </p>
-        </header>
-        {section({ title: "Color Palette", children: paletteGrid() })}
-        {section({ title: "Belt Colors", children: beltColorGrid() })}
-        {section({ title: "Panel", children: panelGrid() })}
-        {section({ title: "Buttons", children: buttonGrid() })}
-        {section({ title: "StatusBanner", children: statusBannerGrid() })}
-        {section({ title: "Text, Badge, Glyph, Radius", children: mixinGrid() })}
-        {section({ title: "Form Controls", children: formPreview() })}
-        {section({ title: "Menu, Select, Combobox", children: choicePreview() })}
-      </main>
-    )
-  });
+  return primitivesContent();
+}
+
+export function PrimitivesContent(_handle: Handle) {
+  return () => primitivesContent();
+}
+
+function primitivesContent() {
+  return (
+    <main mix={mix(primitivePreviewStyle)}>
+      <header class="preview-header">
+        <h1 class="preview-title">Belt Remix Primitives</h1>
+        <p class="preview-note">
+          Preview rendered from the example app with actual @repo/renderer-remix components and
+          @repo/theme-css tokens.
+        </p>
+      </header>
+      {section({ title: "Color Palette", children: paletteGrid() })}
+      {section({ title: "Belt Colors", children: beltColorGrid() })}
+      {section({ title: "Panel", children: panelGrid() })}
+      {section({ title: "Buttons", children: buttonGrid() })}
+      {section({ title: "StatusBanner", children: statusBannerGrid() })}
+      {section({ title: "Text, Badge, Glyph, Radius", children: mixinGrid() })}
+      {section({ title: "Form Controls", children: formPreview() })}
+      {section({ title: "Menu, Select, Combobox", children: choicePreview() })}
+    </main>
+  );
 }
 
 function section(props: { readonly children?: RemixNode; readonly title: string }) {
@@ -340,8 +345,12 @@ function panelGrid() {
       {elevations.map((elevation) => (
         <Panel elevation={elevation}>
           <div class="preview-panel-content">
-            <span class="belt-text" data-emphasis="strong" data-weight="semibold">Elevation {elevation}</span>
-            <span class="belt-text" data-emphasis="subtle" data-size="xs">Default surface.</span>
+            <span class="belt-text" data-emphasis="strong" data-weight="semibold">
+              Elevation {elevation}
+            </span>
+            <span class="belt-text" data-emphasis="subtle" data-size="xs">
+              Default surface.
+            </span>
           </div>
         </Panel>
       ))}
@@ -355,7 +364,9 @@ function buttonGrid() {
       {elevations.map((elevation) => (
         <Panel elevation={elevation}>
           <div class="preview-panel-content">
-            <span class="belt-text" data-emphasis="strong" data-weight="semibold">Elevation {elevation}</span>
+            <span class="belt-text" data-emphasis="strong" data-weight="semibold">
+              Elevation {elevation}
+            </span>
             {buttonRows(elevation)}
           </div>
         </Panel>
@@ -369,34 +380,50 @@ function buttonRows(elevation: 1 | 2 | 3) {
     <div class="preview-stack">
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button elevation={elevation} tone={tone}>{tone}</Button>
+          <Button elevation={elevation} tone={tone}>
+            {tone}
+          </Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton elevation={elevation} tone={tone}>{tone}</GhostButton>
-        ))}
-      </div>
-      <div class="preview-row">
-        {tones.map((tone) => (
-          <Button elevation={elevation} tone={tone} startIcon="add" endIcon="close">{tone}</Button>
-        ))}
-        {tones.map((tone) => (
-          <GhostButton elevation={elevation} tone={tone} startIcon="add" endIcon="close">{tone}</GhostButton>
+          <GhostButton elevation={elevation} tone={tone}>
+            {tone}
+          </GhostButton>
         ))}
       </div>
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button elevation={elevation} tone={tone} loading>{tone}</Button>
+          <Button elevation={elevation} tone={tone} startIcon="add" endIcon="close">
+            {tone}
+          </Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton elevation={elevation} tone={tone} loading>{tone}</GhostButton>
+          <GhostButton elevation={elevation} tone={tone} startIcon="add" endIcon="close">
+            {tone}
+          </GhostButton>
         ))}
       </div>
       <div class="preview-row">
         {tones.map((tone) => (
-          <Button elevation={elevation} tone={tone} disabled>{tone}</Button>
+          <Button elevation={elevation} tone={tone} loading>
+            {tone}
+          </Button>
         ))}
         {tones.map((tone) => (
-          <GhostButton elevation={elevation} tone={tone} disabled>{tone}</GhostButton>
+          <GhostButton elevation={elevation} tone={tone} loading>
+            {tone}
+          </GhostButton>
+        ))}
+      </div>
+      <div class="preview-row">
+        {tones.map((tone) => (
+          <Button elevation={elevation} tone={tone} disabled>
+            {tone}
+          </Button>
+        ))}
+        {tones.map((tone) => (
+          <GhostButton elevation={elevation} tone={tone} disabled>
+            {tone}
+          </GhostButton>
         ))}
       </div>
       <div class="preview-row">
@@ -435,9 +462,13 @@ function mixinGrid() {
     <div class="preview-grid">
       <Panel>
         <div class="preview-panel-content">
-          <span class="belt-text" data-emphasis="strong" data-size="md" data-weight="semibold">Strong text</span>
+          <span class="belt-text" data-emphasis="strong" data-size="md" data-weight="semibold">
+            Strong text
+          </span>
           <span class="belt-text">Regular foreground text</span>
-          <span class="belt-text" data-emphasis="subtle" data-size="xs">Subtle helper text</span>
+          <span class="belt-text" data-emphasis="subtle" data-size="xs">
+            Subtle helper text
+          </span>
           <span class="belt-text">office affine efficient 0123456789</span>
         </div>
       </Panel>
@@ -445,7 +476,9 @@ function mixinGrid() {
         <div class="preview-panel-content">
           <div class="preview-row">
             {tones.map((tone) => (
-              <span class="belt-badge" data-tone={tone}>{tone}</span>
+              <span class="belt-badge" data-tone={tone}>
+                {tone}
+              </span>
             ))}
           </div>
           <div class="preview-row">
@@ -460,9 +493,7 @@ function mixinGrid() {
           <span class="preview-radius belt-radius" data-size="inner">
             inner
           </span>
-          <span class="preview-radius belt-radius">
-            default
-          </span>
+          <span class="preview-radius belt-radius">default</span>
           <span class="preview-radius belt-radius" data-size="outer">
             outer
           </span>
@@ -475,20 +506,51 @@ function mixinGrid() {
 function formPreview() {
   return (
     <Panel>
-      <div class="preview-panel-content">
-        <div class="preview-form">
-          <Field>
-            <Label for="branch">Branch</Label>
-            <Input id="branch" placeholder="feature/new-toolbar" />
-          </Field>
-          <Field>
-            <Label for="volume">Intensity</Label>
-            <Slider id="volume" max={100} min={0} value={64} />
-          </Field>
-          <label class="preview-row">
-            <Switch checked />
-            <span class="belt-text">Show dev toolbar</span>
-          </label>
+      <div style={{ width: "100%", padding: "12px", display: "grid", gap: "12px" }}>
+        <Field style={{ width: "33%" }}>
+          <Label for="branch">Branch</Label>
+          <Input id="branch" placeholder="feature/new-toolbar" />
+        </Field>
+        <div
+          style={{
+            width: "100%",
+            display: "grid",
+            gap: "12px",
+            gridTemplateColumns: "repeat(2, 1fr)",
+          }}
+        >
+          {tones.map(
+            (tone, index) =>
+              tone !== "neutral" && (
+                <Slider
+                  id={`slider-${tone}`}
+                  label={tone}
+                  max={100}
+                  min={0}
+                  defaultValue={20 + index * 12}
+                  tone={tone}
+                  unit="%"
+                />
+              ),
+          )}
+        </div>
+        <div
+          style={{
+            width: "100%",
+            display: "grid",
+            gap: "12px",
+            gridTemplateColumns: "repeat(2, 1fr)",
+          }}
+        >
+          {tones.map(
+            (tone, index) =>
+              tone !== "neutral" && (
+                <Label class="preview-row">
+                  <Switch checked tone={tone} />
+                  <span class="belt-text" data-size="sm">Show dev toolbar</span>
+                </Label>
+              ),
+          )}
         </div>
       </div>
     </Panel>
@@ -500,7 +562,9 @@ function choicePreview() {
     <div class="preview-grid">
       <Panel>
         <div class="preview-panel-content">
-          <span class="belt-text" data-emphasis="strong" data-weight="semibold">Behavior controls</span>
+          <span class="belt-text" data-emphasis="strong" data-weight="semibold">
+            Behavior controls
+          </span>
           <Menu label="Menu">
             <MenuItem id="open" label="Open worktree" name="action" value="open">
               Open worktree
@@ -529,7 +593,9 @@ function choicePreview() {
       </Panel>
       <Panel>
         <div class="preview-panel-content">
-          <span class="belt-text" data-emphasis="strong" data-weight="semibold">Menu surface classes</span>
+          <span class="belt-text" data-emphasis="strong" data-weight="semibold">
+            Menu surface classes
+          </span>
           <div class="preview-surface belt-menu__list">
             <div class="belt-menu__item">Open worktree</div>
             <div class="belt-menu__item">Copy URL</div>

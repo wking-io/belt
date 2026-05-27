@@ -6,8 +6,24 @@ import { Menu as BaseMenu } from "@base-ui/react/menu";
 import { Select as BaseSelect } from "@base-ui/react/select";
 import { Slider as BaseSlider } from "@base-ui/react/slider";
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
-import { createContext, createElement, useContext, type CSSProperties, type ReactElement, type ReactNode, type SVGProps } from "react";
-import { glyphDefinitions, glyphIds, glyphNames, type GlyphDefinition, type GlyphName, type GlyphNode } from "@repo/glyphs";
+import {
+  Fragment,
+  createContext,
+  createElement,
+  useContext,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type SVGProps,
+} from "react";
+import {
+  glyphDefinitions,
+  glyphIds,
+  glyphNames,
+  type GlyphDefinition,
+  type GlyphName,
+  type GlyphNode,
+} from "@repo/glyphs";
 
 export type { GlyphDefinition, GlyphName, GlyphNode } from "@repo/glyphs";
 export { glyphDefinitions, glyphIds, glyphNames } from "@repo/glyphs";
@@ -22,17 +38,19 @@ type SurfaceProps = {
   readonly tone?: IntentTone;
 };
 
-type ButtonPropsBase = Omit<React.ComponentProps<typeof BaseButton>, "children"> & SurfaceProps & {
-  readonly children?: ReactNode;
-  readonly endIcon?: GlyphName;
-  readonly icon?: GlyphName;
-  readonly loading?: boolean;
-  readonly startIcon?: GlyphName;
-};
+type ButtonPropsBase = Omit<React.ComponentProps<typeof BaseButton>, "children"> &
+  SurfaceProps & {
+    readonly children?: ReactNode;
+    readonly endIcon?: GlyphName;
+    readonly icon?: GlyphName;
+    readonly loading?: boolean;
+    readonly startIcon?: GlyphName;
+  };
 
-export type PanelProps = React.ComponentProps<"div"> & SurfaceProps & {
-  readonly radius?: Radius;
-};
+export type PanelProps = React.ComponentProps<"div"> &
+  SurfaceProps & {
+    readonly radius?: Radius;
+  };
 export type ButtonProps = ButtonPropsBase;
 export type GhostButtonProps = ButtonPropsBase & {
   readonly variant?: "default" | "icon";
@@ -44,7 +62,10 @@ export type StatusBannerRootProps = React.ComponentProps<"div"> & {
 export type LabelProps = React.ComponentProps<typeof BaseField.Label>;
 export type FieldProps = React.ComponentProps<typeof BaseField.Root>;
 export type InputProps = React.ComponentProps<typeof BaseInput> & SurfaceProps;
-export type SliderProps = React.ComponentProps<typeof BaseSlider.Root>;
+export type SliderProps = React.ComponentProps<typeof BaseSlider.Root> & {
+  readonly label?: ReactNode;
+  readonly unit?: ReactNode;
+};
 export type SwitchProps = React.ComponentProps<typeof BaseSwitch.Root>;
 
 export type MenuProps = React.ComponentProps<typeof BaseMenu.Root> & {
@@ -70,7 +91,9 @@ export type SelectProps<Value = string> = React.ComponentProps<typeof BaseSelect
 };
 export type SelectOptionProps = React.ComponentProps<typeof BaseSelect.Item>;
 
-export type ComboboxProps<Value = string> = React.ComponentProps<typeof BaseCombobox.Root<Value>> & {
+export type ComboboxProps<Value = string> = React.ComponentProps<
+  typeof BaseCombobox.Root<Value>
+> & {
   readonly children?: ReactNode;
   readonly className?: string;
   readonly placeholder?: string;
@@ -93,9 +116,9 @@ export function Panel(props: PanelProps): ReactElement {
       className: classNames("belt-surface", classNameString(className)),
       "data-elevation": String(elevation),
       "data-radius": radius,
-      "data-tone": tone
+      "data-tone": tone,
     },
-    createElement("div", { className: "belt-surface__inner" }, children)
+    createElement("div", { className: "belt-surface__inner" }, children),
   );
 }
 
@@ -119,7 +142,7 @@ export function Button(props: ButtonProps): ReactElement {
     {
       className: "belt-surface",
       "data-elevation": elevation,
-      "data-tone": tone
+      "data-tone": tone,
     },
     createElement(
       "div",
@@ -132,11 +155,11 @@ export function Button(props: ButtonProps): ReactElement {
           className: mergeClassName("belt-button", className),
           disabled: disabled || loading,
           type,
-          "data-control": true
+          "data-control": true,
         } as React.ComponentProps<typeof BaseButton>,
-        buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-button" })
-      )
-    )
+        buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-button" }),
+      ),
+    ),
   );
 }
 
@@ -165,9 +188,9 @@ export function GhostButton(props: GhostButtonProps): ReactElement {
       type,
       "data-control": true,
       "data-elevation": elevation,
-      "data-tone": tone
+      "data-tone": tone,
     } as React.ComponentProps<typeof BaseButton>,
-    buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-ghost-button" })
+    buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-ghost-button" }),
   );
 }
 
@@ -185,26 +208,35 @@ export function StatusBannerRoot(props: StatusBannerRootProps): ReactElement {
         ...rootProps,
         className: classNames("belt-status-banner", className),
         "data-radius": radius,
-        "data-tone": tone
+        "data-tone": tone,
       },
-      children
-    )
+      children,
+    ),
   );
 }
 
 export function StatusBannerRow(props: React.ComponentProps<"div">): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement("div", { ...rootProps, className: classNames("belt-status-banner__row", className) });
+  return createElement("div", {
+    ...rootProps,
+    className: classNames("belt-status-banner__row", className),
+  });
 }
 
 export function StatusBannerBody(props: React.ComponentProps<"div">): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement("div", { ...rootProps, className: classNames("belt-status-banner__body", className) });
+  return createElement("div", {
+    ...rootProps,
+    className: classNames("belt-status-banner__body", className),
+  });
 }
 
 export function StatusBannerMessage(props: React.ComponentProps<"span">): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement("span", { ...rootProps, className: classNames("belt-status-banner__message", className) });
+  return createElement("span", {
+    ...rootProps,
+    className: classNames("belt-status-banner__message", className),
+  });
 }
 
 export function StatusBannerIcon(props: React.ComponentProps<"span">): ReactElement {
@@ -214,13 +246,16 @@ export function StatusBannerIcon(props: React.ComponentProps<"span">): ReactElem
   return createElement("span", {
     ...rootProps,
     className: classNames("belt-status-banner__icon", className),
-    "data-tone": tone
+    "data-tone": tone,
   });
 }
 
 export function StatusBannerAction(props: React.ComponentProps<"div">): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement("div", { ...rootProps, className: classNames("belt-status-banner__action", className) });
+  return createElement("div", {
+    ...rootProps,
+    className: classNames("belt-status-banner__action", className),
+  });
 }
 
 export const StatusBanner = {
@@ -229,17 +264,23 @@ export const StatusBanner = {
   Icon: StatusBannerIcon,
   Message: StatusBannerMessage,
   Root: StatusBannerRoot,
-  Row: StatusBannerRow
+  Row: StatusBannerRow,
 } as const;
 
 export function Field(props: FieldProps): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement(BaseField.Root, { ...rootProps, className: mergeClassName("belt-field", className) });
+  return createElement(BaseField.Root, {
+    ...rootProps,
+    className: mergeClassName("belt-field", className),
+  });
 }
 
 export function Label(props: LabelProps): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement(BaseField.Label, { ...rootProps, className: mergeClassName("belt-label", className) });
+  return createElement(BaseField.Label, {
+    ...rootProps,
+    className: mergeClassName("belt-label", className),
+  });
 }
 
 export function Input(props: InputProps): ReactElement {
@@ -250,32 +291,58 @@ export function Input(props: InputProps): ReactElement {
     {
       className: classNames("belt-surface", classNameString(className)),
       "data-elevation": elevation,
-      "data-tone": tone
+      "data-tone": tone,
     },
     createElement(
       "div",
       { className: "belt-surface__inner" },
-      createElement(BaseInput, { ...inputProps, className: "belt-input" })
-    )
+      createElement(BaseInput, { ...inputProps, className: "belt-input" }),
+    ),
   );
 }
 
 export function Slider(props: SliderProps): ReactElement {
-  const { className, ...rootProps } = props;
+  const { className, label, unit, ...rootProps } = props;
+  const hasHeader = label !== undefined || unit !== undefined;
 
   return createElement(
     BaseSlider.Root,
     { ...rootProps, className: mergeClassName("belt-slider", className) },
+    hasHeader
+      ? createElement(
+          "div",
+          { className: "belt-slider__header" },
+          label === undefined
+            ? createElement("span", null)
+            : createElement(BaseSlider.Label, { className: "belt-slider__label" }, label),
+          createElement(BaseSlider.Value, {
+            className: "belt-slider__value",
+            children: ((formattedValues: readonly string[]) =>
+              createElement(
+                Fragment,
+                null,
+                createElement(
+                  "span",
+                  { className: "belt-slider__value-text" },
+                  formattedValues.join(" - "),
+                ),
+                unit === undefined
+                  ? null
+                  : createElement("span", { className: "belt-slider__unit" }, unit),
+              )) as React.ComponentProps<typeof BaseSlider.Value>["children"],
+          }),
+        )
+      : null,
     createElement(
       BaseSlider.Control,
       { className: "belt-slider__control" },
       createElement(
         BaseSlider.Track,
         { className: "belt-slider__track" },
-        createElement(BaseSlider.Indicator, { className: "belt-slider__indicator" })
+        createElement(BaseSlider.Indicator, { className: "belt-slider__indicator" }),
       ),
-      createElement(BaseSlider.Thumb, { className: "belt-slider__thumb" })
-    )
+      createElement(BaseSlider.Thumb, { className: "belt-slider__thumb" }),
+    ),
   );
 }
 
@@ -285,7 +352,7 @@ export function Switch(props: SwitchProps): ReactElement {
   return createElement(
     BaseSwitch.Root,
     { ...rootProps, className: mergeClassName("belt-switch", className) },
-    createElement(BaseSwitch.Thumb, { className: "belt-switch__thumb" })
+    createElement(BaseSwitch.Thumb, { className: "belt-switch__thumb" }),
   );
 }
 
@@ -298,8 +365,11 @@ export function Menu(props: MenuProps): ReactElement {
     rootProps,
     createElement(
       BaseMenu.Trigger,
-      { ...restTriggerProps, className: mergeClassName("belt-ghost-button belt-menu__trigger", triggerClassName) },
-      label
+      {
+        ...restTriggerProps,
+        className: mergeClassName("belt-ghost-button belt-menu__trigger", triggerClassName),
+      },
+      label,
     ),
     createElement(
       BaseMenu.Portal,
@@ -307,20 +377,26 @@ export function Menu(props: MenuProps): ReactElement {
       createElement(
         BaseMenu.Positioner,
         null,
-        createElement(MenuList, { "aria-label": menuLabel }, children)
-      )
-    )
+        createElement(MenuList, { "aria-label": menuLabel }, children),
+      ),
+    ),
   );
 }
 
 export function MenuList(props: MenuListProps): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement(BaseMenu.Popup, { ...rootProps, className: mergeClassName("belt-menu__popup", className) });
+  return createElement(BaseMenu.Popup, {
+    ...rootProps,
+    className: mergeClassName("belt-menu__popup", className),
+  });
 }
 
 export function MenuItem(props: MenuItemProps): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement(BaseMenu.Item, { ...rootProps, className: mergeClassName("belt-menu__item", className) });
+  return createElement(BaseMenu.Item, {
+    ...rootProps,
+    className: mergeClassName("belt-menu__item", className),
+  });
 }
 
 export function Submenu(props: SubmenuProps): ReactElement {
@@ -333,7 +409,7 @@ export function Submenu(props: SubmenuProps): ReactElement {
     createElement(
       BaseMenu.SubmenuTrigger,
       { ...restTriggerProps, className: mergeClassName("belt-menu__item", triggerClassName) },
-      label
+      label,
     ),
     createElement(
       BaseMenu.Portal,
@@ -341,9 +417,9 @@ export function Submenu(props: SubmenuProps): ReactElement {
       createElement(
         BaseMenu.Positioner,
         null,
-        createElement(MenuList, { ...listProps, "aria-label": menuLabel }, children)
-      )
-    )
+        createElement(MenuList, { ...listProps, "aria-label": menuLabel }, children),
+      ),
+    ),
   );
 }
 
@@ -356,9 +432,16 @@ export function Select<Value = string>(props: SelectProps<Value>): ReactElement 
     rootProps,
     createElement(
       BaseSelect.Trigger,
-      { ...restTriggerProps, className: mergeClassName("belt-ghost-button belt-select__trigger", triggerClassName) },
+      {
+        ...restTriggerProps,
+        className: mergeClassName("belt-ghost-button belt-select__trigger", triggerClassName),
+      },
       createElement(BaseSelect.Value, { placeholder: defaultLabel }),
-      createElement(BaseSelect.Icon, { className: "belt-button__end-icon" }, createElement(Glyph, { name: "chevronDown" }))
+      createElement(
+        BaseSelect.Icon,
+        { className: "belt-button__end-icon" },
+        createElement(Glyph, { name: "chevronDown" }),
+      ),
     ),
     createElement(
       BaseSelect.Portal,
@@ -369,10 +452,10 @@ export function Select<Value = string>(props: SelectProps<Value>): ReactElement 
         createElement(
           BaseSelect.Popup,
           { className: "belt-select__popup" },
-          createElement(BaseSelect.List, { className: "belt-select__list" }, children)
-        )
-      )
-    )
+          createElement(BaseSelect.List, { className: "belt-select__list" }, children),
+        ),
+      ),
+    ),
   );
 }
 
@@ -383,7 +466,11 @@ export function SelectOption(props: SelectOptionProps): ReactElement {
     BaseSelect.Item,
     { ...rootProps, className: mergeClassName("belt-select__item", className) },
     createElement(BaseSelect.ItemText, null, children),
-    createElement(BaseSelect.ItemIndicator, null, createElement(Glyph, { className: "belt-icon", name: "check" }))
+    createElement(
+      BaseSelect.ItemIndicator,
+      null,
+      createElement(Glyph, { className: "belt-icon", name: "check" }),
+    ),
   );
 }
 
@@ -403,9 +490,9 @@ export function Combobox<Value = string>(props: ComboboxProps<Value>): ReactElem
         createElement(
           BaseCombobox.Trigger,
           { className: "belt-ghost-button" },
-          createElement(BaseCombobox.Icon, null, createElement(Glyph, { name: "chevronDown" }))
-        )
-      )
+          createElement(BaseCombobox.Icon, null, createElement(Glyph, { name: "chevronDown" })),
+        ),
+      ),
     ),
     createElement(
       BaseCombobox.Portal,
@@ -416,16 +503,19 @@ export function Combobox<Value = string>(props: ComboboxProps<Value>): ReactElem
         createElement(
           BaseCombobox.Popup,
           { className: "belt-combobox__popup" },
-          createElement(BaseCombobox.List, { className: "belt-combobox__list" }, children)
-        )
-      )
-    )
+          createElement(BaseCombobox.List, { className: "belt-combobox__list" }, children),
+        ),
+      ),
+    ),
   );
 }
 
 export function ComboboxOption(props: ComboboxOptionProps): ReactElement {
   const { className, ...rootProps } = props;
-  return createElement(BaseCombobox.Item, { ...rootProps, className: mergeClassName("belt-combobox__item", className) });
+  return createElement(BaseCombobox.Item, {
+    ...rootProps,
+    className: mergeClassName("belt-combobox__item", className),
+  });
 }
 
 export function GlyphSheet(props: GlyphSheetProps): ReactElement {
@@ -436,7 +526,7 @@ export function GlyphSheet(props: GlyphSheetProps): ReactElement {
     height: "0",
     overflow: "hidden",
     pointerEvents: "none",
-    ...style
+    ...style,
   } satisfies CSSProperties;
 
   return createElement(
@@ -448,9 +538,9 @@ export function GlyphSheet(props: GlyphSheetProps): ReactElement {
       height: props.height ?? "0",
       style: hiddenStyle,
       width: props.width ?? "0",
-      xmlns: "http://www.w3.org/2000/svg"
+      xmlns: "http://www.w3.org/2000/svg",
     },
-    glyphNames.map((name) => renderSymbol(name, glyphDefinitions[name]))
+    glyphNames.map((name) => renderSymbol(name, glyphDefinitions[name])),
   );
 }
 
@@ -459,7 +549,10 @@ GlyphSheet.values = glyphDefinitions;
 
 export function Glyph(props: GlyphProps): ReactElement {
   const { fill, name, ...svgProps } = props;
-  const hiddenByDefault = props["aria-hidden"] === undefined && props["aria-label"] === undefined && props["aria-labelledby"] === undefined;
+  const hiddenByDefault =
+    props["aria-hidden"] === undefined &&
+    props["aria-label"] === undefined &&
+    props["aria-labelledby"] === undefined;
 
   return createElement(
     "svg",
@@ -467,11 +560,11 @@ export function Glyph(props: GlyphProps): ReactElement {
       ...svgProps,
       "aria-hidden": hiddenByDefault ? true : props["aria-hidden"],
       fill: fill ?? "none",
-      xmlns: "http://www.w3.org/2000/svg"
+      xmlns: "http://www.w3.org/2000/svg",
     },
     createElement("use", {
-      xlinkHref: `#${glyphIds[name]}`
-    })
+      xlinkHref: `#${glyphIds[name]}`,
+    }),
   );
 }
 
@@ -486,17 +579,31 @@ function buttonContents(options: {
   const resolvedStartIcon = options.loading ? "spinner" : options.startIcon;
 
   if (options.icon) {
-    return createElement("span", { className: `${options.part}__icon` }, createElement(Glyph, { name: options.icon }));
+    return createElement(
+      "span",
+      { className: `${options.part}__icon` },
+      createElement(Glyph, { name: options.icon }),
+    );
   }
 
   return [
     resolvedStartIcon
-      ? createElement("span", { className: `${options.part}__start-icon`, key: "start" }, createElement(Glyph, { name: resolvedStartIcon }))
+      ? createElement(
+          "span",
+          { className: `${options.part}__start-icon`, key: "start" },
+          createElement(Glyph, { name: resolvedStartIcon }),
+        )
       : null,
-    options.children !== undefined ? createElement("span", { key: "children" }, options.children) : null,
+    options.children !== undefined
+      ? createElement("span", { key: "children" }, options.children)
+      : null,
     options.endIcon
-      ? createElement("span", { className: `${options.part}__end-icon`, key: "end" }, createElement(Glyph, { name: options.endIcon }))
-      : null
+      ? createElement(
+          "span",
+          { className: `${options.part}__end-icon`, key: "end" },
+          createElement(Glyph, { name: options.endIcon }),
+        )
+      : null,
   ];
 }
 
@@ -507,16 +614,16 @@ function renderSymbol(name: GlyphName, definition: GlyphDefinition): ReactElemen
       ...toReactAttrs(definition.attrs),
       id: glyphIds[name],
       key: name,
-      viewBox: definition.viewBox
+      viewBox: definition.viewBox,
     },
-    definition.children.map((node, index) => renderNode(node, `${name}-${index}`))
+    definition.children.map((node, index) => renderNode(node, `${name}-${index}`)),
   );
 }
 
 function renderNode(node: GlyphNode, key: string): ReactElement {
   return createElement(node.tag, {
     ...toReactAttrs(node.attrs),
-    key
+    key,
   });
 }
 
@@ -548,7 +655,10 @@ function classNameString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function mergeClassName(base: string, value: unknown): string | ((state: unknown) => string | undefined) {
+function mergeClassName(
+  base: string,
+  value: unknown,
+): string | ((state: unknown) => string | undefined) {
   if (typeof value === "function") {
     const resolve = value as (state: unknown) => string | undefined;
     return (state: unknown) => classNames(base, resolve(state));

@@ -1,11 +1,5 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { createElement, type RemixNode } from "remix/ui";
-
-const themeCssPath = fileURLToPath(
-  new URL("../../../../packages/theme-css/src/theme.css", import.meta.url),
-);
-const themeCss = readFileSync(themeCssPath, "utf8");
+import { clientScriptPath, themeCssPath } from "../client.ts";
 
 export function document(options: {
   readonly bodyMix?: unknown;
@@ -22,14 +16,9 @@ export function document(options: {
       createElement("meta", { content: "width=device-width, initial-scale=1", name: "viewport" }),
       createElement("meta", { content: "light dark", name: "color-scheme" }),
       createElement("title", undefined, options.title),
-      createElement("style", undefined, getThemeCss()),
+      createElement("link", { href: themeCssPath, rel: "stylesheet" }),
+      createElement("script", { src: clientScriptPath, type: "module" })
     ),
     createElement("body", { mix: options.bodyMix }, options.children),
   );
-}
-
-function getThemeCss() {
-  if (process.env.NODE_ENV === "production") return themeCss;
-
-  return readFileSync(themeCssPath, "utf8");
 }

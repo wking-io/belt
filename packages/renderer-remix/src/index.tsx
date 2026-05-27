@@ -1,11 +1,11 @@
 // @jsxRuntime classic
 // @jsx createElement
 // @jsxFrag Fragment
-// oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
 import {
-  // oxlint-disable-next-line no-unused-vars -- Remix UI classic JSX needs the factory in scope.
   createElement,
   Fragment,
+  ref,
+  on,
   type Handle,
   type Props,
   type RemixNode,
@@ -16,7 +16,7 @@ import * as RemixMenu from "@remix-run/ui/menu";
 import * as RemixSelect from "@remix-run/ui/select";
 import type { GlyphName } from "@repo/glyphs";
 
-type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger";
+type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger" | "foreground";
 type Elevation = 1 | 2 | 3;
 type Radius = "inner" | "default" | "outer";
 type ForegroundTone = "foreground" | "subtle" | "strong";
@@ -37,14 +37,23 @@ type SurfaceProps = {
 
 export type { IntentTone, Elevation, Radius, ForegroundTone, TextSize };
 
-export type PanelProps = Props<"div"> & SurfaceProps & {
-  readonly children?: RemixNode;
-  readonly radius?: Radius;
-};
+export type PanelProps = Props<"div"> &
+  SurfaceProps & {
+    readonly children?: RemixNode;
+    readonly radius?: Radius;
+  };
 
 export function Panel(handle: Handle<PanelProps>) {
   return () => {
-    const { children, elevation = 1, mix, className, radius = "outer", tone, ...rootProps } = handle.props;
+    const {
+      children,
+      elevation = 1,
+      mix,
+      className,
+      radius = "outer",
+      tone,
+      ...rootProps
+    } = handle.props;
 
     return (
       <div
@@ -61,13 +70,14 @@ export function Panel(handle: Handle<PanelProps>) {
   };
 }
 
-export type ButtonProps = Omit<Props<"button">, "children"> & SurfaceProps & {
-  readonly children?: RemixNode;
-  readonly startIcon?: GlyphName;
-  readonly endIcon?: GlyphName;
-  readonly loading?: boolean;
-  readonly icon?: GlyphName;
-};
+export type ButtonProps = Omit<Props<"button">, "children"> &
+  SurfaceProps & {
+    readonly children?: RemixNode;
+    readonly startIcon?: GlyphName;
+    readonly endIcon?: GlyphName;
+    readonly loading?: boolean;
+    readonly icon?: GlyphName;
+  };
 
 export function Button(handle: Handle<ButtonProps>) {
   return () => {
@@ -181,7 +191,6 @@ export function GhostButton(handle: Handle<GhostButtonProps>) {
   };
 }
 
-
 export type StatusBannerRootProps = Props<"div"> & {
   readonly children?: RemixNode;
   readonly radius?: Radius;
@@ -190,12 +199,23 @@ export type StatusBannerRootProps = Props<"div"> & {
 
 export function StatusBannerRoot(handle: Handle<StatusBannerRootProps, { tone: IntentTone }>) {
   return () => {
-    const { children, class: classes, radius = "default", tone = "neutral", ...props } = handle.props;
+    const {
+      children,
+      class: classes,
+      radius = "default",
+      tone = "neutral",
+      ...props
+    } = handle.props;
 
     handle.context.set({ tone });
 
     return (
-      <div {...props} class={classNames("belt-status-banner", classes)} data-radius={radius} data-tone={tone}>
+      <div
+        {...props}
+        class={classNames("belt-status-banner", classes)}
+        data-radius={radius}
+        data-tone={tone}
+      >
         {children}
       </div>
     );
@@ -263,6 +283,7 @@ export function StatusBannerActions(handle: Handle<Props<"div">>) {
 }
 
 export const StatusBanner = {
+  Action: StatusBannerActions,
   Actions: StatusBannerActions,
   Body: StatusBannerBody,
   Icon: StatusBannerIcon,
@@ -301,13 +322,15 @@ export function Field(handle: Handle<FieldProps>) {
   };
 }
 
-export type InputProps = Props<"input"> & SurfaceProps & {
+export type InputProps = Props<"input"> & {
   readonly startIcon?: GlyphName;
   readonly endIcon?: GlyphName;
+  readonly elevation?: Elevation;
+  readonly tone?: Omit<IntentTone, "foreground" | "neutral">;
 };
 
 export function Input() {
-  return ({ tone, elevation, class: classes, ...props }: InputProps) => {
+  return ({ tone, elevation = 2, class: classes, ...props }: InputProps) => {
     return (
       <div class={classNames("belt-surface", classes)} data-tone={tone} data-elevation={elevation}>
         <div class={classNames("belt-surface__inner")}>
@@ -318,23 +341,383 @@ export function Input() {
   };
 }
 
-export type SliderProps = Omit<Props<"input">, "role" | "type">;
+export type SliderProps = Omit<Props<"input">, "children" | "role" | "type"> & {
+  readonly elevation?: Elevation;
+  readonly label: string;
+  readonly tone?: Omit<IntentTone, "foreground" | "neutral">;
+  readonly unit?: string;
+};
 
-export function Slider(handle: Handle<SliderProps>) {
-  return () => {
-    const { class: classes, ...props } = handle.props;
+export function Slider(handle: Handle) {
+  let input: HTMLInputElement | undefined;
+  let thumb: HTMLElement | undefined;
+  let control: HTMLElement | undefined;
+  let valueText: HTMLElement | undefined;
+  let activePointerId: number | undefined;
+  let currentValue: number | undefined;
+  let lastValueProp: number | undefined;
+  let genId = Math.random().toString(36).substring(2, 15);
 
-    return <input {...props} class={classNames("belt-slider", classes)} type="range" />;
+  const update = (newValue: number) => {
+    if (!input) return;
+    const currentMin = sliderNumber(input.min, 0);
+    const currentMax = sliderNumber(input.max, 100);
+    const resolvedValue = Math.min(
+      currentMax,
+      Math.max(currentMin, sliderNumber(newValue, currentMin)),
+    );
+    const percentStyle = `${sliderPercent(resolvedValue, currentMin, currentMax)}%`;
+
+    currentValue = resolvedValue;
+    input.value = String(resolvedValue);
+    input.setAttribute("aria-valuenow", String(resolvedValue));
+    if (valueText) {
+      valueText.textContent = String(resolvedValue);
+    }
+    input
+      .closest<HTMLElement>(".belt-slider")
+      ?.style.setProperty("--belt-slider-value", percentStyle);
+  };
+
+  const updateFocus = () => {
+    if (!input || !thumb) return;
+    if (input.matches(":focus-visible")) {
+      thumb.setAttribute("data-focus-visible", "");
+    } else {
+      thumb.removeAttribute("data-focus-visible");
+    }
+  };
+
+  const updateFromPointer = (event: Pick<PointerEvent, "clientX">) => {
+    if (!input || input.disabled || !control) return;
+
+    const rect = control.getBoundingClientRect();
+    const min = sliderNumber(input.min, 0);
+    const max = sliderNumber(input.max, 100);
+    const percent = rect.width <= 0 ? 0 : (event.clientX - rect.left) / rect.width;
+    const rawValue = min + Math.min(1, Math.max(0, percent)) * (max - min);
+    const nextValue = Math.min(max, Math.max(min, sliderStepValue(rawValue, min, input.step)));
+
+    update(nextValue);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
+  const handlePointerDown = (event: PointerEvent) => {
+    if (!input || input.disabled || event.button !== 0 || activePointerId !== undefined) return;
+    const { currentTarget } = event;
+    if (!(currentTarget instanceof HTMLElement)) return;
+
+    event.preventDefault();
+    activePointerId = event.pointerId;
+    currentTarget.setPointerCapture(event.pointerId);
+    input.focus();
+    updateFromPointer(event);
+  };
+
+  const handlePointerMove = (event: PointerEvent) => {
+    const { currentTarget } = event;
+    if (
+      !(currentTarget instanceof HTMLElement) ||
+      activePointerId !== event.pointerId ||
+      !currentTarget.hasPointerCapture(event.pointerId)
+    ) {
+      return;
+    }
+
+    updateFromPointer(event);
+  };
+
+  const handlePointerEnd = (event: PointerEvent) => {
+    const { currentTarget } = event;
+    if (!(currentTarget instanceof HTMLElement) || activePointerId !== event.pointerId) return;
+
+    if (currentTarget.hasPointerCapture(event.pointerId)) {
+      currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    activePointerId = undefined;
+    input?.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const handleMouseDown = (event: MouseEvent) => {
+    if (!input || input.disabled || event.button !== 0 || activePointerId !== undefined) return;
+
+    event.preventDefault();
+    input.focus();
+    updateFromPointer(event);
+
+    const controller = new AbortController();
+    window.addEventListener("mousemove", updateFromPointer, { signal: controller.signal });
+    window.addEventListener(
+      "mouseup",
+      () => {
+        controller.abort();
+        input?.dispatchEvent(new Event("change", { bubbles: true }));
+      },
+      { once: true, signal: controller.signal },
+    );
+  };
+
+  const bindControl = (node: HTMLElement, signal: AbortSignal) => {
+    control = node;
+    node.addEventListener("pointerdown", handlePointerDown, { signal });
+    node.addEventListener("pointermove", handlePointerMove, { signal });
+    node.addEventListener("pointerup", handlePointerEnd, { signal });
+    node.addEventListener("pointercancel", handlePointerEnd, { signal });
+    node.addEventListener("lostpointercapture", handlePointerEnd, { signal });
+    node.addEventListener("mousedown", handleMouseDown, { signal });
+  };
+
+  return ({
+    class: classes,
+    className,
+    defaultValue,
+    disabled,
+    label,
+    max,
+    min,
+    unit,
+    value,
+    tone = "primary",
+    elevation = 1,
+    ...inputProps
+  }: SliderProps) => {
+    const currentMin = sliderNumber(min, 0);
+    const valueProp = value == null ? undefined : sliderNumber(value, currentMin);
+
+    const shouldSyncExternalValue = valueProp !== undefined && valueProp !== lastValueProp;
+
+    if (shouldSyncExternalValue) {
+      currentValue = valueProp;
+      lastValueProp = valueProp;
+    }
+
+    const resolvedValue = sliderNumber(currentValue ?? defaultValue ?? min ?? 0, 0);
+    const percent = sliderPercent(resolvedValue, currentMin, sliderNumber(max, 100));
+    const percentStyle = `${percent}%`;
+    const disabledData = disabled ? "" : undefined;
+    const id = inputProps.id ?? genId;
+
+    if (shouldSyncExternalValue) {
+      handle.queueTask(() => update(resolvedValue));
+    }
+
+    return (
+      <div
+        class={classNames("belt-slider", classes, className)}
+        data-disabled={disabledData}
+        data-orientation="horizontal"
+        role="group"
+        style={{
+          "--belt-slider-value": `${percentStyle}`,
+        }}
+      >
+        <div class="belt-slider__header">
+          <label class="belt-text" for={id} data-size="sm" data-weight="medium" data-emphasis="strong">
+            {label}
+          </label>
+          <output class="belt-slider__value belt-text" data-size="xs">
+            <span
+              class="belt-slider__value-text"
+              mix={ref((node) => {
+                valueText = node;
+              })}
+            >
+              {resolvedValue}
+            </span>
+            {unit === undefined ? null : <span class="belt-slider__unit" data-size="xs">{unit}</span>}
+          </output>
+        </div>
+        <div
+          class="belt-slider__control"
+          data-disabled={disabledData}
+          data-orientation="horizontal"
+          mix={ref(bindControl)}
+        >
+          <div
+            class="belt-slider__track"
+            data-disabled={disabledData}
+            data-orientation="horizontal"
+          >
+            <div
+              class="belt-slider__indicator belt-surface"
+              data-tone={tone}
+              data-disabled={disabledData}
+              data-orientation="horizontal"
+            >
+              <div class="belt-surface__inner"></div>
+            </div>
+            <div
+              class="belt-slider__thumb belt-surface"
+              data-elevation={elevation + 2}
+              data-tone="foreground"
+              data-disabled={disabledData}
+              data-index={0}
+              data-orientation="horizontal"
+              mix={ref((node) => {
+                thumb = node;
+              })}
+            >
+              <div class="belt-surface__inner" />
+              <input
+                {...inputProps}
+                id={id}
+                aria-orientation="horizontal"
+                aria-valuenow={resolvedValue}
+                disabled={disabled}
+                max={max}
+                min={min}
+                mix={[
+                  ref((node, signal) => {
+                    input = node;
+                    node.form?.addEventListener(
+                      "reset",
+                      () => queueMicrotask(() => update(sliderNumber(defaultValue, 0))),
+                      { signal },
+                    );
+                  }),
+                  on("input", (e) => {
+                    update(e.currentTarget.valueAsNumber);
+                  }),
+                  on("change", (e) => {
+                    update(e.currentTarget.valueAsNumber);
+                  }),
+                  on("focus", updateFocus),
+                  on("blur", updateFocus),
+                ]}
+                style={{
+                  cursor: disabled ? "not-allowed" : "pointer",
+                  display: "block",
+                  height: "100%",
+                  inset: 0,
+                  margin: 0,
+                  opacity: 0,
+                  padding: 0,
+                  pointerEvents: "none",
+                  position: "absolute",
+                  width: "100%",
+                  zIndex: 1,
+                }}
+                type="range"
+                defaultValue={resolvedValue}
+              />
+            </div>
+            <div class="belt-slider__fill belt-surface" data-elevation={elevation + 1}>
+              <div class="belt-surface__inner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 }
 
-export type SwitchProps = Omit<Props<"input">, "role" | "type">;
+export type SwitchProps = Omit<Props<"input">, "children" | "role" | "type"> & SurfaceProps;
 
 export function Switch(handle: Handle<SwitchProps>) {
-  return () => {
-    const { class: classes, ...props } = handle.props;
+  let checkedState = Boolean(handle.props.checked ?? handle.props.defaultChecked);
 
-    return <input {...props} class={classNames("belt-switch", classes)} type="checkbox" role="switch" />;
+  const setChecked = (checked: boolean) => {
+    if (checkedState === checked) return;
+
+    checkedState = checked;
+    void handle.update();
+  };
+
+  return ({
+    checked,
+    class: classes,
+    defaultChecked,
+    disabled,
+    id,
+    mix,
+    name,
+    required,
+    value,
+    tone = "primary",
+    elevation = 2,
+    ...inputProps
+  }: SwitchProps) => {
+    const checkedData = checkedState ? "" : undefined;
+    const disabledData = disabled ? "" : undefined;
+
+    return (
+      <>
+        <div
+          aria-checked={checkedState}
+          class={classNames("belt-switch belt-surface", classes)}
+          data-checked={checkedData}
+          data-disabled={disabledData}
+          data-tone={checkedState ? tone : "neutral"}
+          data-elevation={elevation}
+          id={id}
+          mix={[
+            on("click", (event) => {
+              event.preventDefault();
+              if (!disabled) setChecked(!checkedState);
+            }),
+            on("keydown", (event) => {
+              if (event.key !== " " && event.key !== "Enter") return;
+              event.preventDefault();
+              if (!disabled) setChecked(!checkedState);
+            }),
+          ]}
+          role="switch"
+          tabindex={disabled ? undefined : 0}
+        >
+          <div class="belt-surface__inner">
+            <div
+              class="belt-switch__thumb belt-surface"
+              data-elevation={elevation + 2}
+              data-tone="foreground"
+              data-checked={checkedData}
+              data-disabled={disabledData}
+            >
+              <div class="belt-surface__inner" />
+            </div>
+            <input
+              data-control
+              {...inputProps}
+              aria-hidden="true"
+              checked={checkedState}
+              disabled={disabled}
+              name={name}
+              required={required}
+              mix={[
+                mix,
+                ref((node, signal) => {
+                  node.form?.addEventListener(
+                    "reset",
+                    () => queueMicrotask(() => setChecked(node.checked)),
+                    { signal },
+                  );
+                }),
+                on("input", (event) => {
+                  setChecked(event.currentTarget.checked);
+                }),
+                on("change", (event) => {
+                  setChecked(event.currentTarget.checked);
+                }),
+              ]}
+              style={{
+                border: 0,
+                clipPath: "inset(50%)",
+                height: "1px",
+                margin: "-1px",
+                overflow: "hidden",
+                padding: 0,
+                position: "absolute",
+                whiteSpace: "nowrap",
+                width: "1px",
+              }}
+              tabindex={-1}
+              type="checkbox"
+              value={value}
+            />
+          </div>
+        </div>
+      </>
+    );
   };
 }
 
@@ -422,6 +805,34 @@ function withClass<Props_>(handle: Handle<Props_>, className: string): Handle<Pr
       class: classNames(className, props.class, props.className),
     } as Props_,
   };
+}
+
+function sliderNumber(value: unknown, fallback: number): number {
+  const numeric =
+    typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isFinite(numeric) ? numeric : fallback;
+}
+
+function sliderPercent(value: number, min: number, max: number): number {
+  const range = max - min;
+  if (range <= 0) return 0;
+
+  return Math.min(100, Math.max(0, ((value - min) / range) * 100));
+}
+
+function sliderStepValue(value: number, min: number, step: string): number {
+  if (step === "any") return value;
+
+  const stepValue = sliderNumber(step, 1);
+  if (stepValue <= 0) return value;
+
+  const precision = Math.max(decimalPlaces(min), decimalPlaces(stepValue));
+  return Number((Math.round((value - min) / stepValue) * stepValue + min).toFixed(precision));
+}
+
+function decimalPlaces(value: number): number {
+  const decimal = String(value).split(".")[1];
+  return decimal?.length ?? 0;
 }
 
 function classNames(...parts: readonly (string | undefined)[]): string | undefined {

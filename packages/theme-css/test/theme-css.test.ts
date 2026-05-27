@@ -69,7 +69,10 @@ it("sets the default font family and OpenType feature contract", async () => {
     /--belt-font-variant-ligatures:\s*common-ligatures discretionary-ligatures contextual/,
   );
   assert.match(css, /--belt-font-variant-numeric:\s*slashed-zero/);
-  assert.match(css, /--belt-font-variant-alternates:[\s\S]*styleset\(ss01\)[\s\S]*character-variant\(cv11\)/);
+  assert.match(
+    css,
+    /--belt-font-variant-alternates:[\s\S]*styleset\(ss01\)[\s\S]*character-variant\(cv11\)/,
+  );
 });
 
 it("ships the bundled Inter variable font files", async () => {
@@ -102,6 +105,11 @@ it("exports portable component class hooks for renderers", async () => {
     "belt-field",
     "belt-label",
     "belt-slider",
+    "belt-slider__header",
+    "belt-slider__label",
+    "belt-slider__value",
+    "belt-slider__value-text",
+    "belt-slider__unit",
     "belt-switch",
     "belt-menu__trigger",
     "belt-menu__popup",
@@ -130,7 +138,14 @@ it("does not widen the locked token contract", async () => {
 it("uses short data attributes for component variants", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
-  for (const attribute of ["data-tone", "data-emphasis", "data-elevation", "data-radius", "data-size", "data-gap"]) {
+  for (const attribute of [
+    "data-tone",
+    "data-emphasis",
+    "data-elevation",
+    "data-radius",
+    "data-size",
+    "data-gap",
+  ]) {
     assert.match(css, new RegExp(`\\[${attribute}`));
   }
 
@@ -236,24 +251,63 @@ it("defines inherited container and child radius contexts", async () => {
 
   assert.match(css, /--belt-container-radius:\s*var\(--belt-radius\)/);
   assert.match(css, /--belt-child-radius:\s*var\(--belt-radius\)/);
-  assert.match(css, /\[data-radius="inner"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-inner\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/);
-  assert.match(css, /\[data-radius="default"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/);
-  assert.match(css, /\[data-radius="outer"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-outer\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius\)/);
-  assert.match(css, /\.belt-surface[\s\S]*--belt-surface-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
-  assert.match(css, /\.belt-surface\[data-radius="inner"\][\s\S]*--belt-surface-radius:\s*var\(--belt-container-radius\)/);
-  assert.match(css, /\.belt-button[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
-  assert.match(css, /\.belt-ghost-button[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
-  assert.match(css, /\.belt-input[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/);
-  assert.match(css, /\.belt-status-banner[\s\S]*border-radius:\s*var\(--belt-container-radius,\s*var\(--belt-radius\)\)/);
+  assert.match(
+    css,
+    /\[data-radius="inner"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-inner\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/,
+  );
+  assert.match(
+    css,
+    /\[data-radius="default"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius-inner\)/,
+  );
+  assert.match(
+    css,
+    /\[data-radius="outer"\][\s\S]*--belt-container-radius:\s*var\(--belt-radius-outer\)[\s\S]*--belt-child-radius:\s*var\(--belt-radius\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-surface\)[\s\S]*--belt-surface-radius:\s*calc\(var\(--belt-child-radius,\s*var\(--belt-radius\)\)\s*\+\s*1px\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-surface\[data-radius="inner"\][\s\S]*--belt-surface-radius:\s*var\(--belt-container-radius\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-button\)[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-ghost-button\)[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-input\)[\s\S]*border-radius:\s*var\(--belt-child-radius,\s*var\(--belt-radius\)\)/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-status-banner\)[\s\S]*border-radius:\s*var\(--belt-container-radius,\s*var\(--belt-radius\)\)/,
+  );
 });
 
 it("uses matching neutral hover colors for elevated buttons", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
   assert.match(css, /--belt-surface-hover:\s*var\(--belt-color-elevation-1-hover\)/);
-  assert.match(css, /\[data-elevation="2"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-2-hover\)/);
-  assert.match(css, /\[data-elevation="3"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-3-hover\)/);
+  assert.match(
+    css,
+    /\[data-elevation="2"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-2-hover\)/,
+  );
+  assert.match(
+    css,
+    /\[data-elevation="3"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-3-hover\)/,
+  );
   assert.match(css, /--belt-button-bg-hover:\s*var\(--belt-surface-hover\)/);
-  assert.match(css, /\.belt-ghost-button\[data-elevation="2"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-2-hover\)/);
-  assert.match(css, /\.belt-ghost-button\[data-elevation="3"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-3-hover\)/);
+  assert.match(
+    css,
+    /\.belt-ghost-button\[data-elevation="2"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-2-hover\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[data-elevation="3"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-3-hover\)/,
+  );
 });

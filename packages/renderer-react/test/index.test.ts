@@ -39,7 +39,14 @@ it("renders svg use elements with decorative defaults", () => {
 });
 
 it("preserves labels and host svg props", () => {
-  const html = renderToStaticMarkup(createElement(Glyph, { "aria-label": "Search", name: "search", viewBox: "0 0 20 20", width: 24 }));
+  const html = renderToStaticMarkup(
+    createElement(Glyph, {
+      "aria-label": "Search",
+      name: "search",
+      viewBox: "0 0 20 20",
+      width: 24,
+    }),
+  );
 
   assert.match(html, /aria-label="Search"/);
   assert.match(html, /viewBox="0 0 20 20"/);
@@ -102,8 +109,14 @@ it("lets React containers set radius while controls inherit it", () => {
     ),
   );
 
-  assert.match(html, /belt-surface[^>]*data-radius="default"|data-radius="default"[^>]*belt-surface/);
-  assert.match(html, /belt-status-banner[^>]*data-radius="outer"|data-radius="outer"[^>]*belt-status-banner/);
+  assert.match(
+    html,
+    /belt-surface[^>]*data-radius="default"|data-radius="default"[^>]*belt-surface/,
+  );
+  assert.match(
+    html,
+    /belt-status-banner[^>]*data-radius="outer"|data-radius="outer"[^>]*belt-status-banner/,
+  );
   assert.match(html, /belt-button/);
   assert.match(html, /belt-ghost-button/);
   assert.notMatch(html, /belt-button[^>]*data-radius/);
@@ -117,7 +130,7 @@ it("renders Base UI-backed form and choice primitives", () => {
       null,
       createElement(Label, null, "Branch"),
       createElement(Input, { placeholder: "feature/name" }),
-      createElement(Slider, { defaultValue: 4, min: 0, max: 10 }),
+      createElement(Slider, { defaultValue: 4, min: 0, max: 10, label: "Intensity", unit: "%" }),
       createElement(Switch, { defaultChecked: true }),
       createElement(Menu, { label: "Menu" }, createElement(MenuItem, null, "Open worktree")),
       createElement(
@@ -132,6 +145,12 @@ it("renders Base UI-backed form and choice primitives", () => {
   assert.match(html, /belt-label/);
   assert.match(html, /belt-input/);
   assert.match(html, /belt-slider/);
+  assert.match(html, /belt-slider__header/);
+  assert.match(html, /belt-slider__label/);
+  assert.match(html, /Intensity/);
+  assert.match(html, /belt-slider__value/);
+  assert.match(html, /belt-slider__value-text/);
+  assert.match(html, /belt-slider__unit/);
   assert.match(html, /belt-switch/);
   assert.match(html, /belt-menu__trigger/);
   assert.match(html, /belt-select__trigger/);
