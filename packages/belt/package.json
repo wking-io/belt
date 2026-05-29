@@ -28,6 +28,10 @@
       "default": "./src/theme.ts"
     },
     "./theme.css": "./src/theme.css",
+    "./render-performance": {
+      "types": "./src/render-performance.ts",
+      "default": "./src/render-performance.ts"
+    },
     "./vite": {
       "types": "./src/vite.ts",
       "default": "./src/vite.ts"
@@ -64,6 +68,7 @@
     "@repo/renderer-react": "workspace:*",
     "@repo/server": "workspace:*",
     "@repo/theme-css": "workspace:*",
+    "@repo/tool-render-performance": "workspace:*",
     "@repo/tool-worktrees": "workspace:*",
     "@repo/tool-worktrees-extension-portless": "workspace:*",
     "@repo/tool-worktrees-renderer-remix": "workspace:*"
