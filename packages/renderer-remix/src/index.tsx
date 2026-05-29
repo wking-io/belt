@@ -3,18 +3,52 @@
 // @jsxFrag Fragment
 import {
   createElement,
+  createMixin,
   Fragment,
   ref,
   on,
+  type ElementProps,
   type Handle,
   type Props,
   type RemixNode,
 } from "@remix-run/ui";
 import * as RemixCombobox from "@remix-run/ui/combobox";
 import { Glyph } from "@remix-run/ui/glyph";
-import * as RemixMenu from "@remix-run/ui/menu";
-import * as RemixSelect from "@remix-run/ui/select";
 import type { GlyphName } from "@repo/glyphs";
+import {
+  Menu as RemixMenu,
+  MenuItem as RemixMenuItem,
+  MenuList as RemixMenuList,
+  MenuRoot as RemixMenuRoot,
+  MenuSelectEvent,
+  MenuTrigger as RemixMenuTrigger,
+  menuTriggerMix,
+  onMenuSelect,
+  Submenu as RemixSubmenu,
+  type MenuItemProps as RemixMenuItemProps,
+  type MenuListProps as RemixMenuListProps,
+  type MenuProps as RemixMenuProps,
+  type MenuRootProps as RemixMenuRootProps,
+  type MenuSelectItem,
+  type MenuTriggerProps as RemixMenuTriggerProps,
+  type SubmenuProps as RemixSubmenuProps,
+} from "./menu.js";
+import {
+  Select as RemixSelect,
+  SelectChangeEvent,
+  SelectList as RemixSelectList,
+  SelectOption as RemixSelectOption,
+  SelectRoot as RemixSelectRoot,
+  SelectTrigger as RemixSelectTrigger,
+  SelectValue as RemixSelectValue,
+  onSelectChange,
+  selectTriggerMix,
+  type SelectListProps as RemixSelectListProps,
+  type SelectOptionProps as RemixSelectOptionProps,
+  type SelectProps as RemixSelectProps,
+  type SelectRootProps as RemixSelectRootProps,
+  type SelectTriggerProps as RemixSelectTriggerProps,
+} from "./select.js";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger" | "foreground";
 type Elevation = 1 | 2 | 3;
@@ -78,6 +112,54 @@ export type ButtonProps = Omit<Props<"button">, "children"> &
     readonly loading?: boolean;
     readonly icon?: GlyphName;
   };
+
+export type ButtonMixOptions = SurfaceProps & {
+  readonly loading?: boolean;
+};
+
+const buttonMixDescriptor = createMixin<HTMLElement, [options: ButtonMixOptions], ElementProps>(
+  (handle) => (options, props) => {
+    const { elevation = 1, loading = false, tone = "neutral" } = options;
+
+    return createElement(handle.element, {
+      ...props,
+      "aria-busy": loading || props["aria-busy"],
+      class: classNames("belt-surface belt-button", props.class, props.className),
+      "data-control": props["data-control"] ?? true,
+      "data-elevation": props["data-elevation"] ?? elevation,
+      "data-tone": props["data-tone"] ?? tone,
+      disabled: props.disabled || loading,
+      type: props.type ?? "button",
+    });
+  },
+);
+
+const ghostButtonMixDescriptor = createMixin<
+  HTMLElement,
+  [options: ButtonMixOptions],
+  ElementProps
+>((handle) => (options, props) => {
+  const { elevation = 1, loading = false, tone = "neutral" } = options;
+
+  return createElement(handle.element, {
+    ...props,
+    "aria-busy": loading || props["aria-busy"],
+    class: classNames("belt-ghost-button", props.class, props.className),
+    "data-control": props["data-control"] ?? true,
+    "data-elevation": props["data-elevation"] ?? elevation,
+    "data-tone": props["data-tone"] ?? tone,
+    disabled: props.disabled || loading,
+    type: props.type ?? "button",
+  });
+});
+
+export function buttonMix(options: ButtonMixOptions = {}) {
+  return buttonMixDescriptor(options);
+}
+
+export function ghostButtonMix(options: ButtonMixOptions = {}) {
+  return ghostButtonMixDescriptor(options);
+}
 
 export function Button(handle: Handle<ButtonProps>) {
   return () => {
@@ -299,7 +381,7 @@ export function Label(handle: Handle<LabelProps>) {
     const { children, class: classes, ...props } = handle.props;
 
     return (
-      <label {...props} class={classNames("belt-label", classes)}>
+      <label {...props} class={classNames("belt-label belt-text", classes)} data-size="sm" data-weight="medium" data-emphasis="strong">
         {children}
       </label>
     );
@@ -332,7 +414,12 @@ export type InputProps = Props<"input"> & {
 export function Input() {
   return ({ tone, elevation = 2, class: classes, ...props }: InputProps) => {
     return (
-      <div class={classNames("belt-surface", classes)} data-tone={tone} data-elevation={elevation}>
+      <div
+        class={classNames("belt-surface", classes)}
+        data-tone={tone}
+        data-elevation={elevation}
+        data-control
+      >
         <div class={classNames("belt-surface__inner")}>
           <input {...props} class="belt-input" />
         </div>
@@ -348,62 +435,50 @@ export type SliderProps = Omit<Props<"input">, "children" | "role" | "type"> & {
   readonly unit?: string;
 };
 
-export function Slider(handle: Handle) {
+export function Slider(handle: Handle<SliderProps>) {
   let input: HTMLInputElement | undefined;
-  let thumb: HTMLElement | undefined;
   let control: HTMLElement | undefined;
-  let valueText: HTMLElement | undefined;
   let activePointerId: number | undefined;
-  let currentValue: number | undefined;
+  let hasInitialized = false;
   let lastValueProp: number | undefined;
-  let genId = Math.random().toString(36).substring(2, 15);
+  let sliderValue = 0;
 
-  const update = (newValue: number) => {
-    if (!input) return;
-    const currentMin = sliderNumber(input.min, 0);
-    const currentMax = sliderNumber(input.max, 100);
-    const resolvedValue = Math.min(
-      currentMax,
-      Math.max(currentMin, sliderNumber(newValue, currentMin)),
-    );
-    const percentStyle = `${sliderPercent(resolvedValue, currentMin, currentMax)}%`;
-
-    currentValue = resolvedValue;
-    input.value = String(resolvedValue);
-    input.setAttribute("aria-valuenow", String(resolvedValue));
-    if (valueText) {
-      valueText.textContent = String(resolvedValue);
-    }
-    input
-      .closest<HTMLElement>(".belt-slider")
-      ?.style.setProperty("--belt-slider-value", percentStyle);
+  const resolveValue = (newValue: unknown) => {
+    const min = sliderNumber(handle.props.min, 0);
+    const max = sliderNumber(handle.props.max, 100);
+    return Math.min(max, Math.max(min, sliderNumber(newValue, min)));
   };
 
-  const updateFocus = () => {
-    if (!input || !thumb) return;
-    if (input.matches(":focus-visible")) {
-      thumb.setAttribute("data-focus-visible", "");
-    } else {
-      thumb.removeAttribute("data-focus-visible");
-    }
+  const setValue = async (newValue: unknown) => {
+    const nextValue = resolveValue(newValue);
+    if (sliderValue === nextValue) return;
+
+    sliderValue = nextValue;
+    return handle.update();
   };
 
-  const updateFromPointer = (event: Pick<PointerEvent, "clientX">) => {
-    if (!input || input.disabled || !control) return;
+  const updateFromPointer = async (event: Pick<PointerEvent, "clientX">) => {
+    if (!input || handle.props.disabled || !control) return;
 
     const rect = control.getBoundingClientRect();
-    const min = sliderNumber(input.min, 0);
-    const max = sliderNumber(input.max, 100);
+    const min = sliderNumber(handle.props.min, 0);
+    const max = sliderNumber(handle.props.max, 100);
     const percent = rect.width <= 0 ? 0 : (event.clientX - rect.left) / rect.width;
     const rawValue = min + Math.min(1, Math.max(0, percent)) * (max - min);
-    const nextValue = Math.min(max, Math.max(min, sliderStepValue(rawValue, min, input.step)));
+    const nextValue = Math.min(
+      max,
+      Math.max(min, sliderStepValue(rawValue, min, String(handle.props.step ?? "1"))),
+    );
 
-    update(nextValue);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    const signal = await setValue(nextValue);
+    if (signal?.aborted) return;
+    input?.dispatchEvent(new Event("input", { bubbles: true }));
   };
 
   const handlePointerDown = (event: PointerEvent) => {
-    if (!input || input.disabled || event.button !== 0 || activePointerId !== undefined) return;
+    if (!input || handle.props.disabled || event.button !== 0 || activePointerId !== undefined) {
+      return;
+    }
     const { currentTarget } = event;
     if (!(currentTarget instanceof HTMLElement)) return;
 
@@ -411,7 +486,7 @@ export function Slider(handle: Handle) {
     activePointerId = event.pointerId;
     currentTarget.setPointerCapture(event.pointerId);
     input.focus();
-    updateFromPointer(event);
+    void updateFromPointer(event);
   };
 
   const handlePointerMove = (event: PointerEvent) => {
@@ -424,7 +499,7 @@ export function Slider(handle: Handle) {
       return;
     }
 
-    updateFromPointer(event);
+    void updateFromPointer(event);
   };
 
   const handlePointerEnd = (event: PointerEvent) => {
@@ -440,14 +515,18 @@ export function Slider(handle: Handle) {
   };
 
   const handleMouseDown = (event: MouseEvent) => {
-    if (!input || input.disabled || event.button !== 0 || activePointerId !== undefined) return;
+    if (!input || handle.props.disabled || event.button !== 0 || activePointerId !== undefined) {
+      return;
+    }
 
     event.preventDefault();
     input.focus();
-    updateFromPointer(event);
+    void updateFromPointer(event);
 
     const controller = new AbortController();
-    window.addEventListener("mousemove", updateFromPointer, { signal: controller.signal });
+    window.addEventListener("mousemove", (event) => void updateFromPointer(event), {
+      signal: controller.signal,
+    });
     window.addEventListener(
       "mouseup",
       () => {
@@ -484,23 +563,20 @@ export function Slider(handle: Handle) {
   }: SliderProps) => {
     const currentMin = sliderNumber(min, 0);
     const valueProp = value == null ? undefined : sliderNumber(value, currentMin);
-
-    const shouldSyncExternalValue = valueProp !== undefined && valueProp !== lastValueProp;
-
-    if (shouldSyncExternalValue) {
-      currentValue = valueProp;
+    if (!hasInitialized) {
+      sliderValue = resolveValue(valueProp ?? defaultValue ?? min ?? 0);
+      lastValueProp = valueProp;
+      hasInitialized = true;
+    } else if (valueProp !== undefined && valueProp !== lastValueProp) {
+      sliderValue = resolveValue(valueProp);
       lastValueProp = valueProp;
     }
 
-    const resolvedValue = sliderNumber(currentValue ?? defaultValue ?? min ?? 0, 0);
+    const resolvedValue = sliderValue;
     const percent = sliderPercent(resolvedValue, currentMin, sliderNumber(max, 100));
     const percentStyle = `${percent}%`;
     const disabledData = disabled ? "" : undefined;
-    const id = inputProps.id ?? genId;
-
-    if (shouldSyncExternalValue) {
-      handle.queueTask(() => update(resolvedValue));
-    }
+    const id = inputProps.id ?? handle.id;
 
     return (
       <div
@@ -513,19 +589,18 @@ export function Slider(handle: Handle) {
         }}
       >
         <div class="belt-slider__header">
-          <label class="belt-text" for={id} data-size="sm" data-weight="medium" data-emphasis="strong">
+          <label
+            class="belt-slider__label belt-text"
+            for={id}
+            data-size="sm"
+            data-weight="medium"
+            data-emphasis="strong"
+          >
             {label}
           </label>
           <output class="belt-slider__value belt-text" data-size="xs">
-            <span
-              class="belt-slider__value-text"
-              mix={ref((node) => {
-                valueText = node;
-              })}
-            >
-              {resolvedValue}
-            </span>
-            {unit === undefined ? null : <span class="belt-slider__unit" data-size="xs">{unit}</span>}
+            <span class="belt-slider__value-text">{resolvedValue}</span>
+            {unit === undefined ? null : <span class="belt-slider__unit">{unit}</span>}
           </output>
         </div>
         <div
@@ -554,12 +629,10 @@ export function Slider(handle: Handle) {
               data-disabled={disabledData}
               data-index={0}
               data-orientation="horizontal"
-              mix={ref((node) => {
-                thumb = node;
-              })}
             >
               <div class="belt-surface__inner" />
               <input
+                data-control
                 {...inputProps}
                 id={id}
                 aria-orientation="horizontal"
@@ -572,18 +645,16 @@ export function Slider(handle: Handle) {
                     input = node;
                     node.form?.addEventListener(
                       "reset",
-                      () => queueMicrotask(() => update(sliderNumber(defaultValue, 0))),
+                      () => queueMicrotask(() => void setValue(defaultValue ?? min ?? 0)),
                       { signal },
                     );
                   }),
                   on("input", (e) => {
-                    update(e.currentTarget.valueAsNumber);
+                    void setValue(e.currentTarget.valueAsNumber);
                   }),
                   on("change", (e) => {
-                    update(e.currentTarget.valueAsNumber);
+                    void setValue(e.currentTarget.valueAsNumber);
                   }),
-                  on("focus", updateFocus),
-                  on("blur", updateFocus),
                 ]}
                 style={{
                   cursor: disabled ? "not-allowed" : "pointer",
@@ -599,7 +670,7 @@ export function Slider(handle: Handle) {
                   zIndex: 1,
                 }}
                 type="range"
-                defaultValue={resolvedValue}
+                value={resolvedValue}
               />
             </div>
             <div class="belt-slider__fill belt-surface" data-elevation={elevation + 1}>
@@ -721,56 +792,91 @@ export function Switch(handle: Handle<SwitchProps>) {
   };
 }
 
-export type MenuProps = RemixMenu.MenuProps & WithClassName & WithMix;
-export type MenuItemProps = RemixMenu.MenuItemProps & WithClassName & WithMix;
-export type SubmenuProps = RemixMenu.SubmenuProps & WithClassName & WithMix;
-export type MenuListProps = RemixMenu.MenuListProps & WithClassName & WithMix;
+export type MenuProps = RemixMenuProps & WithClassName & WithMix;
+export type MenuRootProps = RemixMenuRootProps;
+export type MenuTriggerProps = RemixMenuTriggerProps & WithClassName & WithMix;
+export type MenuItemProps = RemixMenuItemProps & WithClassName & WithMix;
+export type SubmenuProps = RemixSubmenuProps & WithClassName & WithMix;
+export type MenuListProps = RemixMenuListProps & WithClassName & WithMix;
 
 export function Menu(handle: Handle<MenuProps>) {
-  const wrappedHandle = withClass(handle, "belt-menu__trigger");
-  return RemixMenu.Menu(wrappedHandle);
+  return RemixMenu({
+    ...handle,
+    props: {
+      ...handle.props,
+      triggerMix: handle.props.triggerMix ?? ghostButtonMix(),
+    },
+  });
+}
+
+export function MenuTrigger(handle: Handle<MenuTriggerProps>) {
+  return RemixMenuTrigger(handle);
 }
 
 export function MenuItem(handle: Handle<MenuItemProps>) {
-  const wrappedHandle = withClass(handle, "belt-menu__item");
-  return RemixMenu.MenuItem(wrappedHandle);
+  return RemixMenuItem(handle);
 }
 
 export function Submenu(handle: Handle<SubmenuProps>) {
-  const wrappedHandle = withClass(handle, "belt-menu__trigger");
-  return RemixMenu.Submenu(wrappedHandle);
+  return RemixSubmenu(handle);
 }
 
 export function MenuList(handle: Handle<MenuListProps>) {
-  const wrappedHandle = withClass(handle, "belt-menu__list");
-  return RemixMenu.MenuList(wrappedHandle);
+  return RemixMenuList(handle);
 }
 
-export const onMenuSelect = RemixMenu.onMenuSelect;
-export const MenuSelectEvent = RemixMenu.MenuSelectEvent;
-export type { MenuSelectItem } from "@remix-run/ui/menu";
+export { menuTriggerMix, onMenuSelect, MenuSelectEvent, type MenuSelectItem };
+export { RemixMenuRoot as MenuRoot };
 
-export type SelectProps = RemixSelect.SelectProps & WithClassName & WithMix;
-export type SelectOptionProps = RemixSelect.SelectOptionProps & WithClassName & WithMix;
+export type SelectProps = RemixSelectProps & WithClassName & WithMix;
+export type SelectRootProps = RemixSelectRootProps;
+export type SelectTriggerProps = RemixSelectTriggerProps & WithClassName & WithMix;
+export type SelectListProps = RemixSelectListProps & WithClassName & WithMix;
+export type SelectOptionProps = RemixSelectOptionProps & WithClassName & WithMix;
 
 export function Select(handle: Handle<SelectProps>) {
-  const wrappedHandle = withClass(handle, "belt-select__trigger");
-  return RemixSelect.Select(wrappedHandle);
+  return RemixSelect(handle);
+}
+
+export function SelectTrigger(handle: Handle<SelectTriggerProps>) {
+  return RemixSelectTrigger(handle);
+}
+
+export function SelectList(handle: Handle<SelectListProps>) {
+  return RemixSelectList(handle);
+}
+
+export function SelectValue(handle: Handle) {
+  return RemixSelectValue(handle);
 }
 
 export function SelectOption(handle: Handle<SelectOptionProps>) {
-  const wrappedHandle = withClass(handle, "belt-select__item");
-  return RemixSelect.Option(wrappedHandle);
+  return RemixSelectOption(handle);
 }
 
-export const onSelectChange = RemixSelect.onSelectChange;
-export const SelectChangeEvent = RemixSelect.SelectChangeEvent;
+export { onSelectChange, selectTriggerMix, SelectChangeEvent };
+export { RemixSelectRoot as SelectRoot };
 
-export type ComboboxProps = RemixCombobox.ComboboxProps & WithClassName & WithMix;
+export type ComboboxProps = RemixCombobox.ComboboxProps &
+  WithClassName &
+  WithMix & {
+    readonly "data-elevation"?: Elevation;
+    readonly elevation?: Elevation;
+  };
 export type ComboboxOptionProps = RemixCombobox.ComboboxOptionProps & WithClassName & WithMix;
 
 export function Combobox(handle: Handle<ComboboxProps>) {
-  const wrappedHandle = withClass(handle, "belt-combobox");
+  const { elevation = 3, "data-elevation": dataElevation, ...props } = handle.props;
+  const wrappedHandle = withClass(
+    {
+      ...handle,
+      props: {
+        ...props,
+        "data-elevation": dataElevation ?? elevation,
+      },
+    },
+    "belt-combobox",
+  );
   return RemixCombobox.Combobox(wrappedHandle);
 }
 

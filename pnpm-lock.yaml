@@ -31,6 +31,31 @@ importers:
         specifier: ^4.1.6
         version: 4.1.6(@types/node@22.19.19)(vite@6.4.2(@types/node@22.19.19)(lightningcss@1.32.0)(tsx@4.22.2)(yaml@2.9.0))
 
+  examples/react-preview:
+    dependencies:
+      '@repo/renderer-react':
+        specifier: workspace:*
+        version: link:../../packages/renderer-react
+      '@riff-refine/belt':
+        specifier: workspace:*
+        version: link:../../packages/belt
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
+      vite:
+        specifier: ^6.3.5
+        version: 6.4.2(@types/node@22.19.19)(lightningcss@1.32.0)(tsx@4.22.2)(yaml@2.9.0)
+
   examples/remix-app:
     dependencies:
       '@remix-run/ui':

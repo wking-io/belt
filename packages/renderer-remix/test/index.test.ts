@@ -16,12 +16,20 @@ import {
   Menu,
   MenuItem,
   MenuList,
+  MenuRoot,
+  menuTriggerMix,
   Panel,
   Select,
+  SelectList,
   SelectOption,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  selectTriggerMix,
   Slider,
   StatusBanner,
   Switch,
+  MenuTrigger,
 } from "../src/index.tsx";
 
 const rendererSourcePath = fileURLToPath(new URL("../src/index.tsx", import.meta.url));
@@ -122,12 +130,9 @@ it("renders form primitives and portable class hooks", async () => {
   assert.match(html, /belt-slider custom-slider/);
   assert.match(html, /role="group"/);
   assert.match(html, /belt-slider__header/);
-  assert.match(html, /<label[^>]*class="belt-slider__label"/);
   assert.match(html, /<label[^>]*for="intensity"/);
   assert.match(html, />Intensity<\/label>/);
   assert.match(html, /belt-slider__value/);
-  assert.match(html, /belt-slider__value-text/);
-  assert.match(html, /belt-slider__unit/);
   assert.match(html, /belt-slider__control/);
   assert.match(html, /belt-slider__track/);
   assert.match(html, /belt-slider__indicator/);
@@ -149,11 +154,16 @@ it("renders form primitives and portable class hooks", async () => {
   assert.match(html, /belt-badge/);
 });
 
-it("keeps slider range input out of Remix UI controlled reflection", async () => {
+it("keeps slider rendering driven by Remix component state", async () => {
   const source = await readFile(rendererSourcePath, "utf8");
 
-  assert.match(source, /defaultValue=\{resolvedValue\}/);
-  assert.notMatch(source, /value=\{resolvedValue\}/);
+  assert.match(source, /let hasInitialized = false/);
+  assert.match(source, /let sliderValue = 0/);
+  assert.match(source, /value=\{resolvedValue\}/);
+  assert.notMatch(source, /input\.value =/);
+  assert.notMatch(source, /setAttribute\("aria-valuenow"/);
+  assert.notMatch(source, /textContent =/);
+  assert.notMatch(source, /setProperty\("--belt-slider-value"/);
 });
 
 it("keeps switch checkbox bound to local checked state", async () => {
@@ -171,10 +181,214 @@ it("exports thin Remix UI wrappers for composed controls", () => {
   assert.strictEqual(typeof Menu, "function");
   assert.strictEqual(typeof MenuItem, "function");
   assert.strictEqual(typeof MenuList, "function");
+  assert.strictEqual(typeof MenuRoot, "function");
+  assert.strictEqual(typeof MenuTrigger, "function");
+  assert.strictEqual(typeof menuTriggerMix, "function");
   assert.strictEqual(typeof Select, "function");
+  assert.strictEqual(typeof SelectRoot, "function");
+  assert.strictEqual(typeof SelectTrigger, "function");
+  assert.strictEqual(typeof SelectValue, "function");
+  assert.strictEqual(typeof SelectList, "function");
   assert.strictEqual(typeof SelectOption, "function");
+  assert.strictEqual(typeof selectTriggerMix, "function");
   assert.strictEqual(typeof Combobox, "function");
   assert.strictEqual(typeof ComboboxOption, "function");
+});
+
+it("renders the local Remix menu with Base UI-compatible class hooks", async () => {
+  const html = await render(
+    createElement(
+      Menu,
+      { label: "Actions", menuLabel: "Worktree actions" },
+      createElement(MenuItem, {
+        id: "open",
+        label: "Open worktree",
+        name: "action",
+        value: "open",
+      }),
+      createElement(MenuItem, {
+        checked: true,
+        id: "pin",
+        label: "Pin worktree",
+        name: "view",
+        type: "checkbox",
+        value: "pin",
+      }),
+      createElement(
+        MenuList,
+        { class: "custom-list" },
+        createElement(MenuItem, { id: "copy", label: "Copy URL", name: "action", value: "copy" }),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-ghost-button belt-menu__trigger/);
+  assert.match(html, /aria-haspopup="menu"/);
+  assert.match(html, /belt-menu__popup belt-surface/);
+  assert.match(html, /data-elevation="1"/);
+  assert.match(html, /data-tone="neutral"/);
+  assert.match(html, /belt-surface__inner/);
+  assert.match(html, /belt-menu__list/);
+  assert.match(html, /custom-list/);
+  assert.match(html, /role="menu"/);
+  assert.match(html, /aria-label="Worktree actions"/);
+  assert.match(html, /belt-menu__item/);
+  assert.match(html, /role="menuitemcheckbox"/);
+});
+
+it("allows the real Button component to act as the menu trigger", async () => {
+  const html = await render(
+    createElement(
+      MenuRoot,
+      { label: "Actions" },
+      createElement(
+        Button,
+        { class: "action-trigger", elevation: 2, mix: menuTriggerMix(), tone: "primary" },
+        "Actions",
+      ),
+      createElement(
+        MenuList,
+        null,
+        createElement(MenuItem, {
+          id: "open",
+          label: "Open worktree",
+          name: "action",
+          value: "open",
+        }),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-surface action-trigger/);
+  assert.match(html, /belt-surface__inner/);
+  assert.match(html, /belt-button/);
+  assert.match(html, /data-elevation="2"/);
+  assert.match(html, /data-tone="primary"/);
+  assert.match(html, /aria-controls="[^"]+-list"/);
+  assert.match(html, /aria-label="Actions"/);
+});
+
+it("allows the real GhostButton component to act as the menu trigger", async () => {
+  const html = await render(
+    createElement(
+      MenuRoot,
+      { label: "Actions" },
+      createElement(GhostButton, { elevation: 3, mix: menuTriggerMix() }, "Actions"),
+      createElement(
+        MenuList,
+        null,
+        createElement(MenuItem, { id: "open", label: "Open", name: "action", value: "open" }),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-ghost-button/);
+  assert.match(html, /aria-controls="[^"]+-list"/);
+  assert.match(html, /data-elevation="3"/);
+});
+
+it("keeps menu behavior local to the Remix renderer", async () => {
+  const source = await readFile(rendererSourcePath, "utf8");
+
+  assert.notMatch(source, /@remix-run\/ui\/menu/);
+  assert.match(source, /from "\.\/menu\.js"/);
+});
+
+it("renders the local Remix select with Belt surface and listbox semantics", async () => {
+  const html = await render(
+    createElement(
+      Select,
+      { defaultLabel: "Select destination", name: "destination" },
+      createElement(SelectOption, { label: "Web", value: "web" }, "Web"),
+      createElement(SelectOption, { label: "Docs", value: "docs" }, "Docs"),
+    ),
+  );
+
+  assert.match(html, /belt-surface/);
+  assert.match(html, /belt-button belt-select__trigger/);
+  assert.match(html, /belt-select__value/);
+  assert.match(
+    html,
+    /<span[^>]*data-placeholder=""[^>]*class="belt-select__value"[^>]*>Select destination<\/span><span class="belt-button__end-icon">/,
+  );
+  assert.match(html, /aria-haspopup="listbox"/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /belt-select__popup belt-surface/);
+  assert.match(html, /data-elevation="1"/);
+  assert.match(html, /data-tone="neutral"/);
+  assert.match(html, /belt-surface__inner/);
+  assert.match(html, /belt-select__list/);
+  assert.match(html, /role="listbox"/);
+  assert.match(html, /belt-select__item/);
+  assert.match(html, /role="option"/);
+  assert.match(html, /type="hidden"/);
+  assert.match(html, /name="destination"/);
+  assert.notMatch(html, /belt-select__item-indicator/);
+});
+
+it("marks selected Remix select options with tone data", async () => {
+  const html = await render(
+    createElement(
+      Select,
+      { defaultLabel: "Status", defaultValue: "shipped", tone: "success" },
+      createElement(SelectOption, { label: "Draft", value: "draft" }, "Draft"),
+      createElement(SelectOption, { label: "Shipped", value: "shipped" }, "Shipped"),
+    ),
+  );
+
+  assert.match(html, /data-tone="success"[^>]*role="listbox"[^>]*class="belt-select__list"/);
+  assert.match(
+    html,
+    /data-tone="success"[^>]*role="option"[^>]*aria-selected="true"[^>]*class="belt-select__item belt-text"/,
+  );
+});
+
+it("allows a composed select trigger to use the real Button component", async () => {
+  const html = await render(
+    createElement(
+      SelectRoot,
+      { defaultLabel: "Branch", name: "branch" },
+      createElement(
+        Button,
+        { mix: selectTriggerMix(), tone: "primary" },
+        createElement(SelectValue),
+      ),
+      createElement(
+        SelectList,
+        null,
+        createElement(SelectOption, { label: "main", value: "main" }, "main"),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-button/);
+  assert.match(html, /Branch/);
+  assert.match(html, /aria-haspopup="listbox"/);
+  assert.match(html, /aria-controls="[^"]+-list"/);
+  assert.match(html, /role="listbox"/);
+  assert.match(html, /type="hidden"/);
+});
+
+it("renders the local Combobox root with elevation for item hover styling", async () => {
+  const html = await render(
+    createElement(
+      Combobox,
+      { elevation: 2, name: "branch", placeholder: "Find branch" },
+      createElement(ComboboxOption, { label: "main", value: "main" }, "main"),
+    ),
+  );
+
+  assert.match(html, /data-elevation="2"[^>]*class="belt-combobox"/);
+  assert.match(html, /role="combobox"/);
+  assert.match(html, /role="listbox"/);
+  assert.match(html, /belt-combobox__item/);
+});
+
+it("keeps select behavior local to the Remix renderer", async () => {
+  const source = await readFile(rendererSourcePath, "utf8");
+
+  assert.notMatch(source, /@remix-run\/ui\/select/);
+  assert.match(source, /from "\.\/select\.js"/);
 });
 
 it("renders the shared toolbar glyph sheet through Remix UI", async () => {

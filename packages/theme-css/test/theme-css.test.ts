@@ -96,6 +96,10 @@ it("exports portable component class hooks for renderers", async () => {
     "belt-badge",
     "belt-text",
     "belt-icon",
+    "belt-drag-indicator",
+    "belt-drag-indicator__dot",
+    "belt-toolbar",
+    "belt-toolbar__inner",
     "belt-radius",
     "belt-gap",
     "belt-input",
@@ -106,16 +110,15 @@ it("exports portable component class hooks for renderers", async () => {
     "belt-label",
     "belt-slider",
     "belt-slider__header",
-    "belt-slider__label",
     "belt-slider__value",
-    "belt-slider__value-text",
-    "belt-slider__unit",
     "belt-switch",
     "belt-menu__trigger",
     "belt-menu__popup",
     "belt-menu__item",
     "belt-select__trigger",
+    "belt-select__value",
     "belt-select__popup",
+    "belt-select__list",
     "belt-select__item",
     "belt-combobox",
     "belt-combobox__popup",
@@ -123,6 +126,67 @@ it("exports portable component class hooks for renderers", async () => {
   ]) {
     assert.match(css, new RegExp(`\\.${className.replaceAll("_", "\\_")}`));
   }
+});
+
+it("styles select placeholders and selected option tone states", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /\.belt-select__value\[data-placeholder\]/);
+  assert.match(css, /--belt-select-selected-bg:\s*var\(--belt-color-primary\)/);
+  assert.match(css, /--belt-select-selected-fg:\s*var\(--belt-color-primary-foreground\)/);
+  assert.match(css, /\.belt-select__item\[aria-selected="true"\]/);
+  assert.match(css, /background-color:\s*var\(--belt-select-selected-bg\)/);
+  assert.notMatch(css, /belt-select__item-indicator/);
+});
+
+it("sets button text with the small font token", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /\.belt-button\)[\s\S]*font-size:\s*var\(--belt-font-size-sm\)/);
+  assert.match(css, /\.belt-ghost-button\)[\s\S]*font-size:\s*var\(--belt-font-size-sm\)/);
+});
+
+it("styles drag indicators with grab and active dragging cursors", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /\.belt-drag-indicator\)[\s\S]*cursor:\s*grab/);
+  assert.match(css, /\.belt-drag-indicator:active/);
+  assert.match(css, /\.belt-drag-indicator\[data-dragging="true"\]/);
+  assert.match(css, /cursor:\s*grabbing/);
+  assert.match(css, /\.belt-drag-indicator__dot\)[\s\S]*inline-size:\s*4px/);
+  assert.match(css, /\.belt-drag-indicator__dot\)[\s\S]*block-size:\s*4px/);
+});
+
+it("styles toolbar as a fixed content-sized viewport bounded surface", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /\.belt-toolbar\)[\s\S]*inline-size:\s*max-content/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*position:\s*fixed/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*max-inline-size:\s*100vw/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*max-block-size:\s*100vh/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*display:\s*flex/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*inline-size:\s*max-content/);
+});
+
+it("bases menu select and combobox item hover states on root elevation", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(
+    css,
+    /\.belt-combobox\[data-elevation="2"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-2-hover\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-combobox\[data-elevation="3"\][\s\S]*--belt-surface-hover:\s*var\(--belt-color-elevation-3-hover\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item\[data-highlighted="true"\][\s\S]*\.belt-select__item\[data-highlighted="true"\][\s\S]*\.belt-combobox__item\[data-highlighted="true"\][\s\S]*background-color:\s*var\(--belt-surface-hover\)/,
+  );
+  assert.notMatch(
+    css,
+    /\.belt-combobox__item\[data-highlighted="true"\][\s\S]*background-color:\s*var\(--belt-color-elevation-3-hover\)/,
+  );
 });
 
 it("does not widen the locked token contract", async () => {
@@ -235,7 +299,8 @@ it("exports portable surface classes with attribute selector variants", async ()
 
   assert.match(css, /::before/);
   assert.match(css, /::after/);
-  assert.match(css, /:has\(\[data-control\]:focus-visible\)/);
+  assert.match(css, /:has\(> \.belt-surface__inner > \[data-control\]:focus-visible\)/);
+  assert.match(css, /:has\(> \.belt-surface__inner > \.belt-input:focus-visible\)/);
   assert.ok(
     !/data-belt-surface/.test(css),
     "surface CSS should use short data attributes for component variants",

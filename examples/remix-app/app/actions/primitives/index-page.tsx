@@ -13,9 +13,16 @@ import {
   Label,
   Menu,
   MenuItem,
+  MenuList,
+  MenuRoot,
+  menuTriggerMix,
   Panel,
   Select,
+  SelectList,
   SelectOption,
+  SelectRoot,
+  selectTriggerMix,
+  SelectValue,
   Slider,
   StatusBanner,
   Switch,
@@ -547,7 +554,9 @@ function formPreview() {
               tone !== "neutral" && (
                 <Label class="preview-row">
                   <Switch checked tone={tone} />
-                  <span class="belt-text" data-size="sm">Show dev toolbar</span>
+                  <span class="belt-text" data-size="sm">
+                    Show dev toolbar
+                  </span>
                 </Label>
               ),
           )}
@@ -573,6 +582,32 @@ function choicePreview() {
               Close panel
             </MenuItem>
           </Menu>
+          <MenuRoot label="Ghost menu">
+            <GhostButton elevation={2} mix={menuTriggerMix()}>
+              Ghost trigger
+            </GhostButton>
+            <MenuList>
+              <MenuItem id="ghost-open" label="Open worktree" name="ghost-action" value="open">
+                Open worktree
+              </MenuItem>
+              <MenuItem id="ghost-copy" label="Copy URL" name="ghost-action" value="copy">
+                Copy URL
+              </MenuItem>
+            </MenuList>
+          </MenuRoot>
+          <MenuRoot label="Primary menu">
+            <Button elevation={1} tone="primary" mix={menuTriggerMix()}>
+              Button trigger
+            </Button>
+            <MenuList>
+              <MenuItem id="button-open" label="Open worktree" name="button-action" value="open">
+                Open worktree
+              </MenuItem>
+              <MenuItem id="button-close" label="Close panel" name="button-action" value="close">
+                Close panel
+              </MenuItem>
+            </MenuList>
+          </MenuRoot>
           <Select defaultLabel="Select destination" name="destination">
             <SelectOption label="Web" value="web">
               Web
@@ -581,6 +616,19 @@ function choicePreview() {
               Docs
             </SelectOption>
           </Select>
+          <SelectRoot defaultLabel="Select branch" name="composed-branch">
+            <Button elevation={1} mix={selectTriggerMix()}>
+              <SelectValue />
+            </Button>
+            <SelectList>
+              <SelectOption label="main" value="main">
+                main
+              </SelectOption>
+              <SelectOption label="feature/toolbar-shell" value="feature/toolbar-shell">
+                feature/toolbar-shell
+              </SelectOption>
+            </SelectList>
+          </SelectRoot>
           <Combobox name="branch" placeholder="Find branch">
             <ComboboxOption label="main" value="main">
               main
@@ -596,11 +644,19 @@ function choicePreview() {
           <span class="belt-text" data-emphasis="strong" data-weight="semibold">
             Menu surface classes
           </span>
-          <div class="preview-surface belt-menu__list">
-            <div class="belt-menu__item">Open worktree</div>
-            <div class="belt-menu__item">Copy URL</div>
-            <div class="belt-menu__item" data-highlighted="true">
-              Highlighted item
+          <div
+            class="preview-surface belt-menu__popup belt-surface"
+            data-elevation="1"
+            data-tone="neutral"
+          >
+            <div class="belt-surface__inner">
+              <div class="belt-menu__list">
+                <div class="belt-menu__item">Open worktree</div>
+                <div class="belt-menu__item">Copy URL</div>
+                <div class="belt-menu__item" data-highlighted="true">
+                  Highlighted item
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   Button,
+  DragIndicator,
   Field,
   GhostButton,
   Glyph,
@@ -17,9 +18,10 @@ import {
   Slider,
   StatusBanner,
   Switch,
+  Toolbar,
   glyphIds,
   type GlyphName,
-} from "../src/index.ts";
+} from "../src/index.tsx";
 
 it("renders a hidden svg sprite sheet with Remix-compatible symbol ids", () => {
   const html = renderToStaticMarkup(createElement(GlyphSheet));
@@ -72,14 +74,22 @@ it("renders React primitives with the shared CSS class contract", () => {
       { elevation: 2 },
       createElement(Button, { tone: "primary", startIcon: "add" }, "Launch"),
       createElement(GhostButton, { tone: "danger" }, "Delete"),
+      createElement(DragIndicator),
+      createElement(
+        Toolbar,
+        { defaultPosition: { x: 24, y: 32 } },
+        createElement(Button, { icon: "check" }),
+        createElement("span", { className: "belt-text" }, "Toolbar"),
+      ),
       createElement(
         StatusBanner.Root,
-        { tone: "warning" },
+        { tone: "primary" },
         createElement(
           StatusBanner.Row,
           null,
-          createElement(StatusBanner.Icon, null, "!"),
+          createElement(StatusBanner.Icon, { glyph: "alert" }),
           createElement(StatusBanner.Message, null, "Unsaved changes"),
+          createElement(StatusBanner.Actions, null, createElement(GhostButton, null, "Undo")),
         ),
       ),
     ),
@@ -90,9 +100,17 @@ it("renders React primitives with the shared CSS class contract", () => {
   assert.match(html, /data-radius="outer"/);
   assert.match(html, /belt-button/);
   assert.match(html, /belt-ghost-button/);
+  assert.match(html, /belt-drag-indicator/);
+  assert.match(html, /belt-drag-indicator__dot/);
+  assert.match(html, /belt-toolbar/);
+  assert.match(html, /belt-toolbar__inner/);
+  assert.match(html, /--belt-toolbar-x:24px/);
+  assert.match(html, /--belt-toolbar-y:32px/);
   assert.match(html, /belt-status-banner/);
   assert.match(html, /data-radius="default"/);
-  assert.match(html, /data-tone="warning"/);
+  assert.match(html, /data-tone="primary"/);
+  assert.match(html, new RegExp(`#${glyphIds.alert}`));
+  assert.match(html, /belt-status-banner__actions/);
 });
 
 it("lets React containers set radius while controls inherit it", () => {

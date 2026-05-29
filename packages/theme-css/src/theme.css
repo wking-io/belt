@@ -703,6 +703,10 @@
   position: relative;
 }
 
+:where(.belt-surface[data-padding="sm"] > .belt-surface__inner) {
+  padding: calc(var(--belt-space) * 1.5);
+}
+
 :where(.belt-surface)::before,
 :where(.belt-surface)::after {
   content: "";
@@ -739,7 +743,10 @@
   position: relative;
 }
 
-:where(.belt-surface:has([data-control]:focus-visible)) {
+:where(.belt-surface[data-control]:focus-visible,
+  .belt-surface:has(> [data-control]:focus-visible),
+  .belt-surface:has(> .belt-surface__inner > [data-control]:focus-visible),
+  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)) {
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 20%, transparent);
 }
 
@@ -824,12 +831,10 @@
   --belt-surface-foreground-strong: var(--belt-color-danger-foreground-strong);
 }
 
-:where(.belt-surface:has([data-control]:focus-visible),
-  belt-surface[data-tone="primary"]:has([data-control]:focus-visible),
-  belt-surface[data-tone="info"]:has([data-control]:focus-visible),
-  belt-surface[data-tone="success"]:has([data-control]:focus-visible),
-  belt-surface[data-tone="warning"]:has([data-control]:focus-visible),
-  belt-surface[data-tone="danger"]:has([data-control]:focus-visible)) {
+:where(.belt-surface[data-control]:focus-visible,
+  .belt-surface:has(> [data-control]:focus-visible),
+  .belt-surface:has(> .belt-surface__inner > [data-control]:focus-visible),
+  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)) {
   --belt-surface-border: color-mix(in oklch, var(--belt-color-focus) 60%, transparent);
 }
 
@@ -856,6 +861,7 @@
   display: inline-flex;
   gap: var(--belt-space);
   flex-direction: row;
+  font-size: var(--belt-font-size-sm);
   align-items: center;
   justify-content: center;
   outline: none;
@@ -954,6 +960,7 @@
   color: var(--belt-ghost-button-text-color);
   display: inline-flex;
   flex-direction: row;
+  font-size: var(--belt-font-size-sm);
   align-items: center;
   justify-content: center;
   outline: none;
@@ -1413,6 +1420,62 @@
   margin-inline-end: calc(var(--belt-space) * -2);
 }
 
+:where(.belt-drag-indicator) {
+  cursor: grab;
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-inline-start: 2px;
+  touch-action: none;
+  user-select: none;
+}
+
+:where(.belt-drag-indicator:active, .belt-drag-indicator[data-dragging="true"]) {
+  cursor: grabbing;
+}
+
+:where(.belt-drag-indicator__dot) {
+  background-color: var(--belt-color-elevation-2);
+  block-size: 4px;
+  border-radius: 1px;
+  box-shadow:
+    0.5px 0.5px 0 0.5px color-mix(in oklch, var(--belt-neutral-14) 50%, transparent),
+    inset 0 0.5px 0 var(--belt-color-elevation-3-highlight),
+    inset 0.5px 0.5px 0 color-mix(in oklch, var(--belt-color-elevation-3-highlight) 65%, transparent);
+  inline-size: 4px;
+}
+
+:where(.belt-toolbar) {
+  inline-size: max-content;
+  inset-block-start: var(--belt-toolbar-y, 0);
+  inset-inline-start: var(--belt-toolbar-x, 0);
+  max-block-size: 100vh;
+  max-inline-size: 100vw;
+  position: fixed;
+  z-index: 1000;
+}
+
+:where(.belt-toolbar > .belt-surface) {
+  inline-size: max-content;
+  max-block-size: 100vh;
+  max-inline-size: 100vw;
+}
+
+:where(.belt-toolbar > .belt-surface > .belt-surface__inner) {
+  inline-size: max-content;
+  max-block-size: 100vh;
+  max-inline-size: 100vw;
+}
+
+:where(.belt-toolbar__inner) {
+  align-items: center;
+  display: flex;
+  gap: calc(var(--belt-space) * 1.5);
+  inline-size: max-content;
+  max-inline-size: 100vw;
+  /* padding-right: calc(var(--belt-space) * 1); */
+}
+
 :where(.belt-field) {
   display: grid;
   gap: calc(var(--belt-space) * 2);
@@ -1538,35 +1601,126 @@
   min-width: 0;
 }
 
-:where(.belt-menu__popup, .belt-select__popup, .belt-combobox__popup, .belt-menu__list) {
-  background-color: var(--belt-color-elevation-3);
+:where(.belt-combobox) {
+  --belt-surface-bg: var(--belt-color-elevation-1);
+  --belt-surface-foreground: var(--belt-color-elevation-1-foreground);
+  --belt-surface-hover: var(--belt-color-elevation-1-hover);
+}
+
+:where(.belt-combobox[data-elevation="2"]) {
+  --belt-surface-bg: var(--belt-color-elevation-2);
+  --belt-surface-foreground: var(--belt-color-elevation-2-foreground);
+  --belt-surface-hover: var(--belt-color-elevation-2-hover);
+}
+
+:where(.belt-combobox[data-elevation="3"]) {
+  --belt-surface-bg: var(--belt-color-elevation-3);
+  --belt-surface-foreground: var(--belt-color-elevation-3-foreground);
+  --belt-surface-hover: var(--belt-color-elevation-3-hover);
+}
+
+:where(.belt-select__trigger) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: stretch;
+  text-align: left;
+}
+
+:where(.belt-select__value) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where(.belt-select__value[data-placeholder]) {
+  color: var(--belt-surface-foreground-subtle);
+}
+
+:where(.belt-select__trigger > .belt-button__end-icon) {
+  justify-self: end;
+}
+
+:where(.belt-combobox__popup, .belt-combobox > [popover]) {
+  background-color: var(--belt-surface-bg);
   border: 0.5px solid var(--belt-color-border-subtle);
   border-radius: var(--belt-radius-outer);
   box-shadow: 0 12px 30px color-mix(in oklch, var(--belt-color-elevation-1-foreground) 18%, transparent);
-  color: var(--belt-color-elevation-1-foreground);
+  color: var(--belt-surface-foreground);
   padding: calc(var(--belt-space) * 1);
 }
 
-:where(.belt-select__list, .belt-combobox__list) {
+:where(.belt-menu__list,
+  .belt-select__list,
+  .belt-combobox__list,
+  .belt-combobox > [popover] [role="listbox"]) {
   display: grid;
   gap: calc(var(--belt-space) * 1);
+  padding: calc(var(--belt-space) * 1);
+}
+
+:where(.belt-menu__popup, .belt-select__popup) {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.belt-menu__popup > .belt-surface__inner, .belt-select__popup > .belt-surface__inner) {
+  height: auto;
 }
 
 :where(.belt-menu__item, .belt-select__item, .belt-combobox__item) {
   border-radius: var(--belt-radius);
-  color: var(--belt-color-elevation-1-foreground);
+  color: var(--belt-surface-foreground);
   cursor: pointer;
   padding-block: calc(var(--belt-space) * 2);
   padding-inline: calc(var(--belt-space) * 3);
 }
 
-:where(.belt-menu__item[data-highlighted],
-  .belt-menu__item[data-highlighted="true"],
-  .belt-select__item[data-highlighted],
+:where(.belt-select__list, .belt-select__item) {
+  --belt-select-selected-bg: var(--belt-color-primary);
+  --belt-select-selected-fg: var(--belt-color-primary-foreground);
+}
+
+:where(.belt-select__list[data-tone="neutral"], .belt-select__item[data-tone="neutral"]) {
+  --belt-select-selected-bg: var(--belt-color-elevation-1-hover);
+  --belt-select-selected-fg: var(--belt-color-elevation-1-foreground);
+}
+
+:where(.belt-select__list[data-tone="primary"], .belt-select__item[data-tone="primary"]) {
+  --belt-select-selected-bg: var(--belt-color-primary);
+  --belt-select-selected-fg: var(--belt-color-primary-foreground);
+}
+
+:where(.belt-select__list[data-tone="info"], .belt-select__item[data-tone="info"]) {
+  --belt-select-selected-bg: var(--belt-color-info);
+  --belt-select-selected-fg: var(--belt-color-info-foreground);
+}
+
+:where(.belt-select__list[data-tone="success"], .belt-select__item[data-tone="success"]) {
+  --belt-select-selected-bg: var(--belt-color-success);
+  --belt-select-selected-fg: var(--belt-color-success-foreground);
+}
+
+:where(.belt-select__list[data-tone="warning"], .belt-select__item[data-tone="warning"]) {
+  --belt-select-selected-bg: var(--belt-color-warning);
+  --belt-select-selected-fg: var(--belt-color-warning-foreground);
+}
+
+:where(.belt-select__list[data-tone="danger"], .belt-select__item[data-tone="danger"]) {
+  --belt-select-selected-bg: var(--belt-color-danger);
+  --belt-select-selected-fg: var(--belt-color-danger-foreground);
+}
+
+:where(.belt-menu__item[data-highlighted="true"],
   .belt-select__item[data-highlighted="true"],
-  .belt-combobox__item[data-highlighted],
   .belt-combobox__item[data-highlighted="true"]) {
-  background-color: var(--belt-color-elevation-3-hover);
+  background-color: var(--belt-surface-hover);
+}
+
+:where(.belt-select__item[aria-selected="true"]) {
+  background-color: var(--belt-select-selected-bg);
+  color: var(--belt-select-selected-fg);
 }
 
 :where(.belt-menu__item[data-disabled],
