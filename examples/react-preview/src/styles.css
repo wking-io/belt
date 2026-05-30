@@ -47,6 +47,13 @@ body {
   justify-content: space-between;
 }
 
+.preview-topbar__controls {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
 .preview-topbar h1 {
   color: var(--belt-color-elevation-1-foreground-strong);
   font-size: 30px;
@@ -63,6 +70,7 @@ body {
 }
 
 .preview-theme-tabs,
+.preview-page-tabs,
 .preview-row,
 .preview-switch-label,
 .preview-mini-glyphs {
@@ -72,6 +80,7 @@ body {
   gap: 8px;
 }
 
+.preview-page-tabs .belt-ghost-button[aria-pressed="true"],
 .preview-theme-tabs .belt-ghost-button[aria-pressed="true"] {
   background: var(--belt-color-primary);
   color: var(--belt-color-primary-foreground-strong);
@@ -180,6 +189,74 @@ body {
   min-width: 0;
 }
 
+.preview-live-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(240px, 0.75fr);
+}
+
+.preview-toolbar-metadata,
+.preview-worktree-list,
+.preview-control-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.preview-toolbar-tool,
+.preview-worktree-row {
+  align-items: center;
+  background: var(--belt-color-elevation-2);
+  border: 0.5px solid var(--belt-color-border-subtle);
+  border-radius: var(--belt-radius-inner);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 8px;
+}
+
+.preview-toolbar-tool {
+  align-items: start;
+  display: grid;
+  justify-content: stretch;
+}
+
+.preview-worktree-row>div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.preview-worktree-row .belt-text {
+  overflow-wrap: anywhere;
+}
+
+.preview-destination-link {
+  border: 1px solid transparent;
+  border-radius: var(--belt-radius-inner);
+  color: var(--belt-color-primary-foreground);
+  font-size: var(--belt-font-size-sm);
+  line-height: 1;
+  padding: 6px 8px;
+  text-decoration: none;
+}
+
+.preview-destination-link:hover {
+  background: var(--belt-color-primary);
+  color: var(--belt-color-primary-foreground-strong);
+}
+
+.preview-control-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.preview-control-fields {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 @media (max-width: 720px) {
   .preview-shell {
     padding: 16px;
@@ -188,6 +265,14 @@ body {
   .preview-topbar {
     align-items: start;
     display: grid;
+  }
+
+  .preview-topbar__controls {
+    justify-items: start;
+  }
+
+  .preview-live-grid {
+    grid-template-columns: 1fr;
   }
 
   .preview-palette-row {

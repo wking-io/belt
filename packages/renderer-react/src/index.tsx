@@ -9,6 +9,7 @@ import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import {
   Fragment,
   createContext,
+  isValidElement,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -17,12 +18,11 @@ import {
   type ComponentProps,
   type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent,
-  type PointerEvent,
   type ReactElement,
   type ReactNode,
   type SVGProps,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   glyphDefinitions,
   glyphIds,
@@ -31,6 +31,15 @@ import {
   type GlyphName,
   type GlyphNode,
 } from "@repo/glyphs";
+import {
+  defineToolbarDefinition,
+  extractToolbarConfig,
+  type ToolDefinition,
+  type ToolbarConfig,
+  type ToolbarConfigSource,
+  type ToolbarDefinition,
+  type ToolbarTool,
+} from "@repo/core";
 
 export type { GlyphDefinition, GlyphName, GlyphNode } from "@repo/glyphs";
 export { glyphDefinitions, glyphIds, glyphNames } from "@repo/glyphs";
@@ -39,6 +48,24 @@ export type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" 
 export type Elevation = 1 | 2 | 3;
 export type Radius = "inner" | "default" | "outer";
 export type StatusBannerTone = IntentTone;
+export type ToolbarRendererModel = {
+  readonly tools: readonly ToolbarTool[];
+};
+
+export function createToolbar<const Config extends ToolbarConfig>(
+  config: Config,
+): ToolbarDefinition<ToolbarConfig> {
+  return defineToolbarDefinition({ toolbarConfig: config });
+}
+
+export function createToolbarRendererModel(source: ToolbarConfigSource): ToolbarRendererModel {
+  return {
+    tools: extractToolbarConfig(source).tools.map((tool: ToolDefinition) => ({
+      id: tool.id,
+      label: tool.label,
+    })),
+  };
+}
 
 type SurfaceProps = {
   readonly elevation?: Elevation;
@@ -73,7 +100,6 @@ export type ToolbarPosition = {
 export type ToolbarProps = Omit<ComponentProps<"div">, "children"> &
   SurfaceProps & {
     readonly children?: ReactNode;
-    readonly defaultPosition?: ToolbarPosition;
     readonly defaultVisible?: boolean;
     readonly radius?: Radius;
   };
@@ -100,7 +126,7 @@ export type MenuProps = ComponentProps<typeof BaseMenu.Root> & {
   readonly triggerProps?: ComponentProps<typeof BaseMenu.Trigger>;
 };
 export type MenuItemProps = ComponentProps<typeof BaseMenu.Item>;
-export type MenuListProps = ComponentProps<typeof BaseMenu.Popup>;
+export type MenuListProps = ComponentProps<"div">;
 export type SubmenuProps = ComponentProps<typeof BaseMenu.SubmenuRoot> & {
   readonly children?: ReactNode;
   readonly label: ReactNode;
@@ -112,6 +138,8 @@ export type SubmenuProps = ComponentProps<typeof BaseMenu.SubmenuRoot> & {
 export type SelectProps<Value = string> = ComponentProps<typeof BaseSelect.Root<Value>> & {
   readonly children?: ReactNode;
   readonly defaultLabel: ReactNode;
+  readonly elevation?: Elevation;
+  readonly tone?: IntentTone;
   readonly triggerProps?: ComponentProps<typeof BaseSelect.Trigger>;
 };
 export type SelectOptionProps = ComponentProps<typeof BaseSelect.Item>;
@@ -119,6 +147,7 @@ export type SelectOptionProps = ComponentProps<typeof BaseSelect.Item>;
 export type ComboboxProps<Value = string> = ComponentProps<typeof BaseCombobox.Root<Value>> & {
   readonly children?: ReactNode;
   readonly className?: string;
+  readonly elevation?: Elevation;
   readonly placeholder?: string;
 };
 export type ComboboxOptionProps = ComponentProps<typeof BaseCombobox.Item>;
@@ -282,7 +311,6 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
   const {
     children,
     className,
-    defaultPosition = { x: 16, y: 16 },
     defaultVisible = true,
     elevation = 1,
     onKeyDown,
@@ -291,20 +319,29 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
     tone,
     ...rootProps
   } = props;
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const lastMouseRef = useRef<ToolbarPosition>(defaultPosition);
-  const dragOffsetRef = useRef<ToolbarPosition>({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const [position, setPosition] = useState<ToolbarPosition>(defaultPosition);
+  const [portalElement, setPortalElement] = useState<HTMLElement | null>(null);
   const [visible, setVisible] = useState(defaultVisible);
 
-  useEffect(() => {
-    const trackMouse = (event: globalThis.MouseEvent) => {
-      lastMouseRef.current = { x: event.clientX, y: event.clientY };
+  useLayoutEffect(() => {
+    const host = document.createElement("div");
+    host.className = "belt-toolbar-host";
+    document.body.appendChild(host);
+    setPortalElement(host);
+    const keepHostLast = () => {
+      if (document.body.lastElementChild !== host) {
+        document.body.appendChild(host);
+      }
     };
+    const observer = typeof MutationObserver === "undefined"
+      ? undefined
+      : new MutationObserver(keepHostLast);
 
-    window.addEventListener("mousemove", trackMouse);
-    return () => window.removeEventListener("mousemove", trackMouse);
+    observer?.observe(document.body, { childList: true });
+
+    return () => {
+      observer?.disconnect();
+      host.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -313,113 +350,98 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
       if (event.key.toLowerCase() !== "b" || !modifierPressed) return;
 
       event.preventDefault();
-      setVisible((current) => {
-        if (!current) {
-          setPosition(clampToolbarPosition(lastMouseRef.current, toolbarRef.current));
-        }
-
-        return !current;
-      });
+      setVisible((current) => !current);
     };
 
     window.addEventListener("keydown", toggleToolbar);
     return () => window.removeEventListener("keydown", toggleToolbar);
   }, []);
 
-  useEffect(() => {
-    if (!visible) return undefined;
-
-    const clampToViewport = () =>
-      setPosition((current) => clampToolbarPosition(current, toolbarRef.current));
-    window.addEventListener("resize", clampToViewport);
-
-    return () => window.removeEventListener("resize", clampToViewport);
-  }, [visible]);
-
-  useLayoutEffect(() => {
-    if (!visible) return;
-
-    setPosition((current) => clampToolbarPosition(current, toolbarRef.current));
-  }, [visible, children]);
-
-  useEffect(() => {
-    if (!dragging) return undefined;
-
-    const drag = (event: globalThis.MouseEvent | globalThis.PointerEvent) => {
-      setPosition(
-        clampToolbarPosition(
-          {
-            x: event.clientX - dragOffsetRef.current.x,
-            y: event.clientY - dragOffsetRef.current.y,
-          },
-          toolbarRef.current,
-        ),
-      );
-    };
-    const stopDragging = () => setDragging(false);
-
-    window.addEventListener("mousemove", drag);
-    window.addEventListener("mouseup", stopDragging);
-    window.addEventListener("pointercancel", stopDragging);
-    window.addEventListener("pointermove", drag);
-    window.addEventListener("pointerup", stopDragging);
-
-    return () => {
-      window.removeEventListener("mousemove", drag);
-      window.removeEventListener("mouseup", stopDragging);
-      window.removeEventListener("pointercancel", stopDragging);
-      window.removeEventListener("pointermove", drag);
-      window.removeEventListener("pointerup", stopDragging);
-    };
-  }, [dragging]);
-
   if (!visible) return null;
 
-  const startDragging = (clientX: number, clientY: number) => {
-    const rect = toolbarRef.current?.getBoundingClientRect();
-    dragOffsetRef.current = rect
-      ? { x: clientX - rect.left, y: clientY - rect.top }
-      : { x: 0, y: 0 };
-    setDragging(true);
-  };
-
-  const toolbarStyle = {
-    ...style,
-    "--belt-toolbar-x": `${position.x}px`,
-    "--belt-toolbar-y": `${position.y}px`,
-  } as CSSProperties;
   const panelProps = {
     elevation,
     padding: "sm" as const,
     radius,
     ...(tone === undefined ? {} : { tone }),
   };
+  const toolbar = (
+    <ToolbarBody
+      {...rootProps}
+      className={className}
+      onKeyDown={onKeyDown}
+      panelProps={panelProps}
+      style={style}
+    >
+      {children}
+    </ToolbarBody>
+  );
+
+  return portalElement ? createPortal(toolbar, portalElement) : toolbar;
+}
+
+type ToolbarBodyProps = Omit<ComponentProps<"div">, "children"> & {
+  readonly children?: ReactNode;
+  readonly panelProps: PanelProps;
+};
+
+function ToolbarBody(props: ToolbarBodyProps): ReactElement {
+  const {
+    children,
+    className,
+    onKeyDown,
+    panelProps,
+    style,
+    ...rootProps
+  } = props;
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = toolbarRef.current;
+    const body = document.body;
+    const previousReservedSize = body.style.getPropertyValue("--belt-toolbar-reserved-block-size");
+
+    const reserveSpace = () => {
+      const blockSize = element?.getBoundingClientRect().height ?? 0;
+      body.style.setProperty("--belt-toolbar-reserved-block-size", `${blockSize}px`);
+    };
+    const resizeObserver = typeof ResizeObserver === "undefined" || element === null
+      ? undefined
+      : new ResizeObserver(reserveSpace);
+
+    reserveSpace();
+    if (element) {
+      resizeObserver?.observe(element);
+    }
+    window.addEventListener("resize", reserveSpace);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", reserveSpace);
+      if (previousReservedSize) {
+        body.style.setProperty("--belt-toolbar-reserved-block-size", previousReservedSize);
+      } else {
+        body.style.removeProperty("--belt-toolbar-reserved-block-size");
+      }
+    };
+  }, [children]);
 
   return (
     <div
       {...rootProps}
       className={classNames("belt-toolbar", className)}
-      data-dragging={dragging ? "true" : undefined}
       onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => {
         onKeyDown?.(event);
       }}
       ref={toolbarRef}
-      style={toolbarStyle}
+      style={style}
     >
-      <Panel {...panelProps}>
-        <div className="belt-toolbar__inner">
-          <DragIndicator
-            onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
-              startDragging(event.clientX, event.clientY);
-            }}
-            onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-              event.currentTarget.setPointerCapture?.(event.pointerId);
-              startDragging(event.clientX, event.clientY);
-            }}
-          />
-          {children}
-        </div>
-      </Panel>
+      <svg className="belt-toolbar__logo" viewBox="0 0 140 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M80 40H60V60H140V100H80V200H100V180H140V220H120V240H60V220H40V100H0V60H20V40H40V0H80V40Z" fill="currentColor" />
+      </svg>
+      <div className="belt-toolbar__inner">
+        {children}
+      </div>
     </div>
   );
 }
@@ -561,16 +583,10 @@ export function Switch(props: SwitchProps): ReactElement {
 
 export function Menu(props: MenuProps): ReactElement {
   const { children, label, menuLabel, triggerProps, ...rootProps } = props;
-  const { className: triggerClassName, ...restTriggerProps } = triggerProps ?? {};
 
   return (
     <BaseMenu.Root {...rootProps}>
-      <BaseMenu.Trigger
-        {...restTriggerProps}
-        className={mergeClassName("belt-ghost-button belt-menu__trigger", triggerClassName)}
-      >
-        {label}
-      </BaseMenu.Trigger>
+      {menuTrigger(label, triggerProps)}
       <BaseMenu.Portal>
         <BaseMenu.Positioner>
           <MenuList aria-label={menuLabel}>{children}</MenuList>
@@ -580,14 +596,129 @@ export function Menu(props: MenuProps): ReactElement {
   );
 }
 
+function menuTrigger(
+  label: ReactNode,
+  triggerProps: ComponentProps<typeof BaseMenu.Trigger> | undefined,
+): ReactElement {
+  const { className: triggerClassName, ...restTriggerProps } = triggerProps ?? {};
+
+  if (isValidElement<ButtonProps>(label) && label.type === Button) {
+    const {
+      children,
+      className,
+      disabled,
+      elevation = 1,
+      endIcon,
+      icon,
+      loading = false,
+      ref: _buttonRef,
+      startIcon,
+      tone = "neutral",
+      type = "button",
+      ...buttonProps
+    } = label.props;
+
+    return (
+      <BaseMenu.Trigger
+        {...buttonProps}
+        {...restTriggerProps}
+        aria-busy={loading || undefined}
+        className={mergeClassName(
+          classNames("belt-button belt-menu__trigger", classNameString(className)) ??
+          "belt-button belt-menu__trigger",
+          triggerClassName,
+        )}
+        data-control
+        disabled={disabled || loading || restTriggerProps.disabled}
+        type={restTriggerProps.type ?? type}
+      >
+        {buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-button" })}
+      </BaseMenu.Trigger>
+    );
+  }
+
+  if (isValidElement<GhostButtonProps>(label) && label.type === GhostButton) {
+    const {
+      children,
+      className,
+      disabled,
+      elevation = 1,
+      endIcon,
+      icon,
+      loading = false,
+      ref: _buttonRef,
+      startIcon,
+      tone = "neutral",
+      type = "button",
+      variant: _variant,
+      ...buttonProps
+    } = label.props;
+
+    return (
+      <BaseMenu.Trigger
+        {...buttonProps}
+        {...restTriggerProps}
+        aria-busy={loading || undefined}
+        className={mergeClassName(
+          classNames("belt-ghost-button belt-menu__trigger", classNameString(className)) ??
+          "belt-ghost-button belt-menu__trigger",
+          triggerClassName,
+        )}
+        data-control
+        data-elevation={elevation}
+        data-tone={tone}
+        disabled={disabled || loading || restTriggerProps.disabled}
+        type={restTriggerProps.type ?? type}
+      >
+        {buttonContents({
+          children,
+          endIcon,
+          icon,
+          loading,
+          startIcon,
+          part: "belt-ghost-button",
+        })}
+      </BaseMenu.Trigger>
+    );
+  }
+
+  return (
+    <BaseMenu.Trigger
+      {...restTriggerProps}
+      className={mergeClassName("belt-ghost-button belt-menu__trigger", triggerClassName)}
+    >
+      {label}
+    </BaseMenu.Trigger>
+  );
+}
+
 export function MenuList(props: MenuListProps): ReactElement {
-  const { className, ...rootProps } = props;
-  return <BaseMenu.Popup {...rootProps} className={mergeClassName("belt-menu__popup", className)} />;
+  const { children, className, ...listProps } = props;
+
+  return (
+    <BaseMenu.Popup
+      className="belt-menu__popup belt-surface"
+      data-elevation="1"
+      data-tone="neutral"
+    >
+      <div className="belt-surface__inner">
+        <div {...listProps} className={classNames("belt-menu__list", className)}>
+          {children}
+        </div>
+      </div>
+    </BaseMenu.Popup>
+  );
 }
 
 export function MenuItem(props: MenuItemProps): ReactElement {
   const { className, ...rootProps } = props;
-  return <BaseMenu.Item {...rootProps} className={mergeClassName("belt-menu__item", className)} />;
+  return (
+    <BaseMenu.Item
+      {...rootProps}
+      className={mergeClassName("belt-menu__item belt-text", className)}
+      data-size="sm"
+    />
+  );
 }
 
 export function Submenu(props: SubmenuProps): ReactElement {
@@ -614,24 +745,37 @@ export function Submenu(props: SubmenuProps): ReactElement {
 }
 
 export function Select<Value = string>(props: SelectProps<Value>): ReactElement {
-  const { children, defaultLabel, triggerProps, ...rootProps } = props;
+  const { children, defaultLabel, tone = "primary", elevation = 2, triggerProps, ...rootProps } = props;
   const { className: triggerClassName, ...restTriggerProps } = triggerProps ?? {};
 
   return (
     <BaseSelect.Root<Value> {...rootProps}>
-      <BaseSelect.Trigger
-        {...restTriggerProps}
-        className={mergeClassName("belt-ghost-button belt-select__trigger", triggerClassName)}
-      >
-        <BaseSelect.Value placeholder={defaultLabel} />
-        <BaseSelect.Icon className="belt-button__end-icon">
-          <Glyph name="chevronDown" />
-        </BaseSelect.Icon>
-      </BaseSelect.Trigger>
+      <div className="belt-surface" data-elevation={elevation} data-tone="neutral">
+        <div className="belt-surface__inner">
+          <BaseSelect.Trigger
+            {...restTriggerProps}
+            className={mergeClassName("belt-button belt-select__trigger", triggerClassName)}
+            data-control
+          >
+            <BaseSelect.Value className="belt-select__value" placeholder={defaultLabel} />
+            <BaseSelect.Icon className="belt-button__end-icon">
+              <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
+            </BaseSelect.Icon>
+          </BaseSelect.Trigger>
+        </div>
+      </div>
       <BaseSelect.Portal>
         <BaseSelect.Positioner>
-          <BaseSelect.Popup className="belt-select__popup">
-            <BaseSelect.List className="belt-select__list">{children}</BaseSelect.List>
+          <BaseSelect.Popup
+            className="belt-select__popup belt-surface"
+            data-elevation={elevation}
+            data-tone="neutral"
+          >
+            <div className="belt-surface__inner">
+              <BaseSelect.List className="belt-select__list" data-tone={tone}>
+                {children}
+              </BaseSelect.List>
+            </div>
           </BaseSelect.Popup>
         </BaseSelect.Positioner>
       </BaseSelect.Portal>
@@ -643,34 +787,47 @@ export function SelectOption(props: SelectOptionProps): ReactElement {
   const { children, className, ...rootProps } = props;
 
   return (
-    <BaseSelect.Item {...rootProps} className={mergeClassName("belt-select__item", className)}>
-      <BaseSelect.ItemText>{children}</BaseSelect.ItemText>
-      <BaseSelect.ItemIndicator>
-        <Glyph className="belt-icon" name="check" />
+    <BaseSelect.Item
+      {...rootProps}
+      className={mergeClassName("belt-select__item belt-text", className)}
+      data-size="sm"
+    >
+      <BaseSelect.ItemText render={<span />}>{children}</BaseSelect.ItemText>
+      <BaseSelect.ItemIndicator className="belt-icon" data-size="md">
+        <Glyph name="check" />
       </BaseSelect.ItemIndicator>
     </BaseSelect.Item>
   );
 }
 
 export function Combobox<Value = string>(props: ComboboxProps<Value>): ReactElement {
-  const { children, className, placeholder, ...rootProps } = props;
+  const { children, className, elevation = 1, placeholder, ...rootProps } = props;
 
   return (
     <BaseCombobox.Root<Value> {...rootProps}>
-      <div className={classNames("belt-surface belt-combobox", className)}>
+      <div
+        className={classNames("belt-surface belt-combobox", className)}
+        data-elevation={elevation}
+      >
         <div className="belt-surface__inner">
           <BaseCombobox.Input className="belt-input" placeholder={placeholder} />
-          <BaseCombobox.Trigger className="belt-ghost-button">
-            <BaseCombobox.Icon>
-              <Glyph name="chevronDown" />
+          <BaseCombobox.Trigger className="belt-ghost-button belt-combobox__trigger">
+            <BaseCombobox.Icon className="belt-button__end-icon">
+              <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
             </BaseCombobox.Icon>
           </BaseCombobox.Trigger>
         </div>
       </div>
       <BaseCombobox.Portal>
         <BaseCombobox.Positioner>
-          <BaseCombobox.Popup className="belt-combobox__popup">
-            <BaseCombobox.List className="belt-combobox__list">{children}</BaseCombobox.List>
+          <BaseCombobox.Popup
+            className="belt-combobox__popup belt-surface"
+            data-elevation="1"
+            data-tone="neutral"
+          >
+            <div className="belt-surface__inner">
+              <BaseCombobox.List className="belt-combobox__list">{children}</BaseCombobox.List>
+            </div>
           </BaseCombobox.Popup>
         </BaseCombobox.Positioner>
       </BaseCombobox.Portal>
@@ -683,7 +840,8 @@ export function ComboboxOption(props: ComboboxOptionProps): ReactElement {
   return (
     <BaseCombobox.Item
       {...rootProps}
-      className={mergeClassName("belt-combobox__item", className)}
+      className={mergeClassName("belt-combobox__item belt-text", className)}
+      data-size="sm"
     />
   );
 }
@@ -826,23 +984,6 @@ function mergeClassName(
   }
 
   return base;
-}
-
-function clampToolbarPosition(position: ToolbarPosition, element: HTMLElement | null): ToolbarPosition {
-  const rect = element?.getBoundingClientRect();
-  const width = rect?.width ?? 0;
-  const height = rect?.height ?? 0;
-  const maxX = Math.max(0, window.innerWidth - width);
-  const maxY = Math.max(0, window.innerHeight - height);
-
-  return {
-    x: clamp(position.x, 0, maxX),
-    y: clamp(position.y, 0, maxY),
-  };
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
 
 function isApplePlatform(): boolean {

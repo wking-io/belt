@@ -14,6 +14,7 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@repo/core": "workspace:*",
     "@repo/glyphs": "workspace:*",
     "@remix-run/ui": "0.1.1"
   },

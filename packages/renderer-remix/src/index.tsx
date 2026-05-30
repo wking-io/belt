@@ -16,6 +16,15 @@ import * as RemixCombobox from "@remix-run/ui/combobox";
 import { Glyph } from "@remix-run/ui/glyph";
 import type { GlyphName } from "@repo/glyphs";
 import {
+  defineToolbarDefinition,
+  extractToolbarConfig,
+  type ToolDefinition,
+  type ToolbarConfig,
+  type ToolbarConfigSource,
+  type ToolbarDefinition,
+  type ToolbarTool,
+} from "@repo/core";
+import {
   Menu as RemixMenu,
   MenuItem as RemixMenuItem,
   MenuList as RemixMenuList,
@@ -55,6 +64,24 @@ type Elevation = 1 | 2 | 3;
 type Radius = "inner" | "default" | "outer";
 type ForegroundTone = "foreground" | "subtle" | "strong";
 type TextSize = "xs" | "sm" | "md";
+export type ToolbarRendererModel = {
+  readonly tools: readonly ToolbarTool[];
+};
+
+export function createToolbar<const Config extends ToolbarConfig>(
+  config: Config,
+): ToolbarDefinition<ToolbarConfig> {
+  return defineToolbarDefinition({ toolbarConfig: config });
+}
+
+export function createToolbarRendererModel(source: ToolbarConfigSource): ToolbarRendererModel {
+  return {
+    tools: extractToolbarConfig(source).tools.map((tool: ToolDefinition) => ({
+      id: tool.id,
+      label: tool.label,
+    })),
+  };
+}
 
 type WithClassName = {
   readonly className?: string;

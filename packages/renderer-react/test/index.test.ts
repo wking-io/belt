@@ -3,6 +3,8 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   Button,
+  Combobox,
+  ComboboxOption,
   DragIndicator,
   Field,
   GhostButton,
@@ -77,7 +79,7 @@ it("renders React primitives with the shared CSS class contract", () => {
       createElement(DragIndicator),
       createElement(
         Toolbar,
-        { defaultPosition: { x: 24, y: 32 } },
+        null,
         createElement(Button, { icon: "check" }),
         createElement("span", { className: "belt-text" }, "Toolbar"),
       ),
@@ -104,8 +106,8 @@ it("renders React primitives with the shared CSS class contract", () => {
   assert.match(html, /belt-drag-indicator__dot/);
   assert.match(html, /belt-toolbar/);
   assert.match(html, /belt-toolbar__inner/);
-  assert.match(html, /--belt-toolbar-x:24px/);
-  assert.match(html, /--belt-toolbar-y:32px/);
+  assert.notMatch(html, /--belt-toolbar-x/);
+  assert.notMatch(html, /--belt-toolbar-y/);
   assert.match(html, /belt-status-banner/);
   assert.match(html, /data-radius="default"/);
   assert.match(html, /data-tone="primary"/);
@@ -156,6 +158,11 @@ it("renders Base UI-backed form and choice primitives", () => {
         { defaultLabel: "Destination" },
         createElement(SelectOption, { value: "web" }, "Web"),
       ),
+      createElement(
+        Combobox,
+        { placeholder: "Find branch" },
+        createElement(ComboboxOption, { value: "main" }, "main"),
+      ),
     ),
   );
 
@@ -172,4 +179,8 @@ it("renders Base UI-backed form and choice primitives", () => {
   assert.match(html, /belt-switch/);
   assert.match(html, /belt-menu__trigger/);
   assert.match(html, /belt-select__trigger/);
+  assert.match(html, /belt-combobox__trigger/);
+  assert.match(html, /belt-button__end-icon/);
+  assert.match(html, /belt-icon/);
+  assert.match(html, /data-size="md"/);
 });

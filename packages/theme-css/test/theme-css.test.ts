@@ -126,6 +126,11 @@ it("exports portable component class hooks for renderers", async () => {
   ]) {
     assert.match(css, new RegExp(`\\.${className.replaceAll("_", "\\_")}`));
   }
+
+  assert.match(
+    css,
+    /\[class\^="belt-"\][\s\S]*\[class\*=" belt-"\][\s\S]*box-sizing:\s*border-box/,
+  );
 });
 
 it("styles select placeholders and selected option tone states", async () => {
@@ -134,9 +139,77 @@ it("styles select placeholders and selected option tone states", async () => {
   assert.match(css, /\.belt-select__value\[data-placeholder\]/);
   assert.match(css, /--belt-select-selected-bg:\s*var\(--belt-color-primary\)/);
   assert.match(css, /--belt-select-selected-fg:\s*var\(--belt-color-primary-foreground\)/);
+  assert.match(
+    css,
+    /--belt-select-selected-fg-subtle:\s*var\(--belt-color-primary-foreground-subtle\)/,
+  );
   assert.match(css, /\.belt-select__item\[aria-selected="true"\]/);
   assert.match(css, /background-color:\s*var\(--belt-select-selected-bg\)/);
+  assert.match(
+    css,
+    /\.belt-select__item\[aria-selected="true"\] \.belt-icon\)[\s\S]*color:\s*var\(--belt-select-selected-fg-subtle\)/,
+  );
   assert.notMatch(css, /belt-select__item-indicator/);
+});
+
+it("sizes select and combobox popovers to their anchor width", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(
+    css,
+    /\.belt-select__popup, \.belt-combobox__popup\)[\s\S]*inline-size:\s*calc\(var\(--anchor-width\) \+ calc\(var\(--belt-space\) \* 3\)\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-select__popup, \.belt-combobox__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
+  );
+});
+
+it("aligns combobox trigger and popup structure with select", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(
+    css,
+    /\.belt-combobox > \.belt-surface__inner\)[\s\S]*display:\s*grid[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) auto/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__popup, \.belt-select__popup, \.belt-combobox__popup\)[\s\S]*border:\s*0[\s\S]*padding:\s*0/,
+  );
+  assert.match(
+    css,
+    /\.belt-combobox__popup > \.belt-surface__inner\)[\s\S]*height:\s*auto/,
+  );
+  assert.match(css, /\.belt-combobox__trigger\)[\s\S]*margin:\s*0/);
+});
+
+it("sizes menu select and combobox options like ghost buttons", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*font-size:\s*var\(--belt-font-size-sm\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*height:\s*calc\(var\(--belt-space\) \* 6\.5\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*margin:\s*1px 0/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*padding:\s*var\(--belt-space\) calc\(var\(--belt-space\) \* 2\.25\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*border:\s*1px solid transparent/,
+  );
+  assert.match(
+    css,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*border-radius:\s*var\(--belt-radius-inner\)/,
+  );
 });
 
 it("sets button text with the small font token", async () => {
@@ -157,15 +230,20 @@ it("styles drag indicators with grab and active dragging cursors", async () => {
   assert.match(css, /\.belt-drag-indicator__dot\)[\s\S]*block-size:\s*4px/);
 });
 
-it("styles toolbar as a fixed content-sized viewport bounded surface", async () => {
+it("styles toolbar as a fixed bottom docked bar", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
-  assert.match(css, /\.belt-toolbar\)[\s\S]*inline-size:\s*max-content/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*inset-block-end:\s*0/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*inset-inline:\s*0/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*inline-size:\s*100%/);
   assert.match(css, /\.belt-toolbar\)[\s\S]*position:\s*fixed/);
-  assert.match(css, /\.belt-toolbar\)[\s\S]*max-inline-size:\s*100vw/);
-  assert.match(css, /\.belt-toolbar\)[\s\S]*max-block-size:\s*100vh/);
+  assert.match(css, /body:has\(> \.belt-toolbar-host\)[\s\S]*block-size:\s*calc\(100dvh - var\(--belt-toolbar-reserved-block-size,\s*42px\)\)/);
+  assert.match(css, /body:has\(> \.belt-toolbar-host\)[\s\S]*overflow:\s*auto/);
+  assert.match(css, /html:has\(> body > \.belt-toolbar-host\)[\s\S]*overflow:\s*hidden/);
+  assert.match(css, /\.belt-toolbar > \.belt-surface\)[\s\S]*inline-size:\s*100%/);
   assert.match(css, /\.belt-toolbar__inner\)[\s\S]*display:\s*flex/);
-  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*inline-size:\s*max-content/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*justify-content:\s*center/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*max-inline-size:\s*min\(100%,\s*960px\)/);
 });
 
 it("bases menu select and combobox item hover states on root elevation", async () => {
@@ -181,11 +259,11 @@ it("bases menu select and combobox item hover states on root elevation", async (
   );
   assert.match(
     css,
-    /\.belt-menu__item\[data-highlighted="true"\][\s\S]*\.belt-select__item\[data-highlighted="true"\][\s\S]*\.belt-combobox__item\[data-highlighted="true"\][\s\S]*background-color:\s*var\(--belt-surface-hover\)/,
+    /\.belt-menu__item\[data-highlighted\][\s\S]*\.belt-select__item\[data-highlighted\][\s\S]*\.belt-combobox__item\[data-highlighted\][\s\S]*background-color:\s*var\(--belt-surface-hover\)/,
   );
   assert.notMatch(
     css,
-    /\.belt-combobox__item\[data-highlighted="true"\][\s\S]*background-color:\s*var\(--belt-color-elevation-3-hover\)/,
+    /\.belt-combobox__item\[data-highlighted\][\s\S]*background-color:\s*var\(--belt-color-elevation-3-hover\)/,
   );
 });
 

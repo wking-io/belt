@@ -150,6 +150,9 @@ importers:
       '@repo/theme-css':
         specifier: workspace:*
         version: link:../theme-css
+      '@repo/tool-render-performance':
+        specifier: workspace:*
+        version: link:../tool-render-performance
       '@repo/tool-worktrees':
         specifier: workspace:*
         version: link:../tool-worktrees
@@ -208,6 +211,9 @@ importers:
       '@base-ui/react':
         specifier: 1.5.0
         version: 1.5.0(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
       '@repo/glyphs':
         specifier: workspace:*
         version: link:../glyphs
@@ -230,6 +236,9 @@ importers:
       '@remix-run/ui':
         specifier: 0.1.1
         version: 0.1.1
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
       '@repo/glyphs':
         specifier: workspace:*
         version: link:../glyphs
@@ -250,6 +259,19 @@ importers:
         version: 4.0.0-beta.66
 
   packages/theme-css: {}
+
+  packages/tool-render-performance:
+    dependencies:
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
 
   packages/tool-worktrees:
     dependencies:

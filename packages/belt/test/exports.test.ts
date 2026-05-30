@@ -16,8 +16,13 @@ import {
   createToolbar,
   createToolbarRendererModel,
   defineControlPanel as reactDefineControlPanel,
-  numberField
+  numberField,
+  RenderPerformanceMeter
 } from "@riff-refine/belt/react";
+import {
+  mountRenderPerformanceMeter,
+  renderPerformanceTool
+} from "@riff-refine/belt/render-performance";
 import { createToolbarServer } from "@riff-refine/belt/server";
 import { toolbarVite } from "@riff-refine/belt/vite";
 import { worktreesTool } from "@riff-refine/belt/worktrees";
@@ -36,8 +41,20 @@ describe("@riff-refine/belt facade exports", () => {
     assert.strictEqual(typeof createToolbarRouteHandler, "function");
     assert.strictEqual(typeof createToolbarServer, "function");
     assert.strictEqual(typeof toolbarVite, "function");
+    assert.strictEqual(typeof mountRenderPerformanceMeter, "function");
+    assert.strictEqual(typeof renderPerformanceTool, "function");
+    assert.strictEqual(typeof RenderPerformanceMeter, "function");
     assert.strictEqual(typeof worktreesTool, "function");
     assert.strictEqual(typeof portlessResolver, "function");
+  });
+
+  it("supports Render Performance tool helpers from the product facade", () => {
+    const tool = renderPerformanceTool();
+
+    assert.deepStrictEqual(tool, {
+      id: "render-performance",
+      label: "Render Performance"
+    });
   });
 
   it("supports Control Panel config helpers from the Remix product facade", () => {
