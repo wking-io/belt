@@ -1,0 +1,107 @@
+@import "tailwindcss/theme" source(none);
+@import "tailwindcss/utilities" source(none);
+@import "./theme.css";
+
+@source "../../renderer-react/src/**/*.{ts,tsx}";
+@source "../../renderer-remix/src/**/*.{ts,tsx}";
+@source "../../tool-worktrees-renderer-remix/src/**/*.{ts,tsx}";
+
+@theme static {
+  --font-belt: var(--belt-font-family);
+
+  --color-belt-elevation-0: var(--belt-color-elevation-0);
+  --color-belt-elevation-0-hover: var(--belt-color-elevation-0-hover);
+  --color-belt-elevation-0-active: var(--belt-color-elevation-0-active);
+  --color-belt-elevation-0-inset: var(--belt-color-elevation-0-inset);
+  --color-belt-elevation-1: var(--belt-color-elevation-1);
+  --color-belt-elevation-1-hover: var(--belt-color-elevation-1-hover);
+  --color-belt-elevation-1-active: var(--belt-color-elevation-1-active);
+  --color-belt-elevation-1-inset: var(--belt-color-elevation-1-inset);
+  --color-belt-elevation-2: var(--belt-color-elevation-2);
+  --color-belt-elevation-2-hover: var(--belt-color-elevation-2-hover);
+  --color-belt-elevation-2-active: var(--belt-color-elevation-2-active);
+  --color-belt-elevation-2-inset: var(--belt-color-elevation-2-inset);
+  --color-belt-elevation-3: var(--belt-color-elevation-3);
+  --color-belt-elevation-3-hover: var(--belt-color-elevation-3-hover);
+  --color-belt-elevation-3-active: var(--belt-color-elevation-3-active);
+  --color-belt-elevation-3-inset: var(--belt-color-elevation-3-inset);
+
+  --color-belt-foreground: var(--belt-color-foreground);
+  --color-belt-foreground-subtle: var(--belt-color-foreground-subtle);
+  --color-belt-foreground-strong: var(--belt-color-foreground-strong);
+  --color-belt-border: var(--belt-color-border);
+  --color-belt-border-subtle: var(--belt-color-border-subtle);
+  --color-belt-border-strong: var(--belt-color-border-strong);
+  --color-belt-focus: var(--belt-color-focus);
+
+  --color-belt-primary: var(--belt-color-primary);
+  --color-belt-primary-foreground: var(--belt-color-primary-foreground);
+  --color-belt-primary-foreground-subtle: var(--belt-color-primary-foreground-subtle);
+  --color-belt-primary-foreground-strong: var(--belt-color-primary-foreground-strong);
+  --color-belt-primary-control: var(--belt-color-primary-control);
+  --color-belt-primary-control-hover: var(--belt-color-primary-control-hover);
+  --color-belt-primary-control-active: var(--belt-color-primary-control-active);
+  --color-belt-primary-control-foreground: var(--belt-color-primary-control-foreground);
+  --color-belt-primary-control-foreground-subtle: var(--belt-color-primary-control-foreground-subtle);
+  --color-belt-primary-control-foreground-strong: var(--belt-color-primary-control-foreground-strong);
+
+  --color-belt-info: var(--belt-color-info);
+  --color-belt-info-foreground: var(--belt-color-info-foreground);
+  --color-belt-info-foreground-subtle: var(--belt-color-info-foreground-subtle);
+  --color-belt-info-foreground-strong: var(--belt-color-info-foreground-strong);
+  --color-belt-info-control: var(--belt-color-info-control);
+  --color-belt-info-control-hover: var(--belt-color-info-control-hover);
+  --color-belt-info-control-active: var(--belt-color-info-control-active);
+  --color-belt-info-control-foreground: var(--belt-color-info-control-foreground);
+  --color-belt-info-control-foreground-subtle: var(--belt-color-info-control-foreground-subtle);
+  --color-belt-info-control-foreground-strong: var(--belt-color-info-control-foreground-strong);
+
+  --color-belt-success: var(--belt-color-success);
+  --color-belt-success-foreground: var(--belt-color-success-foreground);
+  --color-belt-success-foreground-subtle: var(--belt-color-success-foreground-subtle);
+  --color-belt-success-foreground-strong: var(--belt-color-success-foreground-strong);
+  --color-belt-success-control: var(--belt-color-success-control);
+  --color-belt-success-control-hover: var(--belt-color-success-control-hover);
+  --color-belt-success-control-active: var(--belt-color-success-control-active);
+  --color-belt-success-control-foreground: var(--belt-color-success-control-foreground);
+  --color-belt-success-control-foreground-subtle: var(--belt-color-success-control-foreground-subtle);
+  --color-belt-success-control-foreground-strong: var(--belt-color-success-control-foreground-strong);
+
+  --color-belt-warning: var(--belt-color-warning);
+  --color-belt-warning-foreground: var(--belt-color-warning-foreground);
+  --color-belt-warning-foreground-subtle: var(--belt-color-warning-foreground-subtle);
+  --color-belt-warning-foreground-strong: var(--belt-color-warning-foreground-strong);
+  --color-belt-warning-control: var(--belt-color-warning-control);
+  --color-belt-warning-control-hover: var(--belt-color-warning-control-hover);
+  --color-belt-warning-control-active: var(--belt-color-warning-control-active);
+  --color-belt-warning-control-foreground: var(--belt-color-warning-control-foreground);
+  --color-belt-warning-control-foreground-subtle: var(--belt-color-warning-control-foreground-subtle);
+  --color-belt-warning-control-foreground-strong: var(--belt-color-warning-control-foreground-strong);
+
+  --color-belt-danger: var(--belt-color-danger);
+  --color-belt-danger-foreground: var(--belt-color-danger-foreground);
+  --color-belt-danger-foreground-subtle: var(--belt-color-danger-foreground-subtle);
+  --color-belt-danger-foreground-strong: var(--belt-color-danger-foreground-strong);
+  --color-belt-danger-control: var(--belt-color-danger-control);
+  --color-belt-danger-control-hover: var(--belt-color-danger-control-hover);
+  --color-belt-danger-control-active: var(--belt-color-danger-control-active);
+  --color-belt-danger-control-foreground: var(--belt-color-danger-control-foreground);
+  --color-belt-danger-control-foreground-subtle: var(--belt-color-danger-control-foreground-subtle);
+  --color-belt-danger-control-foreground-strong: var(--belt-color-danger-control-foreground-strong);
+
+  --spacing-belt: var(--belt-space);
+  --spacing-belt-0: var(--belt-space-0);
+  --spacing-belt-1: var(--belt-space-1);
+  --spacing-belt-2: var(--belt-space-2);
+  --spacing-belt-3: var(--belt-space-3);
+  --spacing-belt-4: var(--belt-space-4);
+  --spacing-belt-5: var(--belt-space-5);
+  --spacing-belt-6: var(--belt-space-6);
+  --spacing-belt-8: var(--belt-space-8);
+  --spacing-belt-10: var(--belt-space-10);
+  --spacing-belt-12: var(--belt-space-12);
+
+  --radius-belt-inner: var(--belt-radius-inner);
+  --radius-belt: var(--belt-radius);
+  --radius-belt-outer: var(--belt-radius-outer);
+}
