@@ -9,7 +9,6 @@ import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import {
   Fragment,
   createContext,
-  isValidElement,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -89,6 +88,7 @@ export type PanelProps = ComponentProps<"div"> &
 export type ButtonProps = ButtonPropsBase;
 export type GhostButtonProps = ButtonPropsBase & {
   readonly variant?: "default" | "icon";
+  readonly radius?: "none" | "default";
 };
 export type DragIndicatorProps = ComponentProps<"div"> & {
   readonly dots?: number;
@@ -119,14 +119,10 @@ export type SliderProps = ComponentProps<typeof BaseSlider.Root> & {
 };
 export type SwitchProps = ComponentProps<typeof BaseSwitch.Root>;
 
-export type MenuProps = ComponentProps<typeof BaseMenu.Root> & {
-  readonly children?: ReactNode;
-  readonly label: ReactNode;
-  readonly menuLabel?: string;
-  readonly triggerProps?: ComponentProps<typeof BaseMenu.Trigger>;
-};
+export type MenuRootProps = ComponentProps<typeof BaseMenu.Root>;
+export type MenuTriggerProps = ComponentProps<typeof BaseMenu.Trigger>;
 export type MenuItemProps = ComponentProps<typeof BaseMenu.Item>;
-export type MenuListProps = ComponentProps<"div">;
+export type MenuListProps = ComponentProps<typeof BaseMenu.Positioner>;
 export type SubmenuProps = ComponentProps<typeof BaseMenu.SubmenuRoot> & {
   readonly children?: ReactNode;
   readonly label: ReactNode;
@@ -135,20 +131,34 @@ export type SubmenuProps = ComponentProps<typeof BaseMenu.SubmenuRoot> & {
   readonly triggerProps?: ComponentProps<typeof BaseMenu.SubmenuTrigger>;
 };
 
-export type SelectProps<Value = string> = ComponentProps<typeof BaseSelect.Root<Value>> & {
-  readonly children?: ReactNode;
+export type SelectRootProps<Value = string> = ComponentProps<typeof BaseSelect.Root<Value>>;
+export type SelectTriggerProps = ComponentProps<typeof BaseSelect.Trigger> & {
   readonly defaultLabel: ReactNode;
   readonly elevation?: Elevation;
-  readonly tone?: IntentTone;
-  readonly triggerProps?: ComponentProps<typeof BaseSelect.Trigger>;
+};
+export type SelectListProps = ComponentProps<typeof BaseSelect.Positioner> & {
+  readonly children?: ReactNode;
+  readonly elevation?: Elevation;
 };
 export type SelectOptionProps = ComponentProps<typeof BaseSelect.Item>;
 
-export type ComboboxProps<Value = string> = ComponentProps<typeof BaseCombobox.Root<Value>> & {
+export type ComboboxRootProps<Value = string> = ComponentProps<typeof BaseCombobox.Root<Value>>;
+export type ComboboxSearchPlacement = "trigger" | "popup";
+export type ComboboxTriggerProps = ComponentProps<typeof BaseCombobox.Trigger> & {
+  readonly className?: string;
+  readonly elevation?: Elevation;
+  readonly placeholder?: string;
+  readonly searchPlacement?: ComboboxSearchPlacement;
+  readonly surfaceClassName?: string;
+  readonly triggerLabel?: ReactNode;
+};
+export type ComboboxInputProps = ComponentProps<typeof BaseCombobox.Input>;
+export type ComboboxListProps = ComponentProps<typeof BaseCombobox.Positioner> & {
   readonly children?: ReactNode;
   readonly className?: string;
   readonly elevation?: Elevation;
   readonly placeholder?: string;
+  readonly searchPlacement?: ComboboxSearchPlacement;
 };
 export type ComboboxOptionProps = ComponentProps<typeof BaseCombobox.Item>;
 
@@ -209,7 +219,15 @@ export function Button(props: ButtonProps): ReactElement {
           disabled={disabled || loading}
           type={type}
         >
-          {buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-button" })}
+          <ButtonContents
+            endIcon={endIcon}
+            icon={icon}
+            loading={loading}
+            part="belt-button"
+            startIcon={startIcon}
+          >
+            {children}
+          </ButtonContents>
         </BaseButton>
       </div>
     </div>
@@ -228,6 +246,7 @@ export function GhostButton(props: GhostButtonProps): ReactElement {
     startIcon,
     tone = "neutral",
     type = "button",
+    radius = "default",
     ...buttonProps
   } = props;
 
@@ -239,10 +258,19 @@ export function GhostButton(props: GhostButtonProps): ReactElement {
       data-control
       data-elevation={elevation}
       data-tone={tone}
+      data-radius={radius}
       disabled={disabled || loading}
       type={type}
     >
-      {buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-ghost-button" })}
+      <ButtonContents
+        endIcon={endIcon}
+        icon={icon}
+        loading={loading}
+        part="belt-ghost-button"
+        startIcon={startIcon}
+      >
+        {children}
+      </ButtonContents>
     </BaseButton>
   );
 }
@@ -332,9 +360,8 @@ export function Toolbar(props: ToolbarProps): ReactElement | null {
         document.body.appendChild(host);
       }
     };
-    const observer = typeof MutationObserver === "undefined"
-      ? undefined
-      : new MutationObserver(keepHostLast);
+    const observer =
+      typeof MutationObserver === "undefined" ? undefined : new MutationObserver(keepHostLast);
 
     observer?.observe(document.body, { childList: true });
 
@@ -386,14 +413,7 @@ type ToolbarBodyProps = Omit<ComponentProps<"div">, "children"> & {
 };
 
 function ToolbarBody(props: ToolbarBodyProps): ReactElement {
-  const {
-    children,
-    className,
-    onKeyDown,
-    panelProps,
-    style,
-    ...rootProps
-  } = props;
+  const { children, className, onKeyDown, panelProps, style, ...rootProps } = props;
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -403,11 +423,12 @@ function ToolbarBody(props: ToolbarBodyProps): ReactElement {
 
     const reserveSpace = () => {
       const blockSize = element?.getBoundingClientRect().height ?? 0;
-      body.style.setProperty("--belt-toolbar-reserved-block-size", `${blockSize}px`);
+      body.style.setProperty("--belt-toolbar-reserved-block-size", `${blockSize + 1}px`);
     };
-    const resizeObserver = typeof ResizeObserver === "undefined" || element === null
-      ? undefined
-      : new ResizeObserver(reserveSpace);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" || element === null
+        ? undefined
+        : new ResizeObserver(reserveSpace);
 
     reserveSpace();
     if (element) {
@@ -436,12 +457,18 @@ function ToolbarBody(props: ToolbarBodyProps): ReactElement {
       ref={toolbarRef}
       style={style}
     >
-      <svg className="belt-toolbar__logo" viewBox="0 0 140 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M80 40H60V60H140V100H80V200H100V180H140V220H120V240H60V220H40V100H0V60H20V40H40V0H80V40Z" fill="currentColor" />
+      <svg
+        className="belt-toolbar__logo"
+        viewBox="0 0 140 240"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M80 40H60V60H140V100H80V200H100V180H140V220H120V240H60V220H40V100H0V60H20V40H40V0H80V40Z"
+          fill="currentColor"
+        />
       </svg>
-      <div className="belt-toolbar__inner">
-        {children}
-      </div>
+      <div className="belt-toolbar__inner">{children}</div>
     </div>
   );
 }
@@ -552,12 +579,14 @@ export function Slider(props: SliderProps): ReactElement {
             <BaseSlider.Label className="belt-slider__label">{label}</BaseSlider.Label>
           )}
           <BaseSlider.Value className="belt-slider__value">
-            {((formattedValues: readonly string[]) => (
-              <Fragment>
-                <span className="belt-slider__value-text">{formattedValues.join(" - ")}</span>
-                {unit === undefined ? null : <span className="belt-slider__unit">{unit}</span>}
-              </Fragment>
-            )) as ComponentProps<typeof BaseSlider.Value>["children"]}
+            {
+              ((formattedValues: readonly string[]) => (
+                <Fragment>
+                  <span className="belt-slider__value-text">{formattedValues.join(" - ")}</span>
+                  {unit === undefined ? null : <span className="belt-slider__unit">{unit}</span>}
+                </Fragment>
+              )) as ComponentProps<typeof BaseSlider.Value>["children"]
+            }
           </BaseSlider.Value>
         </div>
       ) : null}
@@ -581,132 +610,45 @@ export function Switch(props: SwitchProps): ReactElement {
   );
 }
 
-export function Menu(props: MenuProps): ReactElement {
-  const { children, label, menuLabel, triggerProps, ...rootProps } = props;
+export const Menu = {
+  Root: BaseMenu.Root,
+  Trigger: MenuTrigger,
+  List: MenuList,
+  Item: MenuItem,
+};
 
+export function MenuTrigger({ className, ...props }: MenuTriggerProps): ReactElement {
   return (
-    <BaseMenu.Root {...rootProps}>
-      {menuTrigger(label, triggerProps)}
-      <BaseMenu.Portal>
-        <BaseMenu.Positioner>
-          <MenuList aria-label={menuLabel}>{children}</MenuList>
-        </BaseMenu.Positioner>
-      </BaseMenu.Portal>
-    </BaseMenu.Root>
+    <BaseMenu.Trigger {...props} className={mergeClassName("belt-menu__trigger", className)} />
   );
 }
 
-function menuTrigger(
-  label: ReactNode,
-  triggerProps: ComponentProps<typeof BaseMenu.Trigger> | undefined,
-): ReactElement {
-  const { className: triggerClassName, ...restTriggerProps } = triggerProps ?? {};
-
-  if (isValidElement<ButtonProps>(label) && label.type === Button) {
-    const {
-      children,
-      className,
-      disabled,
-      elevation = 1,
-      endIcon,
-      icon,
-      loading = false,
-      ref: _buttonRef,
-      startIcon,
-      tone = "neutral",
-      type = "button",
-      ...buttonProps
-    } = label.props;
-
-    return (
-      <BaseMenu.Trigger
-        {...buttonProps}
-        {...restTriggerProps}
-        aria-busy={loading || undefined}
-        className={mergeClassName(
-          classNames("belt-button belt-menu__trigger", classNameString(className)) ??
-          "belt-button belt-menu__trigger",
-          triggerClassName,
-        )}
-        data-control
-        disabled={disabled || loading || restTriggerProps.disabled}
-        type={restTriggerProps.type ?? type}
-      >
-        {buttonContents({ children, endIcon, icon, loading, startIcon, part: "belt-button" })}
-      </BaseMenu.Trigger>
-    );
-  }
-
-  if (isValidElement<GhostButtonProps>(label) && label.type === GhostButton) {
-    const {
-      children,
-      className,
-      disabled,
-      elevation = 1,
-      endIcon,
-      icon,
-      loading = false,
-      ref: _buttonRef,
-      startIcon,
-      tone = "neutral",
-      type = "button",
-      variant: _variant,
-      ...buttonProps
-    } = label.props;
-
-    return (
-      <BaseMenu.Trigger
-        {...buttonProps}
-        {...restTriggerProps}
-        aria-busy={loading || undefined}
-        className={mergeClassName(
-          classNames("belt-ghost-button belt-menu__trigger", classNameString(className)) ??
-          "belt-ghost-button belt-menu__trigger",
-          triggerClassName,
-        )}
-        data-control
-        data-elevation={elevation}
-        data-tone={tone}
-        disabled={disabled || loading || restTriggerProps.disabled}
-        type={restTriggerProps.type ?? type}
-      >
-        {buttonContents({
-          children,
-          endIcon,
-          icon,
-          loading,
-          startIcon,
-          part: "belt-ghost-button",
-        })}
-      </BaseMenu.Trigger>
-    );
-  }
-
+export function MenuList({
+  className,
+  children,
+  align = "start",
+  sideOffset = 5,
+  ...props
+}: MenuListProps): ReactElement {
   return (
-    <BaseMenu.Trigger
-      {...restTriggerProps}
-      className={mergeClassName("belt-ghost-button belt-menu__trigger", triggerClassName)}
-    >
-      {label}
-    </BaseMenu.Trigger>
-  );
-}
-
-export function MenuList(props: MenuListProps): ReactElement {
-  const { children, className, ...listProps } = props;
-
-  return (
-    <BaseMenu.Popup
-      className="belt-menu__popup belt-surface"
-      data-elevation="1"
-      data-tone="neutral"
-    >
-      <div className="belt-surface__inner">
-        <div {...listProps} className={classNames("belt-menu__list", className)}>
-          {children}
-        </div>
-      </div>
-    </BaseMenu.Popup>
+    <BaseMenu.Portal>
+      <BaseMenu.Positioner
+        className={mergeClassName("belt-menu__positioner", className)}
+        align={align}
+        sideOffset={sideOffset}
+        {...props}
+      >
+        <BaseMenu.Popup
+          className="belt-menu__popup belt-surface"
+          data-elevation="1"
+          data-tone="neutral"
+        >
+          <div className="belt-surface__inner">
+            <div className="belt-menu__list">{children}</div>
+          </div>
+        </BaseMenu.Popup>
+      </BaseMenu.Positioner>
+    </BaseMenu.Portal>
   );
 }
 
@@ -744,42 +686,63 @@ export function Submenu(props: SubmenuProps): ReactElement {
   );
 }
 
-export function Select<Value = string>(props: SelectProps<Value>): ReactElement {
-  const { children, defaultLabel, tone = "primary", elevation = 2, triggerProps, ...rootProps } = props;
-  const { className: triggerClassName, ...restTriggerProps } = triggerProps ?? {};
+export const Select = {
+  Root: BaseSelect.Root,
+  Trigger: SelectTrigger,
+  List: SelectList,
+  Option: SelectOption,
+};
+
+export function SelectTrigger(props: SelectTriggerProps): ReactElement {
+  const { className, defaultLabel, elevation = 2, ...triggerProps } = props;
 
   return (
-    <BaseSelect.Root<Value> {...rootProps}>
-      <div className="belt-surface" data-elevation={elevation} data-tone="neutral">
-        <div className="belt-surface__inner">
-          <BaseSelect.Trigger
-            {...restTriggerProps}
-            className={mergeClassName("belt-button belt-select__trigger", triggerClassName)}
-            data-control
-          >
-            <BaseSelect.Value className="belt-select__value" placeholder={defaultLabel} />
-            <BaseSelect.Icon className="belt-button__end-icon">
-              <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
-            </BaseSelect.Icon>
-          </BaseSelect.Trigger>
-        </div>
+    <div className="belt-surface" data-elevation={elevation} data-tone="neutral">
+      <div className="belt-surface__inner">
+        <BaseSelect.Trigger
+          {...triggerProps}
+          className={mergeClassName("belt-button belt-select__trigger", className)}
+          data-control
+        >
+          <BaseSelect.Value className="belt-select__value" placeholder={defaultLabel} />
+          <BaseSelect.Icon className="belt-button__end-icon">
+            <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
+          </BaseSelect.Icon>
+        </BaseSelect.Trigger>
       </div>
-      <BaseSelect.Portal>
-        <BaseSelect.Positioner>
-          <BaseSelect.Popup
-            className="belt-select__popup belt-surface"
-            data-elevation={elevation}
-            data-tone="neutral"
-          >
-            <div className="belt-surface__inner">
-              <BaseSelect.List className="belt-select__list" data-tone={tone}>
-                {children}
-              </BaseSelect.List>
-            </div>
-          </BaseSelect.Popup>
-        </BaseSelect.Positioner>
-      </BaseSelect.Portal>
-    </BaseSelect.Root>
+    </div>
+  );
+}
+
+export function SelectList(props: SelectListProps): ReactElement {
+  const {
+    children,
+    className,
+    elevation = 2,
+    align = "start",
+    sideOffset = 5,
+    ...positionerProps
+  } = props;
+
+  return (
+    <BaseSelect.Portal>
+      <BaseSelect.Positioner
+        align={align}
+        sideOffset={sideOffset}
+        {...positionerProps}
+        className={mergeClassName("belt-select__positioner", className)}
+      >
+        <BaseSelect.Popup
+          className="belt-select__popup belt-surface"
+          data-elevation={elevation}
+          data-tone="neutral"
+        >
+          <div className="belt-surface__inner">
+            <BaseSelect.List className="belt-select__list">{children}</BaseSelect.List>
+          </div>
+        </BaseSelect.Popup>
+      </BaseSelect.Positioner>
+    </BaseSelect.Portal>
   );
 }
 
@@ -793,45 +756,119 @@ export function SelectOption(props: SelectOptionProps): ReactElement {
       data-size="sm"
     >
       <BaseSelect.ItemText render={<span />}>{children}</BaseSelect.ItemText>
-      <BaseSelect.ItemIndicator className="belt-icon" data-size="md">
-        <Glyph name="check" />
-      </BaseSelect.ItemIndicator>
     </BaseSelect.Item>
   );
 }
 
-export function Combobox<Value = string>(props: ComboboxProps<Value>): ReactElement {
-  const { children, className, elevation = 1, placeholder, ...rootProps } = props;
+export const Combobox = {
+  Root: BaseCombobox.Root,
+  Input: ComboboxInput,
+  Trigger: ComboboxTrigger,
+  List: ComboboxList,
+  Option: ComboboxOption,
+};
+
+export function ComboboxTrigger(props: ComboboxTriggerProps): ReactElement {
+  const {
+    className,
+    elevation = 1,
+    placeholder,
+    render,
+    searchPlacement = "trigger",
+    surfaceClassName,
+    triggerLabel,
+    ...triggerProps
+  } = props;
+
+  if (render !== undefined) {
+    return (
+      <BaseCombobox.Trigger
+        {...triggerProps}
+        className={mergeClassName("belt-combobox__trigger", className)}
+        render={render}
+      />
+    );
+  }
 
   return (
-    <BaseCombobox.Root<Value> {...rootProps}>
-      <div
-        className={classNames("belt-surface belt-combobox", className)}
-        data-elevation={elevation}
-      >
-        <div className="belt-surface__inner">
-          <BaseCombobox.Input className="belt-input" placeholder={placeholder} />
-          <BaseCombobox.Trigger className="belt-ghost-button belt-combobox__trigger">
-            <BaseCombobox.Icon className="belt-button__end-icon">
-              <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
-            </BaseCombobox.Icon>
-          </BaseCombobox.Trigger>
-        </div>
+    <div
+      className={classNames(
+        "belt-surface belt-combobox",
+        searchPlacement === "popup" ? "belt-combobox--popup-search" : undefined,
+        surfaceClassName,
+      )}
+      data-elevation={elevation}
+    >
+      <div className="belt-surface__inner">
+        {searchPlacement === "trigger" ? <ComboboxInput placeholder={placeholder} /> : null}
+        <BaseCombobox.Trigger
+          {...triggerProps}
+          className={mergeClassName("belt-ghost-button belt-combobox__trigger", className)}
+        >
+          {searchPlacement === "popup" ? (
+            <span className="belt-combobox__value">
+              {triggerLabel ?? placeholder ?? "Select option"}
+            </span>
+          ) : null}
+          <BaseCombobox.Icon className="belt-button__end-icon">
+            <Glyph className="belt-icon" data-size="md" name="chevronVertical" />
+          </BaseCombobox.Icon>
+        </BaseCombobox.Trigger>
       </div>
-      <BaseCombobox.Portal>
-        <BaseCombobox.Positioner>
-          <BaseCombobox.Popup
-            className="belt-combobox__popup belt-surface"
-            data-elevation="1"
-            data-tone="neutral"
-          >
-            <div className="belt-surface__inner">
-              <BaseCombobox.List className="belt-combobox__list">{children}</BaseCombobox.List>
-            </div>
-          </BaseCombobox.Popup>
-        </BaseCombobox.Positioner>
-      </BaseCombobox.Portal>
-    </BaseCombobox.Root>
+    </div>
+  );
+}
+
+export function ComboboxInput(props: ComboboxInputProps): ReactElement {
+  const { className, ...inputProps } = props;
+
+  return <BaseCombobox.Input {...inputProps} className={mergeClassName("belt-input", className)} />;
+}
+
+export function ComboboxList(props: ComboboxListProps): ReactElement {
+  const {
+    children,
+    className,
+    elevation = 1,
+    placeholder,
+    searchPlacement = "trigger",
+    align = "start",
+    sideOffset = 5,
+    ...positionerProps
+  } = props;
+  const searchElevation = Math.min(elevation + 1, 3) as Elevation;
+
+  return (
+    <BaseCombobox.Portal>
+      <BaseCombobox.Positioner
+        align={align}
+        sideOffset={sideOffset}
+        {...positionerProps}
+        className={mergeClassName("belt-combobox__positioner", className)}
+      >
+        <BaseCombobox.Popup
+          className="belt-combobox__popup belt-surface"
+          data-elevation={elevation}
+          data-tone="neutral"
+        >
+          <div className="belt-surface__inner">
+            {searchPlacement === "popup" ? (
+              <div
+                className="belt-surface belt-combobox__search-surface"
+                data-elevation={searchElevation}
+                data-radius="inner"
+                data-tone="neutral"
+              >
+                <div className="belt-surface__inner">
+                  <ComboboxInput className="belt-combobox__search" placeholder={placeholder} />
+                </div>
+              </div>
+            ) : null}
+            <BaseCombobox.List className="belt-combobox__list">{children}</BaseCombobox.List>
+          </div>
+        </BaseCombobox.Popup>
+      </BaseCombobox.Positioner>
+    </BaseCombobox.Portal>
   );
 }
 
@@ -894,20 +931,22 @@ export function Glyph(props: GlyphProps): ReactElement {
   );
 }
 
-function buttonContents(options: {
+type ButtonContentsProps = {
   readonly children?: ReactNode;
   readonly endIcon?: GlyphName | undefined;
   readonly icon?: GlyphName | undefined;
   readonly loading: boolean;
   readonly part: "belt-button" | "belt-ghost-button";
   readonly startIcon?: GlyphName | undefined;
-}): ReactNode {
-  const resolvedStartIcon = options.loading ? "spinner" : options.startIcon;
+};
 
-  if (options.icon) {
+function ButtonContents(props: ButtonContentsProps): ReactElement {
+  const resolvedStartIcon = props.loading ? "spinner" : props.startIcon;
+
+  if (props.icon) {
     return (
-      <span className={`${options.part}__icon`}>
-        <Glyph name={options.icon} />
+      <span className={`${props.part}__icon`}>
+        <Glyph name={props.icon} />
       </span>
     );
   }
@@ -915,14 +954,14 @@ function buttonContents(options: {
   return (
     <Fragment>
       {resolvedStartIcon ? (
-        <span className={`${options.part}__start-icon`}>
+        <span className={`${props.part}__start-icon`}>
           <Glyph name={resolvedStartIcon} />
         </span>
       ) : null}
-      {options.children !== undefined ? <span>{options.children}</span> : null}
-      {options.endIcon ? (
-        <span className={`${options.part}__end-icon`}>
-          <Glyph name={options.endIcon} />
+      {props.children !== undefined ? <span>{props.children}</span> : null}
+      {props.endIcon ? (
+        <span className={`${props.part}__end-icon`}>
+          <Glyph name={props.endIcon} />
         </span>
       ) : null}
     </Fragment>
@@ -931,7 +970,12 @@ function buttonContents(options: {
 
 function renderSymbol(name: GlyphName, definition: GlyphDefinition): ReactElement {
   return (
-    <symbol {...toReactAttrs(definition.attrs)} id={glyphIds[name]} key={name} viewBox={definition.viewBox}>
+    <symbol
+      {...toReactAttrs(definition.attrs)}
+      id={glyphIds[name]}
+      key={name}
+      viewBox={definition.viewBox}
+    >
       {definition.children.map((node, index) => renderNode(node, `${name}-${index}`))}
     </symbol>
   );

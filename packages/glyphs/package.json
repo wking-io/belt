@@ -10,8 +10,10 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "check": "tsc -p tsconfig.json"
+    "build": "pnpm run build:glyphs && tsc -p tsconfig.build.json",
+    "build:glyphs": "node scripts/generate-glyphs.mjs",
+    "check": "pnpm run check:glyphs && tsc -p tsconfig.json",
+    "check:glyphs": "node scripts/generate-glyphs.mjs --check"
   },
   "engines": {
     "node": ">=20"

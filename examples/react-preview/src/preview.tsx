@@ -2,24 +2,20 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Button,
   Combobox,
-  ComboboxOption,
   Field,
   GhostButton,
   Glyph,
   GlyphSheet,
   Input,
   Label,
-  Menu,
-  MenuItem,
   Panel,
   Select,
-  SelectOption,
   Slider,
   StatusBanner,
-  Submenu,
   Switch,
   Toolbar,
   glyphNames,
+  Menu,
   type Elevation,
   type IntentTone,
 } from "@repo/renderer-react";
@@ -107,19 +103,28 @@ type ControlField =
 
 type ControlPanelIndex = {
   readonly config: {
-    readonly fieldsets: Readonly<Record<string, {
-      readonly description?: string;
-      readonly fields: Readonly<Record<string, ControlField>>;
-      readonly label?: string;
-    }>>;
+    readonly fieldsets: Readonly<
+      Record<
+        string,
+        {
+          readonly description?: string;
+          readonly fields: Readonly<Record<string, ControlField>>;
+          readonly label?: string;
+        }
+      >
+    >;
   };
   readonly state: ControlPanelRouteState;
 };
 
 type ControlPanelRouteState = {
-  readonly activeBaseByFieldset: Readonly<Record<string, { readonly snapshotId?: string; readonly type: string }>>;
+  readonly activeBaseByFieldset: Readonly<
+    Record<string, { readonly snapshotId?: string; readonly type: string }>
+  >;
   readonly activeFieldsetId?: string;
-  readonly currentValuesByFieldset: Readonly<Record<string, Readonly<Record<string, string | number | boolean>>>>;
+  readonly currentValuesByFieldset: Readonly<
+    Record<string, Readonly<Record<string, string | number | boolean>>>
+  >;
 };
 
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
@@ -175,16 +180,10 @@ export function ReactPreviewApp() {
         </div>
         <div className="preview-topbar__controls">
           <div className="preview-page-tabs" aria-label="Preview page">
-            <GhostButton
-              aria-pressed={page === "primitives"}
-              onClick={() => setPage("primitives")}
-            >
+            <GhostButton aria-pressed={page === "primitives"} onClick={() => setPage("primitives")}>
               Primitives
             </GhostButton>
-            <GhostButton
-              aria-pressed={page === "live"}
-              onClick={() => setPage("live")}
-            >
+            <GhostButton aria-pressed={page === "live"} onClick={() => setPage("live")}>
               Live toolbar
             </GhostButton>
           </div>
@@ -215,206 +214,219 @@ export function ReactPreviewApp() {
         <LiveToolbarPreview toolbarEnabled={toolbarEnabled} />
       ) : (
         <>
-      <PreviewSection title="Surfaces">
-        <div className="preview-grid preview-grid--three">
-          {elevations.map((elevation) => (
-            <Panel elevation={elevation} key={elevation}>
-              <div className="preview-card-body">
-                <span className="belt-text" data-emphasis="strong" data-weight="semibold">
-                  Elevation {elevation}
-                </span>
-                <span className="belt-text" data-emphasis="subtle" data-size="sm">
-                  Panel with default outer radius.
-                </span>
+          <PreviewSection title="Surfaces">
+            <div className="preview-grid preview-grid--three">
+              {elevations.map((elevation) => (
+                <Panel elevation={elevation} key={elevation}>
+                  <div className="preview-card-body">
+                    <span className="belt-text" data-emphasis="strong" data-weight="semibold">
+                      Elevation {elevation}
+                    </span>
+                    <span className="belt-text" data-emphasis="subtle" data-size="sm">
+                      Panel with default outer radius.
+                    </span>
+                  </div>
+                </Panel>
+              ))}
+              {radii.map((radius) => (
+                <Panel elevation={2} key={radius} radius={radius}>
+                  <div className="preview-card-body">
+                    <span className="belt-text" data-emphasis="strong" data-weight="semibold">
+                      {radius} radius
+                    </span>
+                    <span className="belt-text" data-emphasis="subtle" data-size="sm">
+                      Radius prop on Panel.
+                    </span>
+                  </div>
+                </Panel>
+              ))}
+            </div>
+          </PreviewSection>
+
+          <PreviewSection title="Buttons">
+            <div className="preview-grid preview-grid--stacked">
+              {elevations.map((elevation) => (
+                <Panel elevation={elevation} key={elevation}>
+                  <div className="preview-card-body">
+                    <PreviewLabel>Elevation {elevation}</PreviewLabel>
+                    <ButtonRows elevation={elevation} />
+                  </div>
+                </Panel>
+              ))}
+            </div>
+          </PreviewSection>
+
+          <PreviewSection title="Status Banners">
+            <div className="preview-stack">
+              {tones.map((tone) => (
+                <StatusBanner.Root key={tone} tone={tone}>
+                  <StatusBanner.Row>
+                    <StatusBanner.Icon glyph="alert" />
+                    <StatusBanner.Message>{tone} status message</StatusBanner.Message>
+                    <StatusBanner.Actions>
+                      <GhostButton tone={tone}>cancel</GhostButton>
+                      <Button tone={tone} icon="check" />
+                    </StatusBanner.Actions>
+                  </StatusBanner.Row>
+                </StatusBanner.Root>
+              ))}
+            </div>
+          </PreviewSection>
+
+          <PreviewSection title="Form Controls">
+            <Panel>
+              <div className="preview-form-grid">
+                <Field>
+                  <Label htmlFor="preview-branch">Branch</Label>
+                  <Input
+                    id="preview-branch"
+                    onChange={(event) => setBranch(event.currentTarget.value)}
+                    placeholder="feature/react-preview"
+                    value={branch ?? ""}
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="preview-destination">Destination</Label>
+                  <Select.Root
+                    name="destination"
+                    onValueChange={(value) => setDestination(String(value))}
+                    value={destination}
+                  >
+                    <Select.Trigger defaultLabel="Choose destination" />
+                    <Select.List>
+                      <Select.Option value="workspace">Workspace</Select.Option>
+                      <Select.Option value="browser">Browser</Select.Option>
+                      <Select.Option value="docs">Docs</Select.Option>
+                    </Select.List>
+                  </Select.Root>
+                </Field>
+                <Field className="preview-form-grid__wide">
+                  <Slider
+                    label="Preview intensity"
+                    max={100}
+                    min={0}
+                    onValueChange={(value) =>
+                      setIntensity(Array.isArray(value) ? (value[0] ?? 0) : value)
+                    }
+                    step={1}
+                    unit="%"
+                    value={[intensity]}
+                  />
+                </Field>
+                <label className="preview-switch-label">
+                  <Switch checked={toolbarEnabled} onCheckedChange={setToolbarEnabled} />
+                  <span className="belt-text" data-size="sm">
+                    Enable toolbar overlay
+                  </span>
+                </label>
               </div>
             </Panel>
-          ))}
-          {radii.map((radius) => (
-            <Panel elevation={2} key={radius} radius={radius}>
-              <div className="preview-card-body">
-                <span className="belt-text" data-emphasis="strong" data-weight="semibold">
-                  {radius} radius
-                </span>
-                <span className="belt-text" data-emphasis="subtle" data-size="sm">
-                  Radius prop on Panel.
-                </span>
-              </div>
-            </Panel>
-          ))}
-        </div>
-      </PreviewSection>
+          </PreviewSection>
 
-      <PreviewSection title="Buttons">
-        <div className="preview-grid preview-grid--stacked">
-          {elevations.map((elevation) => (
-            <Panel elevation={elevation} key={elevation}>
-              <div className="preview-card-body">
-                <PreviewLabel>Elevation {elevation}</PreviewLabel>
-                <ButtonRows elevation={elevation} />
-              </div>
-            </Panel>
-          ))}
-        </div>
-      </PreviewSection>
-
-      <PreviewSection title="Status Banners">
-        <div className="preview-stack">
-          {tones.map((tone) => (
-            <StatusBanner.Root key={tone} tone={tone}>
-              <StatusBanner.Row>
-                <StatusBanner.Icon glyph="alert" />
-                <StatusBanner.Message>{tone} status message</StatusBanner.Message>
-                <StatusBanner.Actions>
-                  <GhostButton tone={tone}>cancel</GhostButton>
-                  <Button tone={tone} icon="check" />
-                </StatusBanner.Actions>
-              </StatusBanner.Row>
-            </StatusBanner.Root>
-          ))}
-        </div>
-      </PreviewSection>
-
-      <PreviewSection title="Form Controls">
-        <Panel>
-          <div className="preview-form-grid">
-            <Field>
-              <Label htmlFor="preview-branch">Branch</Label>
-              <Input
-                id="preview-branch"
-                onChange={(event) => setBranch(event.currentTarget.value)}
-                placeholder="feature/react-preview"
-                value={branch ?? ""}
-              />
-            </Field>
-            <Field>
-              <Label htmlFor="preview-destination">Destination</Label>
-              <Select
-                defaultLabel="Choose destination"
-                name="destination"
-                onValueChange={(value) => setDestination(String(value))}
-                value={destination}
-              >
-                <SelectOption value="workspace">Workspace</SelectOption>
-                <SelectOption value="browser">Browser</SelectOption>
-                <SelectOption value="docs">Docs</SelectOption>
-              </Select>
-            </Field>
-            <Field className="preview-form-grid__wide">
-              <Slider
-                label="Preview intensity"
-                max={100}
-                min={0}
-                onValueChange={(value) => setIntensity(Array.isArray(value) ? (value[0] ?? 0) : value)}
-                step={1}
-                unit="%"
-                value={[intensity]}
-              />
-            </Field>
-            <label className="preview-switch-label">
-              <Switch checked={toolbarEnabled} onCheckedChange={setToolbarEnabled} />
-              <span className="belt-text" data-size="sm">
-                Enable toolbar overlay
-              </span>
-            </label>
-          </div>
-        </Panel>
-      </PreviewSection>
-
-      <PreviewSection title="Menus, Selects, Comboboxes">
-        <div className="preview-grid">
-          <Panel>
-            <div className="preview-card-body">
-              <PreviewLabel>Menu</PreviewLabel>
-              <div className="preview-row">
-                <Menu label={<Button endIcon="chevronDown">Actions</Button>} menuLabel="Actions">
-                  <MenuItem>Open worktree</MenuItem>
-                  <MenuItem>Copy URL</MenuItem>
-                  <Submenu label="More">
-                    <MenuItem>Archive</MenuItem>
-                    <MenuItem>Delete</MenuItem>
-                  </Submenu>
-                </Menu>
-                <Menu
-                  label={<GhostButton endIcon="chevronDown">More</GhostButton>}
-                  menuLabel="Secondary actions"
-                >
-                  <MenuItem>Rename</MenuItem>
-                  <MenuItem>Duplicate</MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </Panel>
-          <Panel>
-            <div className="preview-card-body">
-              <PreviewLabel>Select</PreviewLabel>
-              <Select
-                defaultLabel="Pick a surface"
-                onValueChange={(value) => setDestination(String(value))}
-                value={destination}
-                elevation={2}
-              >
-                <SelectOption value="workspace">Workspace</SelectOption>
-                <SelectOption value="browser">Browser</SelectOption>
-                <SelectOption value="docs">Docs</SelectOption>
-              </Select>
-            </div>
-          </Panel>
-          <Panel>
-            <div className="preview-card-body">
-              <PreviewLabel>Combobox</PreviewLabel>
-              <Combobox
-                items={["main", "feature/react-preview", "fix/theme-controls"]}
-                onValueChange={(value) => setBranch(value)}
-                placeholder="Find branch"
-                value={branch}
-              >
-                <ComboboxOption value="main">main</ComboboxOption>
-                <ComboboxOption value="feature/react-preview">feature/react-preview</ComboboxOption>
-                <ComboboxOption value="fix/theme-controls">fix/theme-controls</ComboboxOption>
-              </Combobox>
-            </div>
-          </Panel>
-        </div>
-      </PreviewSection>
-
-      <PreviewSection title="Glyphs">
-        <Panel>
-          <div className="preview-glyph-grid">
-            {glyphNames.map((name) => (
-              <div className="preview-glyph-cell" key={name}>
-                <Glyph className="belt-icon" data-size="md" name={name} />
-                <span className="belt-text" data-size="xs">
-                  {name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </PreviewSection>
-
-      <PreviewSection title="Theme Tokens">
-        <Panel>
-          <div className="preview-palette">
-            {paletteGroups.map((group) => (
-              <div className="preview-palette-row" key={group}>
-                <span className="preview-palette-label">{group}</span>
-                <div className="preview-palette-chips">
-                  {paletteSteps.map((step) => (
-                    <span
-                      aria-label={`${group} ${step}`}
-                      className="preview-palette-chip"
-                      key={step}
-                      style={{ backgroundColor: `var(--${group}-${step})` }}
-                      title={`${group}-${step}`}
-                    />
-                  ))}
+          <PreviewSection title="Menus, Selects, Comboboxes">
+            <div className="preview-grid">
+              <Panel>
+                <div className="preview-card-body">
+                  <PreviewLabel>Menu</PreviewLabel>
+                  <div className="preview-row">
+                    <Menu.Root>
+                      <Menu.Trigger render={<Button endIcon="chevronDown">Actions</Button>} />
+                      <Menu.List>
+                        <Menu.Item>Open worktree</Menu.Item>
+                        <Menu.Item>Copy URL</Menu.Item>
+                        <Menu.Item>Archive</Menu.Item>
+                        <Menu.Item>Delete</Menu.Item>
+                      </Menu.List>
+                    </Menu.Root>
+                    <Menu.Root>
+                      <Menu.Trigger
+                        render={<GhostButton endIcon="chevronDown">More</GhostButton>}
+                      />
+                      <Menu.List>
+                        <Menu.Item>Rename</Menu.Item>
+                        <Menu.Item>Duplicate</Menu.Item>
+                      </Menu.List>
+                    </Menu.Root>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </PreviewSection>
+              </Panel>
+              <Panel>
+                <div className="preview-card-body">
+                  <PreviewLabel>Select</PreviewLabel>
+                  <Select.Root
+                    onValueChange={(value) => setDestination(String(value))}
+                    value={destination}
+                  >
+                    <Select.Trigger defaultLabel="Pick a surface" elevation={2} />
+                    <Select.List elevation={2}>
+                      <Select.Option value="workspace">Workspace</Select.Option>
+                      <Select.Option value="browser">Browser</Select.Option>
+                      <Select.Option value="docs">Docs</Select.Option>
+                    </Select.List>
+                  </Select.Root>
+                </div>
+              </Panel>
+              <Panel>
+                <div className="preview-card-body">
+                  <PreviewLabel>Combobox</PreviewLabel>
+                  <Combobox.Root
+                    items={["main", "feature/react-preview", "fix/theme-controls"]}
+                    onValueChange={(value) => setBranch(value)}
+                    value={branch}
+                  >
+                    <Combobox.Trigger placeholder="Find branch" />
+                    <Combobox.List>
+                      <Combobox.Option value="main">main</Combobox.Option>
+                      <Combobox.Option value="feature/react-preview">
+                        feature/react-preview
+                      </Combobox.Option>
+                      <Combobox.Option value="fix/theme-controls">
+                        fix/theme-controls
+                      </Combobox.Option>
+                    </Combobox.List>
+                  </Combobox.Root>
+                </div>
+              </Panel>
+            </div>
+          </PreviewSection>
 
+          <PreviewSection title="Glyphs">
+            <Panel>
+              <div className="preview-glyph-grid">
+                {glyphNames.map((name) => (
+                  <div className="preview-glyph-cell" key={name}>
+                    <Glyph className="belt-icon" data-size="md" name={name} />
+                    <span className="belt-text" data-size="xs">
+                      {name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </PreviewSection>
+
+          <PreviewSection title="Theme Tokens">
+            <Panel>
+              <div className="preview-palette">
+                {paletteGroups.map((group) => (
+                  <div className="preview-palette-row" key={group}>
+                    <span className="preview-palette-label">{group}</span>
+                    <div className="preview-palette-chips">
+                      {paletteSteps.map((step) => (
+                        <span
+                          aria-label={`${group} ${step}`}
+                          className="preview-palette-chip"
+                          key={step}
+                          style={{ backgroundColor: `var(--${group}-${step})` }}
+                          title={`${group}-${step}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </PreviewSection>
         </>
       )}
 
@@ -459,7 +471,10 @@ function ButtonRows(props: { readonly elevation: Elevation }) {
   );
 }
 
-function ButtonToneRow(props: { readonly elevation: Elevation; readonly variant: "filled" | "ghost" }) {
+function ButtonToneRow(props: {
+  readonly elevation: Elevation;
+  readonly variant: "filled" | "ghost";
+}) {
   return (
     <div className="preview-row">
       {tones.map((tone) =>
@@ -494,7 +509,11 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
                     {live.error ?? `Mounted with ${live.toolbar?.tools.length ?? 0} tools`}
                   </StatusBanner.Message>
                   <StatusBanner.Actions>
-                    <GhostButton icon="spinner" onClick={() => void live.refresh()} title="Refresh" />
+                    <GhostButton
+                      icon="spinner"
+                      onClick={() => void live.refresh()}
+                      title="Refresh"
+                    />
                   </StatusBanner.Actions>
                 </StatusBanner.Row>
               </StatusBanner.Root>
@@ -517,7 +536,9 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
               <PreviewLabel>Live Overlay</PreviewLabel>
               <div className="preview-stack">
                 <span className="belt-text" data-size="sm">
-                  {props.toolbarEnabled ? "The draggable Belt toolbar is rendered on this page." : "Toolbar overlay is disabled from the primitives form."}
+                  {props.toolbarEnabled
+                    ? "The draggable Belt toolbar is rendered on this page."
+                    : "Toolbar overlay is disabled from the primitives form."}
                 </span>
                 <span className="belt-text" data-emphasis="subtle" data-size="xs">
                   The toolbar reads from the Vite-mounted API at /__toolbar.
@@ -548,46 +569,107 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
 
 function LiveBeltToolbar() {
   const live = useLiveToolbarData();
-  const current = live.worktrees?.worktrees.find((worktree) => worktree.current) ?? live.worktrees?.worktrees[0];
+  const worktrees = live.worktrees?.worktrees ?? [];
+  const [selectedWorktreeId, setSelectedWorktreeId] = useState<string | null>(null);
+  const [worktreeSearch, setWorktreeSearch] = useState("");
+  const selectedWorktree =
+    worktrees.find((worktree) => worktree.id === selectedWorktreeId) ??
+    worktrees.find((worktree) => worktree.current) ??
+    worktrees[0];
+  const normalizedWorktreeSearch = worktreeSearch.trim().toLocaleLowerCase();
+  const visibleWorktrees =
+    normalizedWorktreeSearch.length === 0
+      ? worktrees
+      : worktrees.filter((worktree) =>
+        [worktree.branch, worktree.path]
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(normalizedWorktreeSearch),
+      );
+  const current = selectedWorktree;
   const destinations = current?.destinations ?? [];
   const activeFieldsetId = live.controlPanel?.state.activeFieldsetId;
 
+  useEffect(() => {
+    if (worktrees.length === 0) {
+      if (selectedWorktreeId !== null) setSelectedWorktreeId(null);
+      if (worktreeSearch !== "") setWorktreeSearch("");
+      return;
+    }
+
+    if (
+      selectedWorktreeId === null ||
+      !worktrees.some((worktree) => worktree.id === selectedWorktreeId)
+    ) {
+      const nextWorktree = worktrees.find((worktree) => worktree.current) ?? worktrees[0];
+      setSelectedWorktreeId(nextWorktree?.id ?? null);
+      setWorktreeSearch("");
+    }
+  }, [selectedWorktreeId, worktreeSearch, worktrees]);
+
   return (
     <Toolbar aria-label="Belt toolbar">
-      <Menu
-        label={<Button endIcon="chevronDown" startIcon="menu">Worktrees</Button>}
-        menuLabel="Worktrees"
+      <Combobox.Root
+        inputValue={worktreeSearch}
+        items={worktrees.map((worktree) => worktree.branch)}
+        onInputValueChange={(inputValue) => setWorktreeSearch(inputValue)}
+        onValueChange={(branchValue) => {
+          const nextWorktree = worktrees.find((worktree) => worktree.branch === branchValue);
+          setSelectedWorktreeId(nextWorktree?.id ?? null);
+          setWorktreeSearch("");
+        }}
+        value={selectedWorktree?.branch ?? null}
       >
-        {(live.worktrees?.worktrees ?? []).map((worktree) => (
-          <MenuItem key={worktree.id}>
-            {worktree.current ? "✓ " : ""}
-            {worktree.branch}
-          </MenuItem>
-        ))}
-        {live.worktrees?.worktrees.length === 0 ? <MenuItem>No worktrees found</MenuItem> : null}
-      </Menu>
-      <Select
-        defaultLabel="Destination"
-        value={destinations[0]?.id ?? ""}
-      >
-        {destinations.map((destination) => (
-          <SelectOption key={destination.id} value={destination.id}>
-            {destination.label}
-          </SelectOption>
-        ))}
-      </Select>
-      <Menu
-        label={<GhostButton endIcon="chevronDown" startIcon="edit">Controls</GhostButton>}
-        menuLabel="Control panel"
-      >
-        {Object.entries(live.controlPanel?.config.fieldsets ?? {}).map(([fieldsetId, fieldset]) => (
-          <MenuItem key={fieldsetId}>
-            {fieldsetId === activeFieldsetId ? "✓ " : ""}
-            {fieldset.label ?? fieldsetId}
-          </MenuItem>
-        ))}
-        {live.controlPanel === undefined ? <MenuItem>Loading controls</MenuItem> : null}
-      </Menu>
+        <Combobox.Trigger
+          placeholder="Find worktree"
+          searchPlacement="popup"
+          render={<GhostButton endIcon="chevronDown" startIcon="branch">{selectedWorktree?.branch ?? "No worktrees found"}</GhostButton>}
+        />
+        <Combobox.List placeholder="Find worktree" searchPlacement="popup">
+          {visibleWorktrees.map((worktree) => (
+            <Combobox.Option
+              key={worktree.id}
+              onClick={() => {
+                setSelectedWorktreeId(worktree.id);
+                setWorktreeSearch("");
+              }}
+              value={worktree.branch}
+            >
+              {worktree.branch}
+            </Combobox.Option>
+          ))}
+          {worktrees.length > 0 && visibleWorktrees.length === 0 ? (
+            <Combobox.Option disabled value="no-matching-worktrees">
+              No matching worktrees
+            </Combobox.Option>
+          ) : null}
+          {worktrees.length === 0 ? (
+            <Combobox.Option disabled value="no-worktrees">
+              No worktrees found
+            </Combobox.Option>
+          ) : null}
+        </Combobox.List>
+      </Combobox.Root>
+      <Menu.Root>
+        <Menu.Trigger
+          render={
+            <GhostButton endIcon="chevronDown" startIcon="edit">
+              Controls
+            </GhostButton>
+          }
+        />
+        <Menu.List>
+          {Object.entries(live.controlPanel?.config.fieldsets ?? {}).map(
+            ([fieldsetId, fieldset]) => (
+              <Menu.Item key={fieldsetId}>
+                {fieldsetId === activeFieldsetId ? "✓ " : ""}
+                {fieldset.label ?? fieldsetId}
+              </Menu.Item>
+            ),
+          )}
+          {live.controlPanel === undefined ? <Menu.Item>Loading controls</Menu.Item> : null}
+        </Menu.List>
+      </Menu.Root>
       <GhostButton icon="spinner" onClick={() => void live.refresh()} title="Refresh live data" />
     </Toolbar>
   );
@@ -616,7 +698,9 @@ function WorktreeList(props: { readonly worktrees: readonly WorktreeEntry[] }) {
           </div>
           <div className="preview-row">
             {worktree.current ? (
-              <span className="belt-badge" data-tone="success">current</span>
+              <span className="belt-badge" data-tone="success">
+                current
+              </span>
             ) : null}
             {worktree.destinations.map((destination) => (
               <a className="preview-destination-link" href={destination.url} key={destination.id}>
@@ -636,8 +720,11 @@ function ControlPanelEditor(props: {
 }) {
   const controlPanel = props.controlPanel;
   const activeFieldsetId = controlPanel?.state.activeFieldsetId;
-  const activeFieldset = activeFieldsetId === undefined ? undefined : controlPanel?.config.fieldsets[activeFieldsetId];
-  const [draftValues, setDraftValues] = useState<Readonly<Record<string, string | number | boolean>>>({});
+  const activeFieldset =
+    activeFieldsetId === undefined ? undefined : controlPanel?.config.fieldsets[activeFieldsetId];
+  const [draftValues, setDraftValues] = useState<
+    Readonly<Record<string, string | number | boolean>>
+  >({});
 
   useEffect(() => {
     if (!controlPanel || activeFieldsetId === undefined) return;
@@ -672,8 +759,7 @@ function ControlPanelEditor(props: {
     <div className="preview-card-body">
       <div className="preview-control-header">
         <PreviewLabel>{activeFieldset.label ?? activeFieldsetId}</PreviewLabel>
-        <Select
-          defaultLabel="Fieldset"
+        <Select.Root
           onValueChange={(value) => {
             void postJson("/__toolbar/tools/control-panel/state/select-fieldset", {
               fieldsetId: String(value),
@@ -681,12 +767,15 @@ function ControlPanelEditor(props: {
           }}
           value={activeFieldsetId}
         >
-          {Object.entries(controlPanel.config.fieldsets).map(([fieldsetId, fieldset]) => (
-            <SelectOption key={fieldsetId} value={fieldsetId}>
-              {fieldset.label ?? fieldsetId}
-            </SelectOption>
-          ))}
-        </Select>
+          <Select.Trigger defaultLabel="Fieldset" />
+          <Select.List>
+            {Object.entries(controlPanel.config.fieldsets).map(([fieldsetId, fieldset]) => (
+              <Select.Option key={fieldsetId} value={fieldsetId}>
+                {fieldset.label ?? fieldsetId}
+              </Select.Option>
+            ))}
+          </Select.List>
+        </Select.Root>
       </div>
       <div className="preview-control-fields">
         {Object.entries(activeFieldset.fields).map(([fieldId, field]) => (
@@ -700,8 +789,12 @@ function ControlPanelEditor(props: {
         ))}
       </div>
       <div className="preview-row">
-        <Button onClick={() => void branchSnapshot()} startIcon="add">Branch snapshot</Button>
-        <GhostButton onClick={() => void props.onRefresh()} startIcon="spinner">Refresh</GhostButton>
+        <Button onClick={() => void branchSnapshot()} startIcon="add">
+          Branch snapshot
+        </Button>
+        <GhostButton onClick={() => void props.onRefresh()} startIcon="spinner">
+          Refresh
+        </GhostButton>
       </div>
     </div>
   );
@@ -718,11 +811,10 @@ function ControlFieldEditor(props: {
   if (props.field.type === "boolean") {
     return (
       <label className="preview-switch-label">
-        <Switch
-          checked={props.value === true}
-          onCheckedChange={(value) => props.onChange(value)}
-        />
-        <span className="belt-text" data-size="sm">{label}</span>
+        <Switch checked={props.value === true} onCheckedChange={(value) => props.onChange(value)} />
+        <span className="belt-text" data-size="sm">
+          {label}
+        </span>
       </label>
     );
   }
@@ -731,29 +823,34 @@ function ControlFieldEditor(props: {
     return (
       <Field>
         <Label>{label}</Label>
-        <Select
-          defaultLabel={label}
+        <Select.Root
           onValueChange={(value) => props.onChange(String(value))}
           value={String(props.value ?? props.field.default ?? "")}
         >
-          {props.field.options.map((option) => (
-            <SelectOption key={option.value} value={option.value}>
-              {option.label}
-            </SelectOption>
-          ))}
-        </Select>
+          <Select.Trigger defaultLabel={label} />
+          <Select.List>
+            {props.field.options.map((option) => (
+              <Select.Option key={option.value} value={option.value}>
+                {option.label}
+              </Select.Option>
+            ))}
+          </Select.List>
+        </Select.Root>
       </Field>
     );
   }
 
   if (props.field.type === "range") {
-    const value = typeof props.value === "number" ? props.value : props.field.default ?? props.field.min ?? 0;
+    const value =
+      typeof props.value === "number" ? props.value : (props.field.default ?? props.field.min ?? 0);
     return (
       <Slider
         label={label}
         max={props.field.max ?? 1}
         min={props.field.min ?? 0}
-        onValueChange={(nextValue) => props.onChange(Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue)}
+        onValueChange={(nextValue) =>
+          props.onChange(Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue)
+        }
         step={props.field.step ?? 0.01}
         unit={props.field.unit}
         value={[value]}
@@ -766,7 +863,12 @@ function ControlFieldEditor(props: {
       <Label>{label}</Label>
       <Input
         onChange={(event) =>
-          props.onChange(props.field.type === "number" ? Number(event.currentTarget.value) : event.currentTarget.value)}
+          props.onChange(
+            props.field.type === "number"
+              ? Number(event.currentTarget.value)
+              : event.currentTarget.value,
+          )
+        }
         type={props.field.type === "number" ? "number" : "text"}
         value={String(props.value ?? props.field.default ?? "")}
       />
@@ -815,7 +917,7 @@ async function getJson<Data>(url: string): Promise<Data> {
     throw new Error(`${response.status} ${response.statusText}`);
   }
 
-  return await response.json() as Data;
+  return (await response.json()) as Data;
 }
 
 async function postJson<Data = unknown>(url: string, body: unknown): Promise<Data> {
@@ -831,5 +933,5 @@ async function postJson<Data = unknown>(url: string, body: unknown): Promise<Dat
     throw new Error(`${response.status} ${response.statusText}`);
   }
 
-  return await response.json() as Data;
+  return (await response.json()) as Data;
 }

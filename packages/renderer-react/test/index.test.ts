@@ -4,7 +4,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   Button,
   Combobox,
-  ComboboxOption,
   DragIndicator,
   Field,
   GhostButton,
@@ -13,10 +12,8 @@ import {
   Input,
   Label,
   Menu,
-  MenuItem,
   Panel,
   Select,
-  SelectOption,
   Slider,
   StatusBanner,
   Switch,
@@ -152,16 +149,27 @@ it("renders Base UI-backed form and choice primitives", () => {
       createElement(Input, { placeholder: "feature/name" }),
       createElement(Slider, { defaultValue: 4, min: 0, max: 10, label: "Intensity", unit: "%" }),
       createElement(Switch, { defaultChecked: true }),
-      createElement(Menu, { label: "Menu" }, createElement(MenuItem, null, "Open worktree")),
       createElement(
-        Select,
-        { defaultLabel: "Destination" },
-        createElement(SelectOption, { value: "web" }, "Web"),
+        Menu.Root,
+        null,
+        createElement(Menu.Trigger, null, "Menu"),
+        createElement(Menu.List, null, createElement(Menu.Item, null, "Open worktree")),
       ),
       createElement(
-        Combobox,
-        { placeholder: "Find branch" },
-        createElement(ComboboxOption, { value: "main" }, "main"),
+        Select.Root,
+        null,
+        createElement(Select.Trigger, { defaultLabel: "Destination" }),
+        createElement(Select.List, null, createElement(Select.Option, { value: "web" }, "Web")),
+      ),
+      createElement(
+        Combobox.Root,
+        null,
+        createElement(Combobox.Trigger, { placeholder: "Find branch" }),
+        createElement(
+          Combobox.List,
+          null,
+          createElement(Combobox.Option, { value: "main" }, "main"),
+        ),
       ),
     ),
   );
@@ -183,4 +191,33 @@ it("renders Base UI-backed form and choice primitives", () => {
   assert.match(html, /belt-button__end-icon/);
   assert.match(html, /belt-icon/);
   assert.match(html, /data-size="md"/);
+});
+
+it("lets custom combobox triggers own their surface styles", () => {
+  const html = renderToStaticMarkup(
+    createElement(
+      Combobox.Root,
+      null,
+      createElement(Combobox.Trigger, {
+        render: createElement(GhostButton, { endIcon: "chevronDown" }, "Worktree"),
+      }),
+      createElement(Combobox.List, null, createElement(Combobox.Option, { value: "main" }, "main")),
+    ),
+  );
+
+  assert.match(html, /belt-ghost-button/);
+  assert.match(html, /belt-combobox__trigger/);
+  assert.notMatch(html, /belt-combobox--popup-search/);
+  assert.notMatch(html, /belt-surface[^>]*belt-combobox/);
+});
+
+it("renders select options without a selected item indicator icon", () => {
+  const html = renderToStaticMarkup(
+    createElement(Select.Root, null, createElement(Select.Option, { value: "web" }, "Web")),
+  );
+
+  assert.match(html, /belt-select__item/);
+  assert.match(html, />Web</);
+  assert.notMatch(html, /belt-icon/);
+  assert.notMatch(html, /rmx-glyph-check/);
 });

@@ -599,7 +599,6 @@ export function SelectList(handle: Handle<SelectListProps>) {
             <div
               {...divProps}
               class={classNames("belt-select__list", classes, className)}
-              data-tone={context.tone}
               mix={[selectListMixin(), mix]}
             >
               {children}
@@ -632,7 +631,6 @@ export function SelectOption(handle: Handle<SelectOptionProps>) {
         {...divProps}
         class={classNames("belt-select__item belt-text", classes, className)}
         data-size="sm"
-        data-tone={context.tone}
         mix={[
           listbox.option({
             ...(disabled === undefined ? {} : { disabled }),

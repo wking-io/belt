@@ -39,6 +39,12 @@ it("exports the v1 theme token contract", async () => {
   ]) {
     assert.match(css, new RegExp(`${token}:`));
   }
+
+  assert.match(
+    css,
+    /--belt-color-primary:\s*light-dark\(var\(--belt-primary-5\),\s*var\(--belt-primary-6\)\)/,
+  );
+  assert.match(css, /--belt-color-focus:\s*var\(--belt-color-primary\)/);
 });
 
 it("sets the default font family and OpenType feature contract", async () => {
@@ -124,6 +130,7 @@ it("exports portable component class hooks for renderers", async () => {
     "belt-select__item",
     "belt-combobox",
     "belt-combobox__popup",
+    "belt-combobox__search-surface",
     "belt-combobox__item",
   ]) {
     assert.match(css, new RegExp(`\\.${className.replaceAll("_", "\\_")}`));
@@ -135,35 +142,39 @@ it("exports portable component class hooks for renderers", async () => {
   );
 });
 
-it("styles select placeholders and selected option tone states", async () => {
+it("styles select placeholders and selected options", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
   assert.match(css, /\.belt-select__value\[data-placeholder\]/);
-  assert.match(css, /--belt-select-selected-bg:\s*var\(--belt-color-primary\)/);
-  assert.match(css, /--belt-select-selected-fg:\s*var\(--belt-color-primary-foreground\)/);
-  assert.match(
-    css,
-    /--belt-select-selected-fg-subtle:\s*var\(--belt-color-primary-foreground-subtle\)/,
-  );
   assert.match(css, /\.belt-select__item\[aria-selected="true"\]/);
-  assert.match(css, /background-color:\s*var\(--belt-select-selected-bg\)/);
-  assert.match(
-    css,
-    /\.belt-select__item\[aria-selected="true"\] \.belt-icon\)[\s\S]*color:\s*var\(--belt-select-selected-fg-subtle\)/,
-  );
+  assert.match(css, /\.belt-combobox__item\[aria-selected="true"\]/);
+  assert.match(css, /\.belt-combobox__item\[data-selected\]/);
+  assert.match(css, /background-color:\s*var\(--belt-color-primary\)/);
+  assert.match(css, /color:\s*var\(--belt-color-primary-foreground\)/);
+  assert.notMatch(css, /--belt-select-selected-/);
+  assert.notMatch(css, /\.belt-select__item\[aria-selected="true"\] \.belt-icon/);
   assert.notMatch(css, /belt-select__item-indicator/);
+  assert.match(css, /\.belt-combobox__item svg\)[\s\S]*display:\s*none/);
 });
 
-it("sizes select and combobox popovers to their anchor width", async () => {
+it("sizes select popovers to their anchor width and combobox popovers to their content", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
   assert.match(
     css,
-    /\.belt-select__popup, \.belt-combobox__popup\)[\s\S]*inline-size:\s*calc\(var\(--anchor-width\) \+ calc\(var\(--belt-space\) \* 3\)\)/,
+    /\.belt-select__popup\)[\s\S]*inline-size:\s*calc\(var\(--anchor-width\) \+ calc\(var\(--belt-space\) \* 3\)\)/,
   );
   assert.match(
     css,
-    /\.belt-select__popup, \.belt-combobox__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
+    /\.belt-select__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-combobox__popup\)[\s\S]*inline-size:\s*max-content/,
+  );
+  assert.match(
+    css,
+    /\.belt-combobox__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
   );
 });
 
@@ -178,9 +189,14 @@ it("aligns combobox trigger and popup structure with select", async () => {
     css,
     /\.belt-menu__popup, \.belt-select__popup, \.belt-combobox__popup\)[\s\S]*border:\s*0[\s\S]*padding:\s*0/,
   );
+  assert.match(css, /\.belt-combobox__popup > \.belt-surface__inner\)[\s\S]*height:\s*auto/);
   assert.match(
     css,
-    /\.belt-combobox__popup > \.belt-surface__inner\)[\s\S]*height:\s*auto/,
+    /\.belt-combobox__search-surface\)[\s\S]*width:\s*calc\(100% - calc\(var\(--belt-space\) \* 2\)\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-combobox__search-surface\)[\s\S]*--belt-surface-radius:\s*var\(--belt-radius-inner\)/,
   );
   assert.match(css, /\.belt-combobox__trigger\)[\s\S]*margin:\s*0/);
 });
@@ -190,7 +206,7 @@ it("sizes menu select and combobox options like ghost buttons", async () => {
 
   assert.match(
     css,
-    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*font-size:\s*var\(--belt-font-size-sm\)/,
+    /\.belt-menu__item, \.belt-select__item, \.belt-combobox__item\)[\s\S]*font-size:\s*var\(--belt-font-size-xs\)/,
   );
   assert.match(
     css,
@@ -235,16 +251,18 @@ it("styles drag indicators with grab and active dragging cursors", async () => {
 it("styles toolbar as a fixed bottom docked bar", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
-  assert.match(css, /\.belt-toolbar\)[\s\S]*inset-block-end:\s*0/);
-  assert.match(css, /\.belt-toolbar\)[\s\S]*inset-inline:\s*0/);
-  assert.match(css, /\.belt-toolbar\)[\s\S]*inline-size:\s*100%/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*bottom:\s*0/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*left:\s*0/);
+  assert.match(css, /\.belt-toolbar\)[\s\S]*right:\s*0/);
   assert.match(css, /\.belt-toolbar\)[\s\S]*position:\s*fixed/);
-  assert.match(css, /body:has\(> \.belt-toolbar-host\)[\s\S]*block-size:\s*calc\(100dvh - var\(--belt-toolbar-reserved-block-size,\s*42px\)\)/);
+  assert.match(
+    css,
+    /body:has\(> \.belt-toolbar-host\)[\s\S]*block-size:\s*calc\(100dvh - var\(--belt-toolbar-reserved-block-size,\s*42px\)\)/,
+  );
   assert.match(css, /body:has\(> \.belt-toolbar-host\)[\s\S]*overflow:\s*auto/);
   assert.match(css, /html:has\(> body > \.belt-toolbar-host\)[\s\S]*overflow:\s*hidden/);
-  assert.match(css, /\.belt-toolbar > \.belt-surface\)[\s\S]*inline-size:\s*100%/);
   assert.match(css, /\.belt-toolbar__inner\)[\s\S]*display:\s*flex/);
-  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*justify-content:\s*center/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*justify-content:\s*start/);
   assert.match(css, /\.belt-toolbar__inner\)[\s\S]*max-inline-size:\s*min\(100%,\s*960px\)/);
 });
 
@@ -479,5 +497,8 @@ it("keeps Tailwind Preflight out of the theme input", async () => {
   assert.match(css, /@import "tailwindcss\/utilities" source\(none\);/);
   assert.match(css, /@source "\.\.\/\.\.\/renderer-react\/src\/\*\*\/\*\.\{ts,tsx\}";/);
   assert.match(css, /@source "\.\.\/\.\.\/renderer-remix\/src\/\*\*\/\*\.\{ts,tsx\}";/);
-  assert.match(css, /@source "\.\.\/\.\.\/tool-worktrees-renderer-remix\/src\/\*\*\/\*\.\{ts,tsx\}";/);
+  assert.match(
+    css,
+    /@source "\.\.\/\.\.\/tool-worktrees-renderer-remix\/src\/\*\*\/\*\.\{ts,tsx\}";/,
+  );
 });

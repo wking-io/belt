@@ -13,7 +13,6 @@ import {
   type RemixNode,
 } from "@remix-run/ui";
 import * as RemixCombobox from "@remix-run/ui/combobox";
-import { Glyph } from "@remix-run/ui/glyph";
 import type { GlyphName } from "@repo/glyphs";
 import {
   defineToolbarDefinition,
@@ -58,6 +57,7 @@ import {
   type SelectRootProps as RemixSelectRootProps,
   type SelectTriggerProps as RemixSelectTriggerProps,
 } from "./select.js";
+import { Glyph } from "./glyph.js";
 
 type IntentTone = "neutral" | "primary" | "info" | "success" | "warning" | "danger" | "foreground";
 type Elevation = 1 | 2 | 3;

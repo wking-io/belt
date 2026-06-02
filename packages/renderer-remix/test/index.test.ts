@@ -326,7 +326,7 @@ it("renders the local Remix select with Belt surface and listbox semantics", asy
   assert.notMatch(html, /belt-select__item-indicator/);
 });
 
-it("marks selected Remix select options with tone data", async () => {
+it("marks selected Remix select options without tone data or indicator icons", async () => {
   const html = await render(
     createElement(
       Select,
@@ -336,11 +336,14 @@ it("marks selected Remix select options with tone data", async () => {
     ),
   );
 
-  assert.match(html, /data-tone="success"[^>]*role="listbox"[^>]*class="belt-select__list"/);
   assert.match(
     html,
-    /data-tone="success"[^>]*role="option"[^>]*aria-selected="true"[^>]*class="belt-select__item belt-text"/,
+    /role="option"[^>]*aria-selected="true"[^>]*class="belt-select__item belt-text"/,
   );
+  assert.notMatch(html, /data-tone="success"[^>]*role="listbox"/);
+  assert.notMatch(html, /data-tone="success"[^>]*role="option"/);
+  assert.notMatch(html, /belt-icon/);
+  assert.notMatch(html, /rmx-glyph-check/);
 });
 
 it("allows a composed select trigger to use the real Button component", async () => {
@@ -382,6 +385,19 @@ it("renders the local Combobox root with elevation for item hover styling", asyn
   assert.match(html, /role="combobox"/);
   assert.match(html, /role="listbox"/);
   assert.match(html, /belt-combobox__item/);
+});
+
+it("marks selected Remix combobox options for primary selected styling", async () => {
+  const html = await render(
+    createElement(
+      Combobox,
+      { defaultValue: "main", name: "branch", placeholder: "Find branch" },
+      createElement(ComboboxOption, { label: "main", value: "main" }, "main"),
+      createElement(ComboboxOption, { label: "feature", value: "feature" }, "feature"),
+    ),
+  );
+
+  assert.match(html, /class="belt-combobox__item[^"]*"[^>]*role="option"[^>]*aria-selected="true"/);
 });
 
 it("keeps select behavior local to the Remix renderer", async () => {
