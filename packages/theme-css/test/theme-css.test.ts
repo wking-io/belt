@@ -9,6 +9,8 @@ const interVariablePath = fileURLToPath(
 const interVariableItalicPath = fileURLToPath(
   new URL("../src/font-files/InterVariable-Italic.woff2", import.meta.url),
 );
+const themeInputCssPath = fileURLToPath(new URL("../src/theme.input.css", import.meta.url));
+const packageJsonPath = fileURLToPath(new URL("../package.json", import.meta.url));
 
 it("exports the v1 theme token contract", async () => {
   const css = await readFile(themeCssPath, "utf8");
@@ -453,4 +455,29 @@ it("uses matching neutral hover colors for elevated buttons", async () => {
     css,
     /\.belt-ghost-button\[data-elevation="3"\][\s\S]*--belt-ghost-button-bg-hover:\s*var\(--belt-color-elevation-3-hover\)/,
   );
+});
+
+it("builds the public theme artifact from the Tailwind input", async () => {
+  const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
+    scripts: Record<string, string>;
+  };
+
+  assert.strictEqual(
+    packageJson.scripts["build:css"],
+    "tailwindcss -i ./src/theme.input.css -o ./dist/theme.css",
+  );
+  assert.match(packageJson.scripts.build, /build:css/);
+});
+
+it("keeps Tailwind Preflight out of the theme input", async () => {
+  const css = await readFile(themeInputCssPath, "utf8");
+
+  assert.ok(!css.includes('tailwindcss/preflight"'));
+  assert.ok(!css.includes("tailwindcss/preflight'"));
+  assert.ok(!css.includes('tailwindcss"'));
+  assert.match(css, /@import "tailwindcss\/theme" source\(none\);/);
+  assert.match(css, /@import "tailwindcss\/utilities" source\(none\);/);
+  assert.match(css, /@source "\.\.\/\.\.\/renderer-react\/src\/\*\*\/\*\.\{ts,tsx\}";/);
+  assert.match(css, /@source "\.\.\/\.\.\/renderer-remix\/src\/\*\*\/\*\.\{ts,tsx\}";/);
+  assert.match(css, /@source "\.\.\/\.\.\/tool-worktrees-renderer-remix\/src\/\*\*\/\*\.\{ts,tsx\}";/);
 });

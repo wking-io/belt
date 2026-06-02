@@ -15,10 +15,15 @@
     "./theme.css": "./src/theme.css"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm run build:css && tsc -p tsconfig.build.json",
+    "build:css": "tailwindcss -i ./src/theme.input.css -o ./dist/theme.css",
     "check": "tsc -p tsconfig.json"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
   }
 }
