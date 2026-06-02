@@ -41,7 +41,7 @@ await mkdir(path.join(stagingRoot, "_internal"), { recursive: true });
 
 await copyPublicEntrypoints();
 await copyInternalPackages();
-await cp(path.join(workspaceRoot, "packages/theme-css/src/theme.css"), path.join(stagingRoot, "theme.css"));
+await cp(path.join(workspaceRoot, "packages/theme-css/dist/theme.css"), path.join(stagingRoot, "theme.css"));
 await rewriteInternalImports(stagingRoot);
 await writePackageJson();
 
