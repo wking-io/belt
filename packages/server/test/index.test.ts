@@ -8,6 +8,7 @@ import {
   toolbarApiToolRoutePath,
   type ToolbarErrorCode
 } from "@repo/core";
+import { iterationsTool } from "@repo/tool-iterations";
 import { Effect, Schema } from "effect";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
@@ -91,6 +92,61 @@ describe("Effect HTTP Toolbar Server", () => {
       assert.strictEqual(indexResponse.status, 200);
       assert.deepStrictEqual(yield* json(indexResponse), {
         worktrees: []
+      });
+
+      yield* Effect.promise(() => server.dispose());
+    }));
+
+  it.effect("dispatches the canonical Iterations tool route", () =>
+    Effect.gen(function*() {
+      const server = createToolbarServer(defineToolbar({
+        tools: [
+          iterationsTool({
+            providers: [
+              {
+                id: "test",
+                label: "Test",
+                list: () => Effect.succeed([
+                  {
+                    id: "prototype:pricing-test",
+                    label: "pricing-test",
+                    kind: "prototype",
+                    current: false,
+                    destinations: [
+                      {
+                        id: "preview",
+                        label: "Preview",
+                        primary: true,
+                        url: "/__prototype/pricing-test"
+                      }
+                    ]
+                  }
+                ])
+              }
+            ]
+          })
+        ]
+      }));
+      const indexResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("iterations", "/"))));
+
+      assert.strictEqual(indexResponse.status, 200);
+      assert.deepStrictEqual(yield* json(indexResponse), {
+        iterations: [
+          {
+            id: "prototype:pricing-test",
+            label: "pricing-test",
+            kind: "prototype",
+            current: false,
+            destinations: [
+              {
+                id: "preview",
+                label: "Preview",
+                primary: true,
+                url: "/__prototype/pricing-test"
+              }
+            ]
+          }
+        ]
       });
 
       yield* Effect.promise(() => server.dispose());

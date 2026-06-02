@@ -1,6 +1,6 @@
 # Backend v1 Usage
 
-Backend v1 covers the server-side Toolbar API, explicit Tool Registration, framework mounting, and the Worktree Switcher backend. It does not include frontend renderers or process management.
+Backend v1 covers the server-side Toolbar API, explicit Tool Registration, framework mounting, and the Iterations backend. It does not include frontend renderers or process management.
 
 ## Toolbar Config
 
@@ -8,21 +8,28 @@ Create a `toolbar.config.ts` module at the host app root:
 
 ```ts
 import { defineToolbar } from "@riff-refine/belt";
-import { worktreesTool } from "@riff-refine/belt/worktrees";
-import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
 
 export default defineToolbar({
   tools: [
-    worktreesTool({
-      resolver: portlessResolver({
-        destinations: [
-          {
-            id: "web",
-            label: "Web",
-            appName: "myapp"
-          }
-        ]
-      })
+    iterationsTool({
+      providers: [
+        worktreeIterations({
+          resolver: portlessResolver({
+            destinations: [
+              {
+                id: "web",
+                label: "Web",
+                appName: "myapp"
+              }
+            ]
+          })
+        }),
+        prototypeIterations()
+      ]
     })
   ]
 });
@@ -34,21 +41,26 @@ Config discovery can also load a Toolbar Definition produced by a renderer packa
 
 ```ts
 import { createToolbar } from "@riff-refine/belt/react";
-import { worktreesTool } from "@riff-refine/belt/worktrees";
-import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
 
 export default createToolbar({
   tools: [
-    worktreesTool({
-      resolver: portlessResolver({
-        destinations: [
-          {
-            id: "web",
-            label: "Web",
-            appName: "myapp"
-          }
-        ]
-      })
+    iterationsTool({
+      providers: [
+        worktreeIterations({
+          resolver: portlessResolver({
+            destinations: [
+              {
+                id: "web",
+                label: "Web",
+                appName: "myapp"
+              }
+            ]
+          })
+        })
+      ]
     })
   ]
 });
@@ -165,21 +177,29 @@ export default defineConfig({
 
 The adapter mounts `/__toolbar` by default, translates Node middleware requests into Fetch requests, and sends Fetch responses back through Vite middleware responses.
 
-## Worktree Switcher Backend
+## Iterations Backend
 
-`@riff-refine/belt/worktrees` registers the `worktrees` Tool. Its backend route is:
+`@riff-refine/belt/iterations` registers the `iterations` Tool. Its backend route is:
 
 ```txt
-GET /__toolbar/tools/worktrees
+GET /__toolbar/tools/iterations
 ```
 
-The Tool discovers linked Git worktrees, marks the current worktree, and asks a URL Resolver Extension for navigable destinations.
+The Tool asks configured Iteration Providers for app variants and returns one list of iterations. Git worktrees and prototype overlays are providers of the same user-facing capability.
 
-The v1 Worktree Switcher does not start, stop, install dependencies for, or supervise development servers. It only reports worktrees and destinations for servers that already exist.
+An iteration has a stable id, display label, kind, current marker, and one or more destinations. Provider-specific data, such as Git branch/path metadata or prototype source directory metadata, lives under metadata.
+
+The Iterations Tool does not start, stop, install dependencies for, or supervise development servers. It only reports iterations and destinations for app variants that already exist.
+
+## Worktree Iteration Provider
+
+`@riff-refine/belt/iterations/worktrees` discovers linked Git worktrees for the Iterations Tool. It marks the current worktree and asks a URL Resolver Extension for navigable destinations.
+
+Legacy `@riff-refine/belt/worktrees` imports are kept for migration, but new configuration should use the Iterations Tool.
 
 ## Portless Extension
 
-`@riff-refine/belt/worktrees/portless` is a Worktree Switcher URL Resolver Extension. It converts each discovered worktree into one or more Portless-style destinations:
+`@riff-refine/belt/iterations/worktrees/portless` is a Worktree Iteration Provider URL Resolver Extension. It converts each discovered worktree into one or more Portless-style destinations:
 
 ```ts
 portlessResolver({
@@ -210,6 +230,29 @@ Main branches default to unprefixed hostnames:
 
 ```txt
 https://myapp.localhost
+```
+
+## Prototype Iteration Provider
+
+`@riff-refine/belt/iterations/prototypes` discovers prototype folders and exposes them as prototype iterations with preview destinations under `/__prototype/:name` by default.
+
+Prototype overlay runtime behavior for Vite lives in `@riff-refine/belt/iterations/prototypes/vite`. It injects prototype routes, virtual module identity, and module graph overlay behavior. That adapter is separate from the generic Vite Adapter that mounts the Toolbar API.
+
+Pair the provider and adapter when using Vite:
+
+```ts
+// vite.config.ts
+import { toolbarVite } from "@riff-refine/belt/vite";
+import { prototypeIterationsVite } from "@riff-refine/belt/iterations/prototypes/vite";
+import { defineConfig } from "vite";
+import toolbarConfig from "./toolbar.config";
+
+export default defineConfig({
+  plugins: [
+    toolbarVite(toolbarConfig),
+    prototypeIterationsVite()
+  ]
+});
 ```
 
 ## Non-Goals

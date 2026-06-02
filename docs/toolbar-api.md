@@ -72,8 +72,8 @@ Returns API metadata and registered tool metadata.
     "apiVersion": 1,
     "tools": [
       {
-        "id": "worktrees",
-        "label": "Worktrees",
+        "id": "iterations",
+        "label": "Iterations",
         "routes": ["index"]
       }
     ]
@@ -91,8 +91,8 @@ Returns registered tool metadata.
   "data": {
     "tools": [
       {
-        "id": "worktrees",
-        "label": "Worktrees",
+        "id": "iterations",
+        "label": "Iterations",
         "routes": ["index"]
       }
     ]

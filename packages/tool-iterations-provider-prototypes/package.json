@@ -1,5 +1,5 @@
 {
-  "name": "@repo/tool-worktrees-extension-portless",
+  "name": "@repo/tool-iterations-provider-prototypes",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,13 @@
     "check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@repo/tool-iterations-provider-worktrees-extension-portless": "workspace:*",
+    "@effect/platform-node": "4.0.0-beta.66",
+    "@repo/core": "workspace:*",
+    "@repo/tool-iterations": "workspace:*",
     "effect": "4.0.0-beta.66"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18"
   },
   "engines": {
     "node": ">=20"

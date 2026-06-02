@@ -32,6 +32,26 @@
       "types": "./src/render-performance.ts",
       "default": "./src/render-performance.ts"
     },
+    "./iterations": {
+      "types": "./src/iterations.ts",
+      "default": "./src/iterations.ts"
+    },
+    "./iterations/worktrees": {
+      "types": "./src/iterations-worktrees.ts",
+      "default": "./src/iterations-worktrees.ts"
+    },
+    "./iterations/worktrees/portless": {
+      "types": "./src/iterations-worktrees-portless.ts",
+      "default": "./src/iterations-worktrees-portless.ts"
+    },
+    "./iterations/prototypes": {
+      "types": "./src/iterations-prototypes.ts",
+      "default": "./src/iterations-prototypes.ts"
+    },
+    "./iterations/prototypes/vite": {
+      "types": "./src/iterations-prototypes-vite.ts",
+      "default": "./src/iterations-prototypes-vite.ts"
+    },
     "./vite": {
       "types": "./src/vite.ts",
       "default": "./src/vite.ts"
@@ -68,6 +88,11 @@
     "@repo/renderer-react": "workspace:*",
     "@repo/server": "workspace:*",
     "@repo/theme-css": "workspace:*",
+    "@repo/tool-iterations": "workspace:*",
+    "@repo/tool-iterations-adapter-vite-prototypes": "workspace:*",
+    "@repo/tool-iterations-provider-prototypes": "workspace:*",
+    "@repo/tool-iterations-provider-worktrees": "workspace:*",
+    "@repo/tool-iterations-provider-worktrees-extension-portless": "workspace:*",
     "@repo/tool-render-performance": "workspace:*",
     "@repo/tool-worktrees": "workspace:*",
     "@repo/tool-worktrees-extension-portless": "workspace:*",
