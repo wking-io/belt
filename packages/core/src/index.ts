@@ -193,7 +193,7 @@ export function defineToolbar(config: ToolbarConfig): ToolbarConfig {
 
 export function defineToolbarDefinition<const Config extends ToolbarConfig>(
   definition: ToolbarDefinition<Config>
-): ToolbarDefinition<ToolbarConfig> {
+): ToolbarDefinition<ToolbarConfig & Config> {
   return {
     ...definition,
     toolbarConfig: defineToolbar(definition.toolbarConfig)
