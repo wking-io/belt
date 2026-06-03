@@ -17,6 +17,7 @@ import {
   createToolbarRendererModel,
   defineControlPanel as reactDefineControlPanel,
   numberField,
+  RenderPerformance,
   RenderPerformanceMeter,
 } from "@riff-refine/belt/react";
 import {
@@ -48,6 +49,7 @@ describe("@riff-refine/belt facade exports", () => {
     assert.strictEqual(typeof toolbarVite, "function");
     assert.strictEqual(typeof mountRenderPerformanceMeter, "function");
     assert.strictEqual(typeof renderPerformanceTool, "function");
+    assert.strictEqual(typeof RenderPerformance, "function");
     assert.strictEqual(typeof RenderPerformanceMeter, "function");
     assert.strictEqual(typeof iterationsTool, "function");
     assert.strictEqual(typeof worktreeIterations, "function");
