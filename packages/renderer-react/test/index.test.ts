@@ -21,6 +21,7 @@ import {
   Toolbar,
   createToolbar,
   glyphIds,
+  reduceToolbarDrawerState,
   type GlyphName,
 } from "../src/index.tsx";
 
@@ -155,6 +156,45 @@ it("reads typed built-in tool registrations through the toolbar provider", () =>
   );
 
   assert.match(html, />640:640</);
+});
+
+it("keeps a single active toolbar drawer and closes it", () => {
+  let state = reduceToolbarDrawerState<"alpha" | "beta">({}, { drawerId: "alpha", type: "open" });
+
+  assert.deepStrictEqual(state, { activeDrawerId: "alpha" });
+
+  state = reduceToolbarDrawerState(state, { drawerId: "beta", type: "open" });
+
+  assert.deepStrictEqual(state, { activeDrawerId: "beta" });
+
+  state = reduceToolbarDrawerState(state, { type: "close" });
+
+  assert.deepStrictEqual(state, {});
+});
+
+it("exposes active toolbar drawer state through the provider", () => {
+  const toolbar = createToolbar({
+    tools: [{ tool: { id: "alpha", label: "Alpha" } }, { tool: { id: "beta", label: "Beta" } }],
+  });
+
+  function DrawerProbe() {
+    const drawer = toolbar.useToolbarDrawer();
+
+    return createElement("span", null, drawer.activeDrawerId);
+  }
+
+  const html = renderToStaticMarkup(
+    createElement(
+      toolbar.Provider,
+      { initialDrawerId: "alpha" },
+      createElement(DrawerProbe),
+      createElement(toolbar.Drawer, { drawerId: "alpha", title: "Alpha" }, "Alpha drawer"),
+      createElement(toolbar.Drawer, { drawerId: "beta", title: "Beta" }, "Beta drawer"),
+    ),
+  );
+
+  assert.match(html, />alpha</);
+  assert.notMatch(html, /Beta drawer/);
 });
 
 it("lets React containers set radius while controls inherit it", () => {
