@@ -10,6 +10,7 @@ import {
   ToolbarErrorEnvelopeSchema,
   ToolbarToolIdSchema,
   extractToolbarConfig,
+  resolveToolbarConfig,
   type ToolbarError,
   type ToolbarResponseEnvelope,
   type ToolDefinition,
@@ -33,8 +34,9 @@ export function createToolbarServer(config: ToolbarConfigSource): ToolbarServer 
 }
 
 export function createToolbarRouter(config: ToolbarConfigSource): Layer.Layer<never, unknown, unknown> {
-  const toolbarConfig = extractToolbarConfig(config);
-  const toolbarRoutes = toolbarConfig.tools.reduce<Layer.Layer<never, unknown, unknown>>(
+  const toolbarConfig = resolveToolbarConfig(config);
+  const toolbarBackendConfig = extractToolbarConfig(toolbarConfig);
+  const toolbarRoutes = toolbarBackendConfig.tools.reduce<Layer.Layer<never, unknown, unknown>>(
     (routes, tool) => Layer.mergeAll(routes, createToolApiRoutes(tool)),
     ToolbarApiRoutes
   );

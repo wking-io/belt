@@ -25,10 +25,12 @@ describe("ToolbarToolDispatch", () => {
       const server = createToolbarServer(defineToolbar({
         tools: [
           {
-            api: EchoToolApi,
-            apiLayer: EchoToolApiHandlers,
-            id: "echo",
-            label: "Echo"
+            tool: {
+              api: EchoToolApi,
+              apiLayer: EchoToolApiHandlers,
+              id: "echo",
+              label: "Echo"
+            }
           }
         ]
       }));
@@ -62,17 +64,19 @@ describe("ToolbarToolDispatch", () => {
       const server = createToolbarServer(defineToolbar({
         tools: [
           {
-            api: EchoToolApi,
-            apiLayer: Layer.mergeAll(
-              EchoToolApiHandlers,
-              Layer.effectDiscard(
-                Effect.addFinalizer(() => Effect.sync(() => {
-                  disposed = true;
-                }))
-              )
-            ),
-            id: "echo",
-            label: "Echo"
+            tool: {
+              api: EchoToolApi,
+              apiLayer: Layer.mergeAll(
+                EchoToolApiHandlers,
+                Layer.effectDiscard(
+                  Effect.addFinalizer(() => Effect.sync(() => {
+                    disposed = true;
+                  }))
+                )
+              ),
+              id: "echo",
+              label: "Echo"
+            }
           }
         ]
       }));
@@ -132,10 +136,12 @@ const EchoToolApiHandlers = HttpApiBuilder.group(
 const testConfig = defineToolbar({
   tools: [
     {
-      api: EchoToolApi,
-      apiLayer: EchoToolApiHandlers,
-      id: "worktrees",
-      label: "Worktrees"
+      tool: {
+        api: EchoToolApi,
+        apiLayer: EchoToolApiHandlers,
+        id: "worktrees",
+        label: "Worktrees"
+      }
     }
   ]
 });

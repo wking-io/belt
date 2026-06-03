@@ -1,4 +1,4 @@
-import { defineTool, type ToolDefinition } from "@repo/core";
+import { defineTool, defineToolRegistration, type ToolDefinition, type ToolRegistration } from "@repo/core";
 import {
   Button,
   GhostButton,
@@ -15,6 +15,7 @@ import {
 export const renderPerformanceToolId = "render-performance";
 
 export type RenderPerformanceToolDefinition = ToolDefinition;
+export type RenderPerformanceToolRegistration = ToolRegistration<unknown, RenderPerformanceToolDefinition>;
 
 export type LongAnimationFrameSummary = {
   readonly duration: number;
@@ -153,10 +154,12 @@ const emptyLayoutShiftSession: LayoutShiftSessionSummary = {
   value: 0,
 };
 
-export function renderPerformanceTool(): RenderPerformanceToolDefinition {
-  return defineTool({
-    id: renderPerformanceToolId,
-    label: "Render Performance",
+export function renderPerformanceTool(): RenderPerformanceToolRegistration {
+  return defineToolRegistration({
+    tool: defineTool({
+      id: renderPerformanceToolId,
+      label: "Render Performance",
+    })
   });
 }
 

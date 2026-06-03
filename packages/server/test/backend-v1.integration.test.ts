@@ -20,7 +20,7 @@ describe("backend v1 integration", () => {
       const configService = yield* ToolbarConfigService;
       const config = yield* configService.load({ cwd: fixture.appRoot });
 
-      assert.strictEqual(config.tools[0]?.id, "worktrees");
+      assert.strictEqual(config.tools[0]?.tool.id, "worktrees");
 
       const server = createToolbarServer(config);
       const remix = createToolbarRouteHandler(config);

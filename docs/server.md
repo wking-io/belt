@@ -15,7 +15,7 @@ const response = await toolbarServer.fetch(new Request("http://local.test/__tool
 await toolbarServer.dispose();
 ```
 
-`createToolbarServer` accepts either a plain Toolbar Config from `defineToolbar` or a Toolbar Definition from a renderer package's `createToolbar`. The server extracts backend Tool Registration through the shared core protocol shape.
+`createToolbarServer` accepts either a plain Toolbar Config from `defineToolbar` or a Toolbar Definition from a renderer package's `createToolbar`. The server extracts backend Tool Definitions from Tool Registrations through the shared core protocol shape.
 
 Tools can declare default runtime layers for their backend services. For example, the registered Control Panel tool can read and write its snapshot store through `createToolbarServer` without host apps manually providing the Control Panel store layer.
 
@@ -33,8 +33,11 @@ const { runtimeLayer: _defaultRuntimeLayer, ...tool } = registration.tool;
 const toolbarServer = createToolbarServer(defineToolbar({
   tools: [
     {
-      ...tool,
-      apiLayer: Layer.provide(tool.apiLayer, customSnapshotStoreLayer)
+      config: registration.config,
+      tool: {
+        ...tool,
+        apiLayer: Layer.provide(tool.apiLayer, customSnapshotStoreLayer)
+      }
     }
   ]
 }));

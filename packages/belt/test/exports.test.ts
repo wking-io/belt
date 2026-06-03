@@ -59,11 +59,13 @@ describe("@riff-refine/belt facade exports", () => {
   });
 
   it("supports Render Performance tool helpers from the product facade", () => {
-    const tool = renderPerformanceTool();
+    const registration = renderPerformanceTool();
 
-    assert.deepStrictEqual(tool, {
-      id: "render-performance",
-      label: "Render Performance"
+    assert.deepStrictEqual(registration, {
+      tool: {
+        id: "render-performance",
+        label: "Render Performance"
+      }
     });
   });
 
@@ -86,7 +88,7 @@ describe("@riff-refine/belt facade exports", () => {
       }
     });
     const toolbar = createRemixToolbar({
-      tools: [registration.tool]
+      tools: [registration]
     });
 
     const panel = defineControlPanel({
@@ -99,7 +101,7 @@ describe("@riff-refine/belt facade exports", () => {
       }
     });
 
-    assert.strictEqual(toolbar.toolbarConfig.tools[0]?.id, "control-panel");
+    assert.strictEqual(toolbar.toolbarConfig.tools[0]?.tool.id, "control-panel");
     assert.strictEqual(panel.fieldsets.camera?.fields.zoom.type, "range");
   });
 
@@ -132,7 +134,7 @@ describe("@riff-refine/belt facade exports", () => {
       }
     });
     const config = defineToolbar({
-      tools: [registration.tool]
+      tools: [registration]
     });
     const server = createToolbarServer(config);
     const remix = createToolbarRouteHandler(config);

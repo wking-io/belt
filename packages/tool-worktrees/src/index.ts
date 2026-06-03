@@ -1,4 +1,4 @@
-import { defineTool, makeToolbarClient, normalizeRoute, type ToolDefinition } from "@repo/core";
+import { defineTool, defineToolRegistration, makeToolbarClient, normalizeRoute, type ToolDefinition, type ToolRegistration } from "@repo/core";
 import { Context, Effect, Layer, Schema } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
@@ -135,13 +135,17 @@ export type WorktreesToolDefinition = ToolDefinition<
   typeof WorktreeDiscoveryLive
 >;
 
-export function worktreesTool(options: WorktreesToolOptions): WorktreesToolDefinition {
-  return defineTool({
-    api: WorktreesToolApi,
-    apiLayer: worktreesToolApiLayer(options),
-    id: worktreesToolId,
-    label: "Worktrees",
-    runtimeLayer: WorktreeDiscoveryLive
+export type WorktreesToolRegistration = ToolRegistration<unknown, WorktreesToolDefinition>;
+
+export function worktreesTool(options: WorktreesToolOptions): WorktreesToolRegistration {
+  return defineToolRegistration({
+    tool: defineTool({
+      api: WorktreesToolApi,
+      apiLayer: worktreesToolApiLayer(options),
+      id: worktreesToolId,
+      label: "Worktrees",
+      runtimeLayer: WorktreeDiscoveryLive
+    })
   });
 }
 
