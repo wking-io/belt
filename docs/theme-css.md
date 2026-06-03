@@ -35,7 +35,7 @@ Typography tokens are:
 - `--belt-font-variant-ligatures`
 - `--belt-font-variant-numeric`
 
-The default typography contract bundles the official Inter variable font files and enables `calt`, `dlig`, `case`, `ccmp`, `zero`, `ss01`, `ss02`, `ss07`, `ss08`, `cv06`, and `cv11`. It also opts into common, discretionary, and contextual ligatures plus slashed zero through `font-variant-*` tokens. Host apps that import `@repo/theme-css/theme.css` do not need to load Inter separately.
+The default typography contract uses the package-managed Geist Pixel Square font from `geist` and falls back through Vercel's documented monospace stack. Host apps that import `@repo/theme-css/theme.css` do not need to load Geist Pixel Square separately.
 
 V1 does not include background/surface tokens, selected/highlight tokens, shadows, or a TypeScript spacing helper.
 

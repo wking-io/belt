@@ -9,6 +9,7 @@ export const glyphNames = [
   "chevronVertical",
   "close",
   "copy",
+  "dial",
   "edit",
   "expand",
   "info",
@@ -16,7 +17,9 @@ export const glyphNames = [
   "open",
   "search",
   "spinner",
+  "split",
   "trash",
+  "versions",
 ] as const;
 
 export type GlyphName = (typeof glyphNames)[number];
@@ -319,6 +322,101 @@ export const glyphDefinitions = {
       },
     ],
   },
+  dial: {
+    viewBox: "0 0 18 18",
+    children: [
+      {
+        tag: "line",
+        attrs: {
+          x1: 12.712,
+          y1: 12.712,
+          x2: 9,
+          y2: 9,
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 9,
+          cy: 9,
+          r: 5.25,
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 9,
+          cy: 0.75,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 14.834,
+          cy: 3.166,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 17.25,
+          cy: 9,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 14.834,
+          cy: 14.834,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 3.166,
+          cy: 14.834,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 0.75,
+          cy: 9,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+      {
+        tag: "circle",
+        attrs: {
+          cx: 3.166,
+          cy: 3.166,
+          r: 0.75,
+          fill: "currentColor",
+        },
+      },
+    ],
+  },
   edit: {
     viewBox: "0 0 24 24",
     attrs: {
@@ -521,6 +619,69 @@ export const glyphDefinitions = {
       },
     ],
   },
+  split: {
+    viewBox: "0 0 18 18",
+    children: [
+      {
+        tag: "path",
+        attrs: {
+          d: "M6,9l2.159,3.337c.369,.57,1.001,.913,1.679,.913h5.412",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "path",
+        attrs: {
+          d: "M6,9l2.159-3.337c.369-.57,1.001-.913,1.679-.913h5.412",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "line",
+        attrs: {
+          x1: 1.75,
+          y1: 9,
+          x2: 6,
+          y2: 9,
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "polyline",
+        attrs: {
+          points: "12.5 10.5 15.25 13.25 12.5 16",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "polyline",
+        attrs: {
+          points: "12.5 2 15.25 4.75 12.5 7.5",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+    ],
+  },
   trash: {
     viewBox: "0 0 24 24",
     attrs: {
@@ -559,6 +720,50 @@ export const glyphDefinitions = {
         tag: "path",
         attrs: {
           d: "M14 11v6",
+        },
+      },
+    ],
+  },
+  versions: {
+    viewBox: "0 0 18 18",
+    children: [
+      {
+        tag: "path",
+        attrs: {
+          d: "M4.813,12.75h-1.063c-1.105,0-2-.895-2-2v-3.5c0-1.105,.895-2,2-2h1.064",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "path",
+        attrs: {
+          d: "M8.314,14.25h-1.564c-1.105,0-2-.895-2-2V5.75c0-1.105,.895-2,2-2h1.564",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
+        },
+      },
+      {
+        tag: "rect",
+        attrs: {
+          x: 8.25,
+          y: 2.25,
+          width: 7.5,
+          height: 13.5,
+          rx: 2,
+          ry: 2,
+          transform: "translate(24 18) rotate(180)",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "stroke-width": 1,
         },
       },
     ],

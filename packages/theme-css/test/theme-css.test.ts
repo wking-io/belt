@@ -3,12 +3,6 @@ import { fileURLToPath } from "node:url";
 import { assert, it } from "@effect/vitest";
 
 const themeCssPath = fileURLToPath(new URL("../src/theme.css", import.meta.url));
-const interVariablePath = fileURLToPath(
-  new URL("../src/font-files/InterVariable.woff2", import.meta.url),
-);
-const interVariableItalicPath = fileURLToPath(
-  new URL("../src/font-files/InterVariable-Italic.woff2", import.meta.url),
-);
 const themeInputCssPath = fileURLToPath(new URL("../src/theme.input.css", import.meta.url));
 const packageJsonPath = fileURLToPath(new URL("../package.json", import.meta.url));
 
@@ -50,47 +44,37 @@ it("exports the v1 theme token contract", async () => {
 it("sets the default font family and OpenType feature contract", async () => {
   const css = await readFile(themeCssPath, "utf8");
 
-  assert.match(css, /font-family:\s*"InterVariable"/);
-  assert.match(css, /url\("\.\/font-files\/InterVariable\.woff2"\)/);
-  assert.match(css, /url\("\.\/font-files\/InterVariable-Italic\.woff2"\)/);
-  assert.match(css, /--belt-font-family:\s*"InterVariable",\s*"Inter"/);
-  assert.match(css, /@font-feature-values\s+"InterVariable"/);
-
-  for (const feature of [
-    "calt",
-    "dlig",
-    "case",
-    "ccmp",
-    "zero",
-    "ss01",
-    "ss02",
-    "ss07",
-    "ss08",
-    "cv06",
-    "cv11",
-  ]) {
-    assert.match(css, new RegExp(`"${feature}" 1`));
-  }
-
+  assert.match(css, /font-family:\s*"Geist Pixel Square"/);
   assert.match(
     css,
-    /--belt-font-variant-ligatures:\s*common-ligatures discretionary-ligatures contextual/,
+    /url\("\.\.\/node_modules\/geist\/dist\/fonts\/geist-pixel\/GeistPixel-Square\.woff2"\)/,
   );
-  assert.match(css, /--belt-font-variant-numeric:\s*slashed-zero/);
+  assert.match(css, /--belt-font-family:\s*"Geist Pixel Square",\s*"Geist Mono"/);
   assert.match(
     css,
-    /--belt-font-variant-alternates:[\s\S]*styleset\(ss01\)[\s\S]*character-variant\(cv11\)/,
+    /:where\(\[class\^="belt-"\],[\s\S]*font-family:\s*var\(--belt-font-family\)/,
   );
+  assert.match(
+    css,
+    /:where\(\[class\^="belt-"\],[\s\S]*font-feature-settings:\s*var\(--belt-font-feature-settings\)/,
+  );
+
+  assert.match(css, /--belt-font-feature-settings:\s*normal/);
+  assert.match(css, /--belt-font-variant-alternates:\s*normal/);
+  assert.match(css, /--belt-font-variant-ligatures:\s*normal/);
+  assert.match(css, /--belt-font-variant-numeric:\s*normal/);
+  assert.match(css, /-webkit-font-smoothing:\s*antialiased/);
+  assert.match(css, /-moz-osx-font-smoothing:\s*grayscale/);
 });
 
-it("ships the bundled Inter variable font files", async () => {
-  const [normal, italic] = await Promise.all([
-    readFile(interVariablePath),
-    readFile(interVariableItalicPath),
-  ]);
+it("uses the package-managed Geist font asset", async () => {
+  const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
+    dependencies?: Record<string, string>;
+    exports: Record<string, unknown>;
+  };
 
-  assert.ok(normal.length > 0);
-  assert.ok(italic.length > 0);
+  assert.match(packageJson.dependencies?.geist ?? "", /^\^1\.7\.2/);
+  assert.ok(!("./font-files/*" in packageJson.exports));
 });
 
 it("exports portable component class hooks for renderers", async () => {
@@ -108,6 +92,14 @@ it("exports portable component class hooks for renderers", async () => {
     "belt-drag-indicator__dot",
     "belt-toolbar",
     "belt-toolbar__inner",
+    "belt-render-performance",
+    "belt-render-performance-meter",
+    "belt-render-performance-toolbar-item",
+    "belt-render-performance-toolbar-chart",
+    "belt-render-performance-toolbar-chart__graph",
+    "belt-render-performance-chart",
+    "belt-render-performance-chart-bar",
+    "belt-render-performance-drawer",
     "belt-radius",
     "belt-gap",
     "belt-input",
@@ -155,6 +147,52 @@ it("styles select placeholders and selected options", async () => {
   assert.notMatch(css, /\.belt-select__item\[aria-selected="true"\] \.belt-icon/);
   assert.notMatch(css, /belt-select__item-indicator/);
   assert.match(css, /\.belt-combobox__item svg\)[\s\S]*display:\s*none/);
+});
+
+it("styles expanded ghost buttons as active primary controls", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(css, /\.belt-ghost-button\[aria-expanded="true"\]/);
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\]\)[\s\S]*--belt-ghost-button-text-color:\s*var\(--belt-color-primary-foreground\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\]\)[\s\S]*--belt-ghost-button-icon-color:\s*var\(--belt-color-primary-foreground-subtle\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\]\)[\s\S]*background-color:\s*var\(--belt-color-primary\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\] \.belt-text\)[\s\S]*--belt-text-color:\s*var\(--belt-color-primary-foreground\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\] \.belt-text\)[\s\S]*--belt-text-color-subtle:\s*var\(--belt-color-primary-foreground-subtle\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-render-performance-chart-bar\[data-severity="warning"\]\)[\s\S]*background-color:\s*var\(--belt-color-warning\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-render-performance-chart-bar\[data-severity="danger"\]\)[\s\S]*background-color:\s*var\(--belt-color-danger\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button\[aria-expanded="true"\] \.belt-render-performance-chart-bar\)[\s\S]*background-color:\s*var\(--belt-color-primary-hover\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button__icon\)[\s\S]*color:\s*var\(--belt-ghost-button-text-color\)/,
+  );
+  assert.match(
+    css,
+    /\.belt-ghost-button__start-icon\),[\s\S]*\.belt-ghost-button__end-icon\)[\s\S]*color:\s*var\(--belt-ghost-button-icon-color\)/,
+  );
 });
 
 it("sizes select popovers to their anchor width and combobox popovers to their content", async () => {

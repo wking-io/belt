@@ -58,7 +58,7 @@ import { Glyph, GlyphSheet } from "@repo/renderer-remix";
 
 The Remix example includes a real Remix 3 app shape based on the upstream template: `server.ts`, `app/router.ts`, `app/routes.ts`, controller actions, and UI document/layout modules.
 
-The example document uses the bundled Inter font files from `@repo/theme-css/theme.css`, and the app chrome applies the same typography contract as the renderer primitives: `var(--belt-font-family)`, `var(--belt-font-feature-settings)`, and the `font-variant-*` typography tokens.
+The example document uses the package-managed Geist Pixel Square font from `@repo/theme-css/theme.css`, and the app chrome applies the same typography contract as the renderer primitives: `var(--belt-font-family)`, `var(--belt-font-feature-settings)`, and the `font-variant-*` typography tokens.
 
 Run the example app and open `/primitives`:
 

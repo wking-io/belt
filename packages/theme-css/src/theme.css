@@ -1,46 +1,9 @@
 @font-face {
-  font-family: "InterVariable";
+  font-family: "Geist Pixel Square";
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 500;
   font-display: swap;
-  src: url("./font-files/InterVariable.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "InterVariable";
-  font-style: italic;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("./font-files/InterVariable-Italic.woff2") format("woff2");
-}
-
-@font-feature-values "InterVariable" {
-  @character-variant {
-    cv01: 1;
-    cv02: 2;
-    cv03: 3;
-    cv04: 4;
-    cv05: 5;
-    cv06: 6;
-    cv07: 7;
-    cv08: 8;
-    cv09: 9;
-    cv10: 10;
-    cv11: 11;
-    cv12: 12;
-    cv13: 13;
-  }
-
-  @styleset {
-    ss01: 1;
-    ss02: 2;
-    ss03: 3;
-    ss04: 4;
-    ss05: 5;
-    ss06: 6;
-    ss07: 7;
-    ss08: 8;
-  }
+  src: url("../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2") format("woff2");
 }
 
 :where([class^="belt-"],
@@ -52,6 +15,13 @@
   [class*=" belt-"]::before,
   [class*=" belt-"]::after) {
   box-sizing: border-box;
+  font-family: var(--belt-font-family);
+  font-feature-settings: var(--belt-font-feature-settings);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-alternates: var(--belt-font-variant-alternates);
+  font-variant-ligatures: var(--belt-font-variant-ligatures);
+  font-variant-numeric: var(--belt-font-variant-numeric);
 }
 
 :root {
@@ -623,13 +593,12 @@
   --belt-radius-outer: 8px;
 
   --belt-font-family:
-    "InterVariable", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --belt-font-feature-settings:
-    "calt" 1, "dlig" 1, "case" 1, "ccmp" 1, "zero" 1, "ss01" 1, "ss02" 1, "ss07" 1, "ss08" 1,
-    "cv06" 1, "cv11" 1;
-  --belt-font-variant-alternates: styleset(ss01) styleset(ss02) styleset(ss07) styleset(ss08) character-variant(cv06) character-variant(cv11);
-  --belt-font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
-  --belt-font-variant-numeric: slashed-zero;
+    "Geist Pixel Square", "Geist Mono", ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo,
+    Monaco, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace;
+  --belt-font-feature-settings: normal;
+  --belt-font-variant-alternates: normal;
+  --belt-font-variant-ligatures: normal;
+  --belt-font-variant-numeric: normal;
 
   /* 12px */
   --belt-font-size-xs: 0.75rem;
@@ -982,6 +951,11 @@
   border-radius: var(--belt-child-radius, var(--belt-radius));
 }
 
+:where(.belt-ghost-button[data-size="compact"]) {
+  height: calc(var(--belt-space) * 5.5);
+  padding: var(--belt-space) calc(var(--belt-space) * 1.5);
+}
+
 :where(.belt-ghost-button[data-radius="none"]) {
   border-radius: 0;
 }
@@ -1009,6 +983,20 @@
 :where(.belt-ghost-button:not(:disabled):not(:active):hover),
 :where(.belt-ghost-button:not(:disabled):not(:active):focus-visible) {
   background-color: var(--belt-ghost-button-bg-hover);
+}
+
+:where(.belt-ghost-button[aria-expanded="true"]) {
+  --belt-ghost-button-text-color: var(--belt-color-primary-foreground);
+  --belt-ghost-button-icon-color: var(--belt-color-primary-foreground-subtle);
+  --belt-ghost-button-bg-hover: var(--belt-color-primary-hover);
+
+  background-color: var(--belt-color-primary);
+}
+
+:where(.belt-ghost-button[aria-expanded="true"] .belt-text) {
+  --belt-text-color: var(--belt-color-primary-foreground);
+  --belt-text-color-subtle: var(--belt-color-primary-foreground-subtle);
+  --belt-text-color-strong: var(--belt-color-primary-foreground-strong);
 }
 
 :where(.belt-ghost-button:focus-visible) {
@@ -1060,13 +1048,20 @@
   height: calc(var(--belt-space) * 3.5);
 }
 
+:where(.belt-ghost-button[data-size="compact"] .belt-ghost-button__start-icon),
+:where(.belt-ghost-button[data-size="compact"] .belt-ghost-button__end-icon),
+:where(.belt-ghost-button[data-size="compact"] .belt-ghost-button__icon) {
+  width: calc(var(--belt-space) * 3);
+  height: calc(var(--belt-space) * 3);
+}
+
 :where(.belt-ghost-button__icon) {
-  color: var(--belt-button-text-color);
+  color: var(--belt-ghost-button-text-color);
 }
 
 :where(.belt-ghost-button__start-icon),
 :where(.belt-ghost-button__end-icon) {
-  color: var(--belt-button-icon-color);
+  color: var(--belt-ghost-button-icon-color);
 }
 
 :where(.belt-ghost-button__start-icon) {
@@ -1481,6 +1476,261 @@ body:has(> .belt-toolbar-host) {
   box-shadow: 0 1px 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
 }
 
+body:has(.belt-render-performance-drawer) {
+  border-bottom-right-radius: var(--belt-radius-outer);
+  border-right: 1px solid color-mix(in oklch, var(--belt-color-elevation-1-foreground-subtle) 15%, transparent);
+  box-shadow: 1px 0 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
+  inline-size: calc(100dvw - min(420px, calc(100dvw - 16px)));
+  overflow: auto;
+  padding-inline-end: 0;
+  scrollbar-width: none;
+}
+
+body:has(.belt-render-performance-drawer)::-webkit-scrollbar {
+  block-size: 0;
+  inline-size: 0;
+}
+
+body:has(.belt-render-performance-drawer)::-webkit-scrollbar-track,
+body:has(.belt-render-performance-drawer)::-webkit-scrollbar-corner {
+  border-bottom-right-radius: var(--belt-radius-outer);
+}
+
+/* body:has(.belt-render-performance-drawer)::after {
+  background: color-mix(in oklch, var(--belt-color-elevation-1-foreground) 10%, transparent);
+  border-bottom-right-radius: calc(var(--belt-radius-outer) - 1px);
+  bottom: var(--belt-toolbar-reserved-block-size, 0px);
+  box-shadow: 1px 0 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
+  content: "";
+  inline-size: max(var(--belt-body-scrollbar-inline-size, 0px), 1px);
+  pointer-events: none;
+  position: fixed;
+  right: var(--belt-render-performance-drawer-reserved-inline-size, 420px);
+  top: 0;
+  z-index: 999997;
+} */
+
+:where(.belt-render-performance-meter) {
+  background: color-mix(in oklch, var(--belt-black) 75%, transparent);
+  border-radius: var(--belt-radius-inner);
+  color: var(--belt-white);
+  font: 12px var(--belt-font-family);
+  padding: 4px 6px;
+  pointer-events: none;
+  position: fixed;
+  right: 8px;
+  top: 8px;
+  z-index: 999999;
+}
+
+:where(.belt-render-performance__panel-body) {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+:where(.belt-render-performance__metric-header) {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+:where(.belt-render-performance__metric-label-group) {
+  display: grid;
+  gap: 2px;
+}
+
+:where(.belt-render-performance__metric-value) {
+  font-size: 32px;
+  line-height: 1;
+}
+
+:where(.belt-render-performance__footer) {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+:where(.belt-render-performance-toolbar-item) {
+  display: inline-flex;
+}
+
+:where(.belt-render-performance-toolbar-chart) {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  height: 22px;
+  justify-content: space-between;
+  position: relative;
+  width: 60px;
+}
+
+:where(.belt-render-performance-toolbar-chart__graph) {
+  bottom: 0;
+  left: calc(var(--belt-space) * -2.25);
+  pointer-events: none;
+  position: absolute;
+  right: calc(var(--belt-space) * -2.25);
+  top: 0;
+}
+
+:where(.belt-render-performance-toolbar-chart[data-size="compact"] .belt-render-performance-toolbar-chart__graph) {
+  left: calc(var(--belt-space) * -1.5);
+  right: calc(var(--belt-space) * -1.5);
+}
+
+:where(.belt-render-performance-toolbar-chart__label) {
+  flex: 0 1 auto;
+  line-height: 1;
+  min-width: 0;
+  text-shadow: 0 1px 1px var(--belt-color-elevation-1);
+  z-index: 2;
+}
+
+:where(.belt-render-performance-toolbar-chart__value) {
+  flex: 0 0 auto;
+  line-height: 1;
+  text-shadow: 0 1px 1px var(--belt-color-elevation-1);
+  z-index: 2;
+}
+
+:where(.belt-render-performance-drawer) {
+  background: var(--belt-color-elevation-1);
+  bottom: var(--belt-toolbar-reserved-block-size, 0px);
+  color: var(--belt-color-elevation-1-foreground);
+  max-inline-size: min(420px, calc(100vw - 16px));
+  overflow: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  inline-size: 420px;
+  z-index: 999998;
+}
+
+:where(.belt-render-performance-drawer__panel) {
+  min-block-size: 100%;
+}
+
+:where(.belt-render-performance-drawer__body) {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+:where(.belt-render-performance-drawer__header) {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+:where(.belt-render-performance__detail-grid) {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+:where(.belt-render-performance__detail-metric) {
+  background: var(--belt-color-elevation-2);
+  border: 0.5px solid var(--belt-color-border-subtle);
+  border-radius: var(--belt-radius-inner);
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+}
+
+:where(.belt-render-performance-chart) {
+  align-items: end;
+  background: var(--belt-color-elevation-2);
+  border: 0.5px solid var(--belt-color-border-subtle);
+  border-radius: var(--belt-radius-inner);
+  display: flex;
+  gap: 3px;
+  block-size: 128px;
+  justify-content: flex-end;
+  min-inline-size: 0;
+  overflow: hidden;
+  padding: 8px;
+  position: relative;
+}
+
+:where(.belt-render-performance-chart[data-axis="true"]) {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  gap: 0;
+  padding: 0;
+  block-size: 22px;
+}
+
+:where(.belt-render-performance-chart__axis) {
+  background: transparent;
+  bottom: 0;
+  block-size: 2px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 0;
+}
+
+:where(.belt-render-performance-chart-bar) {
+  background-color: var(--belt-color-elevation-3);
+  border-radius: 2px 2px 0 0;
+  flex: 0 1 8px;
+  min-inline-size: 3px;
+  z-index: 1;
+}
+
+:where(.belt-render-performance-chart[data-axis="true"] .belt-render-performance-chart-bar) {
+  border-radius: 0;
+}
+
+:where(.belt-render-performance-chart-bar[data-height="0"]) { block-size: 0%; }
+:where(.belt-render-performance-chart-bar[data-height="4"]) { block-size: 4%; }
+:where(.belt-render-performance-chart-bar[data-height="8"]) { block-size: 8%; }
+:where(.belt-render-performance-chart-bar[data-height="12"]) { block-size: 12%; }
+:where(.belt-render-performance-chart-bar[data-height="16"]) { block-size: 16%; }
+:where(.belt-render-performance-chart-bar[data-height="20"]) { block-size: 20%; }
+:where(.belt-render-performance-chart-bar[data-height="24"]) { block-size: 24%; }
+:where(.belt-render-performance-chart-bar[data-height="28"]) { block-size: 28%; }
+:where(.belt-render-performance-chart-bar[data-height="32"]) { block-size: 32%; }
+:where(.belt-render-performance-chart-bar[data-height="36"]) { block-size: 36%; }
+:where(.belt-render-performance-chart-bar[data-height="40"]) { block-size: 40%; }
+:where(.belt-render-performance-chart-bar[data-height="44"]) { block-size: 44%; }
+:where(.belt-render-performance-chart-bar[data-height="48"]) { block-size: 48%; }
+:where(.belt-render-performance-chart-bar[data-height="52"]) { block-size: 52%; }
+:where(.belt-render-performance-chart-bar[data-height="56"]) { block-size: 56%; }
+:where(.belt-render-performance-chart-bar[data-height="60"]) { block-size: 60%; }
+:where(.belt-render-performance-chart-bar[data-height="64"]) { block-size: 64%; }
+:where(.belt-render-performance-chart-bar[data-height="68"]) { block-size: 68%; }
+:where(.belt-render-performance-chart-bar[data-height="72"]) { block-size: 72%; }
+:where(.belt-render-performance-chart-bar[data-height="76"]) { block-size: 76%; }
+:where(.belt-render-performance-chart-bar[data-height="80"]) { block-size: 80%; }
+:where(.belt-render-performance-chart-bar[data-height="84"]) { block-size: 84%; }
+:where(.belt-render-performance-chart-bar[data-height="88"]) { block-size: 88%; }
+:where(.belt-render-performance-chart-bar[data-height="92"]) { block-size: 92%; }
+:where(.belt-render-performance-chart-bar[data-height="96"]) { block-size: 96%; }
+:where(.belt-render-performance-chart-bar[data-height="100"]) { block-size: 100%; }
+
+:where(.belt-render-performance-chart-bar[data-severity="none"]) {
+  background-color: transparent;
+}
+
+:where(.belt-render-performance-chart-bar[data-severity="warning"]) {
+  background-color: var(--belt-color-warning);
+}
+
+:where(.belt-render-performance-chart-bar[data-severity="danger"]) {
+  background-color: var(--belt-color-danger);
+}
+
+:where(.belt-ghost-button[aria-expanded="true"] .belt-render-performance-chart-bar) {
+  background-color: var(--belt-color-primary-hover);
+}
+
 :where(.belt-toolbar__logo) {
   color: var(--belt-color-elevation-1-foreground);
   width: calc(var(--belt-space) * 5);
@@ -1497,12 +1747,27 @@ html:has(> body > .belt-toolbar-host) {
 :where(.belt-toolbar__inner) {
   align-items: center;
   display: flex;
-  gap: calc(var(--belt-space) * 1.5);
+  gap: calc(var(--belt-space) * 2);
   inline-size: 100%;
-  justify-content: start;
-  margin-inline: auto;
-  max-inline-size: min(100%, 960px);
+  justify-content: space-between;
+  margin: 0 calc(var(--belt-space) * 2);
   overflow-x: auto;
+}
+
+:where(.belt-toolbar__left),
+:where(.belt-toolbar__right) {
+  align-items: center;
+  display: flex;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+
+:where(.belt-toolbar__left) {
+  justify-content: flex-start;
+}
+
+:where(.belt-toolbar__right) {
+  justify-content: flex-end;
 }
 
 :where(.belt-field) {

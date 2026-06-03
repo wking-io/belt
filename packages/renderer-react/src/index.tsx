@@ -89,6 +89,7 @@ export type ButtonProps = ButtonPropsBase;
 export type GhostButtonProps = ButtonPropsBase & {
   readonly variant?: "default" | "icon";
   readonly radius?: "none" | "default";
+  readonly size?: "default" | "compact";
 };
 export type DragIndicatorProps = ComponentProps<"div"> & {
   readonly dots?: number;
@@ -103,6 +104,7 @@ export type ToolbarProps = Omit<ComponentProps<"div">, "children"> &
     readonly defaultVisible?: boolean;
     readonly radius?: Radius;
   };
+export type ToolbarShellProps = ComponentProps<"div">;
 export type StatusBannerRootProps = ComponentProps<"div"> & {
   readonly radius?: Radius;
   readonly tone?: StatusBannerTone;
@@ -247,6 +249,7 @@ export function GhostButton(props: GhostButtonProps): ReactElement {
     tone = "neutral",
     type = "button",
     radius = "default",
+    size = "default",
     ...buttonProps
   } = props;
 
@@ -259,6 +262,7 @@ export function GhostButton(props: GhostButtonProps): ReactElement {
       data-elevation={elevation}
       data-tone={tone}
       data-radius={radius}
+      data-size={size}
       disabled={disabled || loading}
       type={type}
     >
@@ -335,7 +339,7 @@ export function DragIndicator(props: DragIndicatorProps): ReactElement {
   );
 }
 
-export function Toolbar(props: ToolbarProps): ReactElement | null {
+function ToolbarRoot(props: ToolbarProps): ReactElement | null {
   const {
     children,
     className,
@@ -457,7 +461,7 @@ function ToolbarBody(props: ToolbarBodyProps): ReactElement {
       ref={toolbarRef}
       style={style}
     >
-      <svg
+      {/* <svg
         className="belt-toolbar__logo"
         viewBox="0 0 140 240"
         fill="none"
@@ -467,11 +471,48 @@ function ToolbarBody(props: ToolbarBodyProps): ReactElement {
           d="M80 40H60V60H140V100H80V200H100V180H140V220H120V240H60V220H40V100H0V60H20V40H40V0H80V40Z"
           fill="currentColor"
         />
-      </svg>
-      <div className="belt-toolbar__inner">{children}</div>
+      </svg> */}
+      {isToolbarBody(children) ? children : <ToolbarBodyShell>{children}</ToolbarBodyShell>}
     </div>
   );
 }
+
+function ToolbarBodyShell(props: ToolbarShellProps): ReactElement {
+  const { className, ...rootProps } = props;
+  return (
+    <div
+      {...rootProps}
+      className={classNames("belt-toolbar__inner", "belt-toolbar__body", className)}
+    />
+  );
+}
+
+function ToolbarLeft(props: ToolbarShellProps): ReactElement {
+  const { className, ...rootProps } = props;
+  return <div {...rootProps} className={classNames("belt-toolbar__left", className)} />;
+}
+
+function ToolbarRight(props: ToolbarShellProps): ReactElement {
+  const { className, ...rootProps } = props;
+  return <div {...rootProps} className={classNames("belt-toolbar__right", className)} />;
+}
+
+function isToolbarBody(children: ReactNode): boolean {
+  return Array.isArray(children)
+    ? children.some(isToolbarBody)
+    : Boolean(
+        children &&
+          typeof children === "object" &&
+          "type" in children &&
+          children.type === ToolbarBodyShell,
+      );
+}
+
+export const Toolbar = Object.assign(ToolbarRoot, {
+  Body: ToolbarBodyShell,
+  Left: ToolbarLeft,
+  Right: ToolbarRight,
+});
 
 const StatusBannerContext = createContext<StatusBannerTone>("neutral");
 
@@ -822,7 +863,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): ReactElement {
 export function ComboboxInput(props: ComboboxInputProps): ReactElement {
   const { className, ...inputProps } = props;
 
-  return <BaseCombobox.Input {...inputProps} className={mergeClassName("belt-input", className)} />;
+  return <BaseCombobox.Input {...inputProps} className={mergeClassName("belt-input belt-text", className)} />;
 }
 
 export function ComboboxList(props: ComboboxListProps): ReactElement {
@@ -860,7 +901,7 @@ export function ComboboxList(props: ComboboxListProps): ReactElement {
                 data-tone="neutral"
               >
                 <div className="belt-surface__inner">
-                  <ComboboxInput className="belt-combobox__search" placeholder={placeholder} />
+                  <ComboboxInput className="belt-combobox__search" data-size="xs" placeholder={placeholder} />
                 </div>
               </div>
             ) : null}
@@ -878,7 +919,7 @@ export function ComboboxOption(props: ComboboxOptionProps): ReactElement {
     <BaseCombobox.Item
       {...rootProps}
       className={mergeClassName("belt-combobox__item belt-text", className)}
-      data-size="sm"
+      data-size="xs"
     />
   );
 }

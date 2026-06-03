@@ -467,7 +467,7 @@ _Avoid_: Fetch adapter package
 - Custom Themes may be partial and inherit from built-in or registered Themes.
 - Theme color variables should use OKLCH values or OKLCH color mixing.
 - Theme color variables use elevation, foreground, border, focus, and intent/control families instead of background/surface tokens.
-- The default **Typography Contract** bundles Inter and uses it with `calt`, `dlig`, `case`, `ccmp`, `zero`, `ss01`, `ss02`, `ss07`, `ss08`, `cv06`, and `cv11` enabled.
+- The default **Typography Contract** uses package-managed Geist Pixel Square from `geist`.
 - The **Default Theme** is optional and can be customized or replaced by the host app.
 - The **Internal Component Library** provides the preferred building blocks for **Renderers** and downstream Tools.
 - Each supported frontend rendering target should have a **Target Component Library**.

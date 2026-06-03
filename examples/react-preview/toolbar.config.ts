@@ -7,6 +7,7 @@ import {
   selectField,
   textField,
 } from "@riff-refine/belt/react";
+import { renderPerformanceTool } from "@riff-refine/belt/render-performance";
 import { worktreesTool } from "@riff-refine/belt/worktrees";
 import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
 
@@ -78,5 +79,6 @@ export default defineToolbar({
       }),
     }),
     previewControlPanel.tool,
+    renderPerformanceTool(),
   ],
 });

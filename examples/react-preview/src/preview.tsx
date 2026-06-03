@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  RenderPerformanceInpToolbarItem,
+  RenderPerformanceJankPanel,
+  RenderPerformanceLayoutShiftToolbarItem,
+  RenderPerformanceToolbarItem,
+} from "@riff-refine/belt/render-performance";
 import {
   Button,
   Combobox,
@@ -17,11 +23,10 @@ import {
   glyphNames,
   Menu,
   type Elevation,
-  type IntentTone,
 } from "@repo/renderer-react";
 
 type ThemeMode = "system" | "belt-light" | "belt-dark";
-type PreviewPage = "primitives" | "live";
+type PreviewPage = "primitives" | "live" | "performance";
 
 type ToolbarApiTool = {
   readonly id: string;
@@ -165,11 +170,6 @@ export function ReactPreviewApp() {
   const [intensity, setIntensity] = useState(48);
   const themeAttribute = theme === "system" ? undefined : theme;
 
-  const selectedGlyphs = useMemo(
-    () => glyphNames.filter((_, index) => index % 2 === 0).slice(0, 8),
-    [],
-  );
-
   return (
     <main className="preview-shell" data-belt-theme={themeAttribute}>
       <GlyphSheet />
@@ -185,6 +185,12 @@ export function ReactPreviewApp() {
             </GhostButton>
             <GhostButton aria-pressed={page === "live"} onClick={() => setPage("live")}>
               Live toolbar
+            </GhostButton>
+            <GhostButton
+              aria-pressed={page === "performance"}
+              onClick={() => setPage("performance")}
+            >
+              Performance
             </GhostButton>
           </div>
           <div className="preview-theme-tabs" aria-label="Theme">
@@ -212,6 +218,8 @@ export function ReactPreviewApp() {
 
       {page === "live" ? (
         <LiveToolbarPreview toolbarEnabled={toolbarEnabled} />
+      ) : page === "performance" ? (
+        <PerformancePreview />
       ) : (
         <>
           <PreviewSection title="Surfaces">
@@ -435,6 +443,62 @@ export function ReactPreviewApp() {
   );
 }
 
+function PerformancePreview() {
+  return (
+    <PreviewSection title="Render Performance">
+      <div className="preview-live-grid">
+        <RenderPerformanceJankPanel historySize={60} updateIntervalMs={1000} />
+        <Panel>
+          <div className="preview-card-body">
+            <PreviewLabel>Jank Trigger</PreviewLabel>
+            <div className="preview-stack">
+              <span className="belt-text" data-emphasis="subtle" data-size="sm">
+                Block the main thread for a few animation frames to verify the panel and toolbar
+                item catch the spike.
+              </span>
+              <div className="preview-row">
+                <Button onClick={inducePreviewJank} startIcon="alert" tone="warning">
+                  Make real jank
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Panel>
+        <Panel>
+          <div className="preview-card-body">
+            <PreviewLabel>Toolbar Component</PreviewLabel>
+            <div className="preview-stack">
+              <span className="belt-text" data-emphasis="subtle" data-size="sm">
+                The toolbar item below is the same package-owned component rendered in the live
+                toolbar.
+              </span>
+              <div className="preview-row">
+                <RenderPerformanceToolbarItem historySize={20} size="compact" />
+              </div>
+            </div>
+          </div>
+        </Panel>
+      </div>
+    </PreviewSection>
+  );
+}
+
+function inducePreviewJank(): void {
+  const blockFrame = (remainingFrames: number) => {
+    const end = performance.now() + 180;
+
+    while (performance.now() < end) {
+      Math.sqrt(performance.now());
+    }
+
+    if (remainingFrames > 1) {
+      requestAnimationFrame(() => blockFrame(remainingFrames - 1));
+    }
+  };
+
+  requestAnimationFrame(() => blockFrame(4));
+}
+
 function PreviewSection(props: { readonly children: ReactNode; readonly title: string }) {
   return (
     <section className="preview-section">
@@ -586,10 +650,6 @@ function LiveBeltToolbar() {
           .toLocaleLowerCase()
           .includes(normalizedWorktreeSearch),
       );
-  const current = selectedWorktree;
-  const destinations = current?.destinations ?? [];
-  const activeFieldsetId = live.controlPanel?.state.activeFieldsetId;
-
   useEffect(() => {
     if (worktrees.length === 0) {
       if (selectedWorktreeId !== null) setSelectedWorktreeId(null);
@@ -609,68 +669,58 @@ function LiveBeltToolbar() {
 
   return (
     <Toolbar aria-label="Belt toolbar">
-      <Combobox.Root
-        inputValue={worktreeSearch}
-        items={worktrees.map((worktree) => worktree.branch)}
-        onInputValueChange={(inputValue) => setWorktreeSearch(inputValue)}
-        onValueChange={(branchValue) => {
-          const nextWorktree = worktrees.find((worktree) => worktree.branch === branchValue);
-          setSelectedWorktreeId(nextWorktree?.id ?? null);
-          setWorktreeSearch("");
-        }}
-        value={selectedWorktree?.branch ?? null}
-      >
-        <Combobox.Trigger
-          placeholder="Find worktree"
-          searchPlacement="popup"
-          render={<GhostButton endIcon="chevronDown" startIcon="branch">{selectedWorktree?.branch ?? "No worktrees found"}</GhostButton>}
-        />
-        <Combobox.List placeholder="Find worktree" searchPlacement="popup">
-          {visibleWorktrees.map((worktree) => (
-            <Combobox.Option
-              key={worktree.id}
-              onClick={() => {
-                setSelectedWorktreeId(worktree.id);
-                setWorktreeSearch("");
-              }}
-              value={worktree.branch}
-            >
-              {worktree.branch}
-            </Combobox.Option>
-          ))}
-          {worktrees.length > 0 && visibleWorktrees.length === 0 ? (
-            <Combobox.Option disabled value="no-matching-worktrees">
-              No matching worktrees
-            </Combobox.Option>
-          ) : null}
-          {worktrees.length === 0 ? (
-            <Combobox.Option disabled value="no-worktrees">
-              No worktrees found
-            </Combobox.Option>
-          ) : null}
-        </Combobox.List>
-      </Combobox.Root>
-      <Menu.Root>
-        <Menu.Trigger
-          render={
-            <GhostButton endIcon="chevronDown" startIcon="edit">
-              Controls
-            </GhostButton>
-          }
-        />
-        <Menu.List>
-          {Object.entries(live.controlPanel?.config.fieldsets ?? {}).map(
-            ([fieldsetId, fieldset]) => (
-              <Menu.Item key={fieldsetId}>
-                {fieldsetId === activeFieldsetId ? "✓ " : ""}
-                {fieldset.label ?? fieldsetId}
-              </Menu.Item>
-            ),
-          )}
-          {live.controlPanel === undefined ? <Menu.Item>Loading controls</Menu.Item> : null}
-        </Menu.List>
-      </Menu.Root>
-      <GhostButton icon="spinner" onClick={() => void live.refresh()} title="Refresh live data" />
+      <Toolbar.Body>
+        <Toolbar.Left>
+          <Combobox.Root
+            inputValue={worktreeSearch}
+            items={worktrees.map((worktree) => worktree.branch)}
+            onInputValueChange={(inputValue) => setWorktreeSearch(inputValue)}
+            onValueChange={(branchValue) => {
+              const nextWorktree = worktrees.find((worktree) => worktree.branch === branchValue);
+              setSelectedWorktreeId(nextWorktree?.id ?? null);
+              setWorktreeSearch("");
+            }}
+            value={selectedWorktree?.branch ?? null}
+          >
+            <Combobox.Trigger
+              placeholder="Find worktree"
+              searchPlacement="popup"
+              render={
+                <GhostButton size="compact" startIcon="split" radius="none">
+                  {selectedWorktree?.branch ?? "No worktrees found"}
+                </GhostButton>
+              }
+            />
+            <Combobox.List placeholder="Find worktree" searchPlacement="popup">
+              {visibleWorktrees.map((worktree) => (
+                <Combobox.Option key={worktree.id} value={worktree.branch}>
+                  {worktree.branch}
+                </Combobox.Option>
+              ))}
+              {worktrees.length > 0 && visibleWorktrees.length === 0 ? (
+                <Combobox.Option disabled value="no-matching-worktrees">
+                  No matching worktrees
+                </Combobox.Option>
+              ) : null}
+              {worktrees.length === 0 ? (
+                <Combobox.Option disabled value="no-worktrees">
+                  No worktrees found
+                </Combobox.Option>
+              ) : null}
+            </Combobox.List>
+          </Combobox.Root>
+          <GhostButton size="compact" icon="dial" radius="none" />
+        </Toolbar.Left>
+        <Toolbar.Right>
+          <RenderPerformanceInpToolbarItem historySize={20} radius="none" size="compact" />
+          <RenderPerformanceLayoutShiftToolbarItem
+            historySize={20}
+            radius="none"
+            size="compact"
+          />
+          <RenderPerformanceToolbarItem historySize={20} radius="none" size="compact" />
+        </Toolbar.Right>
+      </Toolbar.Body>
     </Toolbar>
   );
 }

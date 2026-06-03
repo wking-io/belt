@@ -77,8 +77,16 @@ it("renders React primitives with the shared CSS class contract", () => {
       createElement(
         Toolbar,
         null,
-        createElement(Button, { icon: "check" }),
-        createElement("span", { className: "belt-text" }, "Toolbar"),
+        createElement(
+          Toolbar.Body,
+          null,
+          createElement(
+            Toolbar.Left,
+            null,
+            createElement("span", { className: "belt-text" }, "Toolbar"),
+          ),
+          createElement(Toolbar.Right, null, createElement(Button, { icon: "check" })),
+        ),
       ),
       createElement(
         StatusBanner.Root,
@@ -103,6 +111,9 @@ it("renders React primitives with the shared CSS class contract", () => {
   assert.match(html, /belt-drag-indicator__dot/);
   assert.match(html, /belt-toolbar/);
   assert.match(html, /belt-toolbar__inner/);
+  assert.match(html, /belt-toolbar__body/);
+  assert.match(html, /belt-toolbar__left/);
+  assert.match(html, /belt-toolbar__right/);
   assert.notMatch(html, /--belt-toolbar-x/);
   assert.notMatch(html, /--belt-toolbar-y/);
   assert.match(html, /belt-status-banner/);

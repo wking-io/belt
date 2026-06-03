@@ -42,6 +42,7 @@ await mkdir(path.join(stagingRoot, "_internal"), { recursive: true });
 await copyPublicEntrypoints();
 await copyInternalPackages();
 await cp(path.join(workspaceRoot, "packages/theme-css/dist/theme.css"), path.join(stagingRoot, "theme.css"));
+await rewriteThemeCssAssetUrls();
 await rewriteInternalImports(stagingRoot);
 await writePackageJson();
 
@@ -117,6 +118,16 @@ async function rewriteInternalImports(root) {
   }
 }
 
+async function rewriteThemeCssAssetUrls() {
+  const themeCssPath = path.join(stagingRoot, "theme.css");
+  const source = await readFile(themeCssPath, "utf8");
+  const rewritten = source.replaceAll("../node_modules/geist/", "../../geist/");
+
+  if (rewritten !== source) {
+    await writeFile(themeCssPath, rewritten);
+  }
+}
+
 async function writePackageJson() {
   const packageJson = {
     name: "@riff-refine/belt",
@@ -140,7 +151,8 @@ async function writePackageJson() {
     files: ["**/*"],
     dependencies: {
       "@effect/platform-node": "4.0.0-beta.66",
-      effect: "4.0.0-beta.66"
+      effect: "4.0.0-beta.66",
+      geist: "^1.7.2"
     },
     peerDependencies: {
       vite: "^6.3.5"
