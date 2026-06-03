@@ -300,8 +300,10 @@ it("styles toolbar as a fixed bottom docked bar", async () => {
   assert.match(css, /body:has\(> \.belt-toolbar-host\)[\s\S]*overflow:\s*auto/);
   assert.match(css, /html:has\(> body > \.belt-toolbar-host\)[\s\S]*overflow:\s*hidden/);
   assert.match(css, /\.belt-toolbar__inner\)[\s\S]*display:\s*flex/);
-  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*justify-content:\s*start/);
-  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*max-inline-size:\s*min\(100%,\s*960px\)/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*inline-size:\s*100%/);
+  assert.match(css, /\.belt-toolbar__inner\)[\s\S]*justify-content:\s*space-between/);
+  assert.match(css, /\.belt-toolbar__left\)[\s\S]*justify-content:\s*flex-start/);
+  assert.match(css, /\.belt-toolbar__right\)[\s\S]*justify-content:\s*flex-end/);
 });
 
 it("bases menu select and combobox item hover states on root elevation", async () => {

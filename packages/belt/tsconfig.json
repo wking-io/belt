@@ -1,9 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "jsx": "react",
-    "jsxFactory": "createElement",
-    "jsxFragmentFactory": "Fragment"
-  },
-  "include": ["src"]
+  "files": [
+    "src/config.ts",
+    "src/index.ts",
+    "src/server.ts",
+    "src/theme.ts",
+    "src/vite.ts",
+    "src/worktrees-portless.ts",
+    "src/worktrees-remix.ts",
+    "src/worktrees.ts"
+  ]
 }

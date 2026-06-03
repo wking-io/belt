@@ -12,11 +12,8 @@ import {
   extractToolbarConfig,
   type ToolbarError,
   type ToolbarResponseEnvelope,
-  type ToolbarToolData,
   type ToolDefinition,
-  type ToolbarSuccessEnvelope,
-  type ToolbarConfigSource,
-  type ToolbarConfig as ToolbarConfigData
+  type ToolbarConfigSource
 } from "@repo/core";
 import { ToolbarConfig as ToolbarConfigService } from "@repo/config";
 import { Effect, Layer, Schema } from "effect";

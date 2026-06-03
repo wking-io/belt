@@ -417,7 +417,7 @@ type ToolbarBodyProps = Omit<ComponentProps<"div">, "children"> & {
 };
 
 function ToolbarBody(props: ToolbarBodyProps): ReactElement {
-  const { children, className, onKeyDown, panelProps, style, ...rootProps } = props;
+  const { children, className, onKeyDown, panelProps: _panelProps, style, ...rootProps } = props;
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
