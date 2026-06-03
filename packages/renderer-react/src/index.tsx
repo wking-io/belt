@@ -51,10 +51,31 @@ export type ToolbarRendererModel = {
   readonly tools: readonly ToolbarTool[];
 };
 
+export type ToolbarToolIdentity<Config extends ToolbarConfig = ToolbarConfig> =
+  Config["tools"][number]["tool"]["id"] & string;
+
+export type ToolRegistrationByIdentity<
+  Config extends ToolbarConfig,
+  ToolId extends string,
+> = Extract<Config["tools"][number], { readonly tool: { readonly id: ToolId } }>;
+
+export type BoundToolbarProviderProps = {
+  readonly children?: ReactNode;
+};
+
+export type ReactToolbarDefinition<Config extends ToolbarConfig> = ToolbarDefinition<Config> & {
+  readonly Provider: (props: BoundToolbarProviderProps) => ReactElement;
+  readonly useToolbarConfig: () => Config;
+  readonly useToolbarDefinition: () => ToolbarDefinition<Config>;
+  readonly useToolRegistration: <const ToolId extends ToolbarToolIdentity<Config>>(
+    toolId: ToolId,
+  ) => ToolRegistrationByIdentity<Config, ToolId> | undefined;
+};
+
 export function createToolbar<const Config extends ToolbarConfig>(
   config: Config,
-): ToolbarDefinition<ToolbarConfig> {
-  return defineToolbarDefinition({ toolbarConfig: config });
+): ReactToolbarDefinition<ToolbarConfig & Config> {
+  return createToolbarContext(defineToolbarDefinition({ toolbarConfig: config }));
 }
 
 export function createToolbarRendererModel(source: ToolbarConfigSource): ToolbarRendererModel {
@@ -64,6 +85,55 @@ export function createToolbarRendererModel(source: ToolbarConfigSource): Toolbar
       label: tool.label,
     })),
   };
+}
+
+export function createToolbarContext<const Config extends ToolbarConfig>(
+  toolbar: ToolbarDefinition<Config>,
+): ReactToolbarDefinition<Config> {
+  const ToolbarDefinitionContext = createContext<ToolbarDefinition<Config> | undefined>(undefined);
+
+  const Provider = (props: BoundToolbarProviderProps): ReactElement => (
+    <ToolbarDefinitionContext.Provider value={toolbar}>
+      {props.children}
+    </ToolbarDefinitionContext.Provider>
+  );
+
+  const useBoundToolbarDefinition = (): ToolbarDefinition<Config> => {
+    const current = useContext(ToolbarDefinitionContext);
+
+    if (current === undefined) {
+      throw new Error("Toolbar Provider is required before reading toolbar registrations.");
+    }
+
+    return current;
+  };
+
+  const useBoundToolbarConfig = (): Config => useBoundToolbarDefinition().toolbarConfig;
+
+  const useBoundToolRegistration = <const ToolId extends ToolbarToolIdentity<Config>>(
+    toolId: ToolId,
+  ): ToolRegistrationByIdentity<Config, ToolId> | undefined => {
+    const config = useBoundToolbarConfig();
+
+    return config.tools.find(
+      (registration): registration is ToolRegistrationByIdentity<Config, ToolId> =>
+        hasToolIdentity(registration, toolId),
+    );
+  };
+
+  return Object.assign(toolbar, {
+    Provider,
+    useToolbarConfig: useBoundToolbarConfig,
+    useToolbarDefinition: useBoundToolbarDefinition,
+    useToolRegistration: useBoundToolRegistration,
+  });
+}
+
+function hasToolIdentity<Config extends ToolbarConfig, ToolId extends string>(
+  registration: Config["tools"][number],
+  toolId: ToolId,
+): registration is ToolRegistrationByIdentity<Config, ToolId> {
+  return registration.tool.id === toolId;
 }
 
 type SurfaceProps = {

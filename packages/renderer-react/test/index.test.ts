@@ -1,4 +1,5 @@
 import { assert, it } from "@effect/vitest";
+import { controlField, controlPanelTool, controlPanelToolId } from "@repo/control-panel-core";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -18,6 +19,7 @@ import {
   StatusBanner,
   Switch,
   Toolbar,
+  createToolbar,
   glyphIds,
   type GlyphName,
 } from "../src/index.tsx";
@@ -121,6 +123,38 @@ it("renders React primitives with the shared CSS class contract", () => {
   assert.match(html, /data-tone="primary"/);
   assert.match(html, new RegExp(`#${glyphIds.alert}`));
   assert.match(html, /belt-status-banner__actions/);
+});
+
+it("reads typed built-in tool registrations through the toolbar provider", () => {
+  const toolbar = createToolbar({
+    tools: [
+      controlPanelTool({
+        fieldsets: {
+          layout: {
+            fields: {
+              width: controlField.number({ default: 640 }),
+            },
+            label: "Layout",
+          },
+        },
+      }),
+    ],
+  });
+
+  function ControlPanelProbe() {
+    const registration = toolbar.useToolRegistration(controlPanelToolId);
+    const config = toolbar.useToolbarConfig();
+    const width = registration?.config.fieldsets.layout.fields.width.default;
+    const configWidth = config.tools[0]?.config.fieldsets.layout.fields.width.default;
+
+    return createElement("span", null, `${width}:${configWidth}`);
+  }
+
+  const html = renderToStaticMarkup(
+    createElement(toolbar.Provider, null, createElement(ControlPanelProbe)),
+  );
+
+  assert.match(html, />640:640</);
 });
 
 it("lets React containers set radius while controls inherit it", () => {
