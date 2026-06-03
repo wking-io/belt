@@ -37,3 +37,57 @@ toolbarVite(toolbarConfig, {
   mountPath: "/internal/toolbar"
 });
 ```
+
+## Prototype Iterations
+
+Prototype overlays use a separate Vite adapter because they change the app module graph. Pair the backend Prototype Iteration Provider with the Vite prototype adapter:
+
+```ts
+// toolbar.config.ts
+import { defineToolbar } from "@riff-refine/belt";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
+
+export default defineToolbar({
+  tools: [
+    iterationsTool({
+      providers: [
+        prototypeIterations()
+      ]
+    })
+  ]
+});
+```
+
+```ts
+// vite.config.ts
+import { toolbarVite } from "@riff-refine/belt/vite";
+import { prototypeIterationsVite } from "@riff-refine/belt/iterations/prototypes/vite";
+import { defineConfig } from "vite";
+import toolbarConfig from "./toolbar.config";
+
+export default defineConfig({
+  plugins: [
+    toolbarVite(toolbarConfig),
+    prototypeIterationsVite()
+  ]
+});
+```
+
+By default, the provider discovers folders under `prototypes/` and exposes destinations under `/__prototype/:name`. The Vite adapter serves those routes by injecting a prototype-specific app entry and resolving app-local imports through sparse prototype overlays.
+
+If the app entry is not `/src/main.tsx`, pass the same entry path to the adapter:
+
+```ts
+prototypeIterationsVite({
+  appEntry: "/src/main.ts"
+});
+```
+
+For production prototype gallery builds, pass `buildPrototype` to build one prototype graph at a time:
+
+```ts
+prototypeIterationsVite({
+  buildPrototype: "pricing-test"
+});
+```

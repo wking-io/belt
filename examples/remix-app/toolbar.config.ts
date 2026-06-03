@@ -1,19 +1,26 @@
 import { defineToolbar } from "@riff-refine/belt";
-import { worktreesTool } from "@riff-refine/belt/worktrees";
-import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
 
 export default defineToolbar({
   tools: [
-    worktreesTool({
-      resolver: portlessResolver({
-        destinations: [
-          {
-            id: "web",
-            label: "Web",
-            appName: "toolbar-example"
-          }
-        ]
-      })
+    iterationsTool({
+      providers: [
+        worktreeIterations({
+          resolver: portlessResolver({
+            destinations: [
+              {
+                id: "web",
+                label: "Web",
+                appName: "toolbar-example"
+              }
+            ]
+          })
+        }),
+        prototypeIterations()
+      ]
     })
   ]
 });

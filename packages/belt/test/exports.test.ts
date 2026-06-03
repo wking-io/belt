@@ -23,6 +23,11 @@ import {
   mountRenderPerformanceMeter,
   renderPerformanceTool
 } from "@riff-refine/belt/render-performance";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
+import { prototypeIterationsVite } from "@riff-refine/belt/iterations/prototypes/vite";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver as iterationsPortlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
 import { createToolbarServer } from "@riff-refine/belt/server";
 import { toolbarVite } from "@riff-refine/belt/vite";
 import { worktreesTool } from "@riff-refine/belt/worktrees";
@@ -44,6 +49,11 @@ describe("@riff-refine/belt facade exports", () => {
     assert.strictEqual(typeof mountRenderPerformanceMeter, "function");
     assert.strictEqual(typeof renderPerformanceTool, "function");
     assert.strictEqual(typeof RenderPerformanceMeter, "function");
+    assert.strictEqual(typeof iterationsTool, "function");
+    assert.strictEqual(typeof worktreeIterations, "function");
+    assert.strictEqual(typeof prototypeIterations, "function");
+    assert.strictEqual(typeof iterationsPortlessResolver, "function");
+    assert.strictEqual(typeof prototypeIterationsVite, "function");
     assert.strictEqual(typeof worktreesTool, "function");
     assert.strictEqual(typeof portlessResolver, "function");
   });

@@ -19,6 +19,9 @@
     "@repo/core": "workspace:*",
     "effect": "4.0.0-beta.66"
   },
+  "devDependencies": {
+    "@repo/tool-iterations": "workspace:*"
+  },
   "engines": {
     "node": ">=20"
   }

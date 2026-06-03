@@ -16,8 +16,28 @@ _Avoid_: tool renderer shell, worktree UI
 An installable capability that contributes behavior and optional UI to the **Toolbar Wrapper**.
 _Avoid_: Plugin, widget
 
+**Iterations**:
+A **Tool** used to show available variants of the same application and open one.
+_Avoid_: Worktree switcher, branch picker
+
+**Iteration Provider**:
+A Tool-owned source of **Iterations**, such as Git worktrees or prototype overlays.
+_Avoid_: Adapter, renderer, package discovery
+
+**Worktree Iteration Provider**:
+An **Iteration Provider** that discovers Git worktrees for the same application.
+_Avoid_: Worktree Switcher
+
+**Prototype Iteration Provider**:
+An **Iteration Provider** that discovers prototype overlays for the same application.
+_Avoid_: Vite adapter, URL resolver
+
+**Prototype Overlay Adapter**:
+An **Adapter** that connects prototype overlay runtime behavior to a host runtime such as Vite.
+_Avoid_: URL resolver, iteration provider
+
 **Worktree Switcher**:
-The first **Tool**, used to move between Git worktrees for the same application.
+The legacy name for the worktree-backed **Iterations** experience.
 _Avoid_: Branch picker
 
 **Control Panel**:
@@ -233,7 +253,7 @@ The shell-scoped frontend context that owns the single instantiated **Tool Clien
 _Avoid_: per-tool clients, per-component client construction, unrelated global singleton
 
 **URL Resolver**:
-An **Extension** for the **Worktree Switcher** that computes navigable destinations for worktrees.
+An **Extension** for the **Worktree Iteration Provider** that computes navigable destinations for worktrees.
 _Avoid_: Portless dependency, URL builder
 
 **Destination**:
@@ -341,7 +361,11 @@ _Avoid_: Fetch adapter package
 - **Product Facades** may re-export Tool, Renderer, and config helpers so users can import from one package.
 - **Product Facades** for different frontend targets should expose consistent public helper names when they support the same capabilities.
 - The **Control Panel** ships as part of base product packages such as `@toolbar/remix` and `@toolbar/react`, not as a separate user install.
-- The **Worktree Switcher** is a **Tool**.
+- **Iterations** is a **Tool**.
+- Git worktrees are provided to **Iterations** by the **Worktree Iteration Provider**.
+- Prototype overlays are provided to **Iterations** by the **Prototype Iteration Provider**.
+- Vite prototype overlay runtime behavior belongs in a **Prototype Overlay Adapter**.
+- The **Worktree Switcher** is the legacy name for the worktree-backed **Iterations** experience.
 - The **Control Panel** is a **Tool**.
 - The **Control Panel** is dev-only and is not a production settings or feature-flag system.
 - The **Toolbar Shell** shows the **Control Panel** as one **Tool** entry.
@@ -481,7 +505,7 @@ _Avoid_: Fetch adapter package
 - Full combobox behavior belongs in the Remix **Target Component Library**.
 - Downstream Tools should prefer the **Internal Component Library** when it has a component for the UI need.
 - Custom components may still participate in the **Theme** by using the same CSS custom properties.
-- The **Worktree Switcher** uses a **URL Resolver** to determine each worktree's **Destinations**.
+- The **Worktree Iteration Provider** uses a **URL Resolver** to determine each worktree's **Destinations**.
 - A worktree may have one or more **Destinations**.
 - A **Remix 3 Component** is provided by a **Renderer**.
 - A **Toolbar API** exposes registered **Tools** under a shared namespace.
