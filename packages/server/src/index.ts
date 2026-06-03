@@ -12,7 +12,6 @@ import {
   extractToolbarConfig,
   type ToolbarError,
   type ToolbarResponseEnvelope,
-  type ToolbarToolData,
   type ToolDefinition,
   type ToolbarConfigSource
 } from "@repo/core";

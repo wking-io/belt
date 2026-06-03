@@ -1,14 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { assert, describe, it } from "@effect/vitest";
-import { ToolbarConfig } from "@repo/config";
 import {
   IdGenerator,
   defineToolbar,
   toolbarApiRoutes,
   toolbarApiToolPath,
   toolApiRoutePath,
-  type ToolbarConfig
+  type ToolbarConfig as ToolbarConfigData
 } from "@repo/core";
 import { Effect, Layer } from "effect";
 import { createToolbarRouteHandler } from "../../adapter-remix/src/index.ts";
@@ -397,7 +396,7 @@ function testStoreLayer(persistence: {
   );
 }
 
-function requiredApiLayer(tool: ToolbarConfig["tools"][number]) {
+function requiredApiLayer(tool: ToolbarConfigData["tools"][number]) {
   if (!tool.apiLayer) {
     throw new Error("Control Panel tool API layer is missing");
   }
@@ -405,7 +404,7 @@ function requiredApiLayer(tool: ToolbarConfig["tools"][number]) {
   return tool.apiLayer;
 }
 
-function withoutDefaultRuntime<Tool extends ToolbarConfig["tools"][number]>(
+function withoutDefaultRuntime<Tool extends ToolbarConfigData["tools"][number]>(
   tool: Tool
 ): Omit<Tool, "runtimeLayer"> {
   const { runtimeLayer: _defaultRuntimeLayer, ...toolWithoutDefaultRuntime } = tool;

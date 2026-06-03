@@ -54,8 +54,8 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "check": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.react.build.json && tsc -p tsconfig.remix.build.json",
+    "check": "tsc -p tsconfig.json && tsc -p tsconfig.react.json && tsc -p tsconfig.remix.json",
     "pack:npm": "pnpm --dir ../.. build && node scripts/stage-npm-package.mjs"
   },
   "dependencies": {

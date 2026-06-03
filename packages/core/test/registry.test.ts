@@ -45,7 +45,7 @@ it.effect("validates toolbar theme config in string and object forms", () =>
           mode: "dark",
           extends: "belt-dark",
           variables: {
-            "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+            "--belt-color-elevation-1": "oklch(20% 0.01 260)"
           }
         })
       ]
@@ -159,7 +159,7 @@ it("preserves configured theme registration from defineToolbar", () => {
           mode: "dark",
           extends: "belt-dark",
           variables: {
-            "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+            "--belt-color-elevation-1": "oklch(20% 0.01 260)"
           }
         })
       ]
@@ -176,7 +176,7 @@ it("preserves configured theme registration from defineToolbar", () => {
         mode: "dark",
         extends: "belt-dark",
         variables: {
-          "--belt-color-elevation-0": "oklch(20% 0.01 260)"
+          "--belt-color-elevation-1": "oklch(20% 0.01 260)"
         }
       }
     ]

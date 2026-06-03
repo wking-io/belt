@@ -12,8 +12,7 @@ import {
 } from "../config/index.js";
 import {
   ControlVector2ValueSchema,
-  ControlVector3ValueSchema,
-  type ControlFieldsetValueMap
+  ControlVector3ValueSchema
 } from "../config/fields.js";
 import {
   CannotSaveDefaultsBaseError,

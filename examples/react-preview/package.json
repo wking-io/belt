@@ -1,0 +1,25 @@
+{
+  "name": "react-preview-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build --configLoader runner",
+    "check": "tsc -p tsconfig.json",
+    "dev": "vite --host 127.0.0.1 --configLoader runner",
+    "preview": "vite preview --host 127.0.0.1 --configLoader runner"
+  },
+  "dependencies": {
+    "@riff-refine/belt": "workspace:*",
+    "@repo/renderer-react": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
