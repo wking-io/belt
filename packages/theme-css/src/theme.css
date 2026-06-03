@@ -1534,6 +1534,7 @@ body:has(> .belt-toolbar-host) {
   box-shadow: 0 1px 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
 }
 
+body:has(.belt-tool-drawer),
 body:has(.belt-render-performance-drawer) {
   border-bottom-right-radius: var(--belt-radius-outer);
   border-right: 1px solid
@@ -1545,11 +1546,14 @@ body:has(.belt-render-performance-drawer) {
   scrollbar-width: none;
 }
 
+body:has(.belt-tool-drawer)::-webkit-scrollbar,
 body:has(.belt-render-performance-drawer)::-webkit-scrollbar {
   block-size: 0;
   inline-size: 0;
 }
 
+body:has(.belt-tool-drawer)::-webkit-scrollbar-track,
+body:has(.belt-tool-drawer)::-webkit-scrollbar-corner,
 body:has(.belt-render-performance-drawer)::-webkit-scrollbar-track,
 body:has(.belt-render-performance-drawer)::-webkit-scrollbar-corner {
   border-bottom-right-radius: var(--belt-radius-outer);
@@ -1657,6 +1661,36 @@ body:has(.belt-render-performance-drawer)::-webkit-scrollbar-corner {
   line-height: 1;
   text-shadow: 0 1px 1px var(--belt-color-elevation-1);
   z-index: 2;
+}
+
+:where(.belt-tool-drawer) {
+  background: var(--belt-color-elevation-1);
+  bottom: var(--belt-toolbar-reserved-block-size, 0px);
+  color: var(--belt-color-elevation-1-foreground);
+  max-inline-size: min(420px, calc(100vw - 16px));
+  overflow: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  inline-size: 420px;
+  z-index: 999998;
+}
+
+:where(.belt-tool-drawer__panel) {
+  min-block-size: 100%;
+}
+
+:where(.belt-tool-drawer__body) {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+:where(.belt-tool-drawer__header) {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
 }
 
 :where(.belt-render-performance-drawer) {

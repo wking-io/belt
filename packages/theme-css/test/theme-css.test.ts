@@ -506,6 +506,25 @@ it("uses matching neutral hover colors for elevated buttons", async () => {
   );
 });
 
+it("shares drawer layout styles with the render performance drawer", async () => {
+  const css = await readFile(themeCssPath, "utf8");
+
+  assert.match(
+    css,
+    /body:has\(\.belt-tool-drawer\),[\s\S]*body:has\(\.belt-render-performance-drawer\)/,
+  );
+  assert.match(css, /:where\(\.belt-tool-drawer\)[\s\S]*inline-size:\s*420px/);
+  assert.match(css, /:where\(\.belt-tool-drawer__panel\)[\s\S]*min-block-size:\s*100%/);
+  assert.match(
+    css,
+    /:where\(\.belt-tool-drawer__body\)[\s\S]*display:\s*grid[\s\S]*gap:\s*12px[\s\S]*padding:\s*12px/,
+  );
+  assert.match(
+    css,
+    /:where\(\.belt-tool-drawer__header\)[\s\S]*align-items:\s*start[\s\S]*display:\s*flex[\s\S]*gap:\s*12px[\s\S]*justify-content:\s*space-between/,
+  );
+});
+
 it("builds the public theme artifact from the Tailwind input", async () => {
   const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
     scripts: Record<string, string>;
