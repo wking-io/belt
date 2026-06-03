@@ -6,18 +6,18 @@ import {
   ControlSnapshotStore,
   controlField,
   defineControlPanel,
-  type ControlSnapshotStoreData
+  type ControlSnapshotStoreData,
 } from "../src/index.ts";
 import { ControlSession } from "../src/session/index.ts";
 
 it.effect("persists active Control Session selection through the Snapshot Store", () => {
   let persisted: unknown = {
     version: 1,
-    snapshots: []
+    snapshots: [],
   };
   const definition = testDefinition();
 
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const session = yield* ControlSession;
     const selected = yield* session.selectFieldset({ fieldsetId: "camera" });
     const state = yield* session.state;
@@ -25,120 +25,133 @@ it.effect("persists active Control Session selection through the Snapshot Store"
     assert.deepStrictEqual(selected.state.activeFieldsetId, "camera");
     assert.deepStrictEqual(state.state.currentValuesByFieldset, {
       scene: {
-        title: "Default"
+        title: "Default",
       },
       camera: {
-        zoom: 1
-      }
+        zoom: 1,
+      },
     });
     assert.deepStrictEqual(persisted, {
       version: 1,
       activeFieldsetId: "camera",
       activeBaseByFieldset: {
         scene: { type: "defaults" },
-        camera: { type: "defaults" }
+        camera: { type: "defaults" },
       },
-      snapshots: []
+      snapshots: [],
     });
-  }).pipe(Effect.provide(controlSessionLayer(definition, {
-    load: () => Effect.succeed(persisted),
-    save: (data) => Effect.sync(() => {
-      persisted = data;
-    })
-  })));
+  }).pipe(
+    Effect.provide(
+      controlSessionLayer(definition, {
+        load: () => Effect.succeed(persisted),
+        save: (data) =>
+          Effect.sync(() => {
+            persisted = data;
+          }),
+      }),
+    ),
+  );
 });
 
-it.effect("branches, saves, reads, and deletes Control Snapshots through Control Session operations", () => {
-  let persisted: unknown = {
-    version: 1,
-    snapshots: []
-  };
-  const definition = testDefinition();
+it.effect(
+  "branches, saves, reads, and deletes Control Snapshots through Control Session operations",
+  () => {
+    let persisted: unknown = {
+      version: 1,
+      snapshots: [],
+    };
+    const definition = testDefinition();
 
-  return Effect.gen(function*() {
-    const session = yield* ControlSession;
-    const branched = yield* session.branchSnapshot({
-      fieldsetId: "scene",
-      name: "Draft",
-      values: {
-        title: "Draft title"
-      }
-    });
-
-    assert.deepStrictEqual(branched.snapshot, {
-      id: "snapshot_test-id-1",
-      fieldsetId: "scene",
-      name: "Draft",
-      values: {
-        title: "Draft title"
-      }
-    });
-
-    yield* session.saveSnapshot({
-      fieldsetId: "scene",
-      values: {
-        title: "Saved title"
-      }
-    });
-
-    const saved = yield* session.readSnapshot({
-      fieldsetId: "scene",
-      snapshotId: "snapshot_test-id-1"
-    });
-
-    assert.deepStrictEqual(saved.snapshot.values, {
-      title: "Saved title"
-    });
-
-    const deleted = yield* session.deleteSnapshot({
-      fieldsetId: "scene",
-      snapshotId: "snapshot_test-id-1"
-    });
-
-    assert.deepStrictEqual(deleted, {
-      state: {
-        activeFieldsetId: "scene",
-        activeBaseByFieldset: {
-          scene: {
-            type: "defaults"
-          },
-          camera: {
-            type: "defaults"
-          }
+    return Effect.gen(function* () {
+      const session = yield* ControlSession;
+      const branched = yield* session.branchSnapshot({
+        fieldsetId: "scene",
+        name: "Draft",
+        values: {
+          title: "Draft title",
         },
-        currentValuesByFieldset: {
-          scene: {
-            title: "Default"
+      });
+
+      assert.deepStrictEqual(branched.snapshot, {
+        id: "snapshot_test-id-1",
+        fieldsetId: "scene",
+        name: "Draft",
+        values: {
+          title: "Draft title",
+        },
+      });
+
+      yield* session.saveSnapshot({
+        fieldsetId: "scene",
+        values: {
+          title: "Saved title",
+        },
+      });
+
+      const saved = yield* session.readSnapshot({
+        fieldsetId: "scene",
+        snapshotId: "snapshot_test-id-1",
+      });
+
+      assert.deepStrictEqual(saved.snapshot.values, {
+        title: "Saved title",
+      });
+
+      const deleted = yield* session.deleteSnapshot({
+        fieldsetId: "scene",
+        snapshotId: "snapshot_test-id-1",
+      });
+
+      assert.deepStrictEqual(deleted, {
+        state: {
+          activeFieldsetId: "scene",
+          activeBaseByFieldset: {
+            scene: {
+              type: "defaults",
+            },
+            camera: {
+              type: "defaults",
+            },
           },
-          camera: {
-            zoom: 1
-          }
-        }
-      },
-      snapshots: []
-    });
-  }).pipe(Effect.provide(controlSessionLayer(definition, {
-    load: () => Effect.succeed(persisted),
-    save: (data) => Effect.sync(() => {
-      persisted = data;
-    })
-  })));
-});
+          currentValuesByFieldset: {
+            scene: {
+              title: "Default",
+            },
+            camera: {
+              zoom: 1,
+            },
+          },
+        },
+        snapshots: [],
+      });
+    }).pipe(
+      Effect.provide(
+        controlSessionLayer(definition, {
+          load: () => Effect.succeed(persisted),
+          save: (data) =>
+            Effect.sync(() => {
+              persisted = data;
+            }),
+        }),
+      ),
+    );
+  },
+);
 
 function testDefinition() {
   return defineControlPanel({
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Default" })
-        }
+          title: controlField.text({ default: "Default" }),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number({ default: 1 })
-        }
-      }
-    }
+          zoom: controlField.number({ default: 1 }),
+        },
+      },
+    },
   });
 }
 
@@ -147,12 +160,9 @@ function controlSessionLayer(
   persistence: {
     readonly load: () => Effect.Effect<unknown>;
     readonly save: (data: ControlSnapshotStoreData) => Effect.Effect<void>;
-  }
+  },
 ) {
-  return Layer.provide(
-    ControlSession.layer(definition),
-    testStoreLayer(persistence)
-  );
+  return Layer.provide(ControlSession.layer(definition), testStoreLayer(persistence));
 }
 
 function testStoreLayer(persistence: {
@@ -166,14 +176,14 @@ function testStoreLayer(persistence: {
     Layer.mergeAll(
       Layer.succeed(ControlSnapshotPersistence)({
         load: persistence.load,
-        save: (data) => persistence.save(data)
+        save: (data) => persistence.save(data),
       }),
       Layer.succeed(IdGenerator)({
         next: (prefix) => {
           idIndex += 1;
           return Effect.succeed(prefix ? `${prefix}_test-id-${idIndex}` : `test-id-${idIndex}`);
-        }
-      })
-    )
+        },
+      }),
+    ),
   );
 }

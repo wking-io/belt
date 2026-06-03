@@ -6,13 +6,13 @@ export const OklchColorSchema = Schema.String.check(Schema.isPattern(/^oklch\([^
 
 export const ControlVector2ValueSchema = Schema.Struct({
   x: NumericControlSchema,
-  y: NumericControlSchema
+  y: NumericControlSchema,
 });
 
 export const ControlVector3ValueSchema = Schema.Struct({
   x: NumericControlSchema,
   y: NumericControlSchema,
-  z: NumericControlSchema
+  z: NumericControlSchema,
 });
 
 export type ControlVector2Value = Schema.Schema.Type<typeof ControlVector2ValueSchema>;
@@ -85,61 +85,70 @@ export type ControlField =
 
 export type ControlFieldMap = Readonly<Record<string, ControlField>>;
 
-export type ControlFieldValue<Field extends ControlField> =
-  Field extends ControlTextField ? string
-    : Field extends ControlNumberField ? number
-      : Field extends ControlBooleanField ? boolean
-        : Field extends ControlSelectField ? string
-          : Field extends ControlColorField ? string
-            : Field extends ControlRangeField ? number
-              : Field extends ControlVector2Field ? ControlVector2Value
-                : Field extends ControlVector3Field ? ControlVector3Value
-                  : never;
+export type ControlFieldValue<Field extends ControlField> = Field extends ControlTextField
+  ? string
+  : Field extends ControlNumberField
+    ? number
+    : Field extends ControlBooleanField
+      ? boolean
+      : Field extends ControlSelectField
+        ? string
+        : Field extends ControlColorField
+          ? string
+          : Field extends ControlRangeField
+            ? number
+            : Field extends ControlVector2Field
+              ? ControlVector2Value
+              : Field extends ControlVector3Field
+                ? ControlVector3Value
+                : never;
 
-export type ControlPanelDefaultsValue = Readonly<Record<string, Readonly<Record<string, ControlFieldValue<ControlField>>>>>;
+export type ControlPanelDefaultsValue = Readonly<
+  Record<string, Readonly<Record<string, ControlFieldValue<ControlField>>>>
+>;
 export type ControlFieldsetValueMap = Readonly<Record<string, ControlFieldValue<ControlField>>>;
 export type ControlSnapshotValueMap = Readonly<Record<string, unknown>>;
 
 export const ControlFieldMetadataSchema = Schema.Struct({
   label: Schema.optionalKey(NonEmptyStringSchema),
   description: Schema.optionalKey(NonEmptyStringSchema),
-  unit: Schema.optionalKey(NonEmptyStringSchema)
+  unit: Schema.optionalKey(NonEmptyStringSchema),
 });
 
 export const ControlTextFieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("text"),
-  default: Schema.optionalKey(Schema.String)
+  default: Schema.optionalKey(Schema.String),
 });
 
 export const ControlNumberFieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("number"),
-  default: Schema.optionalKey(NumericControlSchema)
+  default: Schema.optionalKey(NumericControlSchema),
 });
 
 export const ControlBooleanFieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("boolean"),
-  default: Schema.optionalKey(Schema.Boolean)
+  default: Schema.optionalKey(Schema.Boolean),
 });
 
 export const ControlSelectOptionSchema = Schema.Struct({
   label: NonEmptyStringSchema,
-  value: NonEmptyStringSchema
+  value: NonEmptyStringSchema,
 });
 
 export const ControlSelectFieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("select"),
   options: Schema.Array(ControlSelectOptionSchema),
-  default: Schema.optionalKey(NonEmptyStringSchema)
+  default: Schema.optionalKey(NonEmptyStringSchema),
 });
 
 export const ControlColorFieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("color"),
-  default: Schema.optionalKey(OklchColorSchema)
+  default: Schema.optionalKey(OklchColorSchema),
 });
 
 export const ControlRangeFieldSchema = Schema.Struct({
@@ -148,19 +157,19 @@ export const ControlRangeFieldSchema = Schema.Struct({
   min: Schema.optionalKey(NumericControlSchema),
   max: Schema.optionalKey(NumericControlSchema),
   step: Schema.optionalKey(NumericControlSchema),
-  default: Schema.optionalKey(NumericControlSchema)
+  default: Schema.optionalKey(NumericControlSchema),
 });
 
 export const ControlVector2FieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("vector2"),
-  default: Schema.optionalKey(ControlVector2ValueSchema)
+  default: Schema.optionalKey(ControlVector2ValueSchema),
 });
 
 export const ControlVector3FieldSchema = Schema.Struct({
   ...ControlFieldMetadataSchema.fields,
   type: Schema.Literal("vector3"),
-  default: Schema.optionalKey(ControlVector3ValueSchema)
+  default: Schema.optionalKey(ControlVector3ValueSchema),
 });
 
 export const ControlFieldSchema = Schema.Union([
@@ -171,32 +180,34 @@ export const ControlFieldSchema = Schema.Union([
   ControlColorFieldSchema,
   ControlRangeFieldSchema,
   ControlVector2FieldSchema,
-  ControlVector3FieldSchema
+  ControlVector3FieldSchema,
 ]);
 
 export const textField = (field: Omit<ControlTextField, "type"> = {}): ControlTextField => ({
   ...field,
-  type: "text"
+  type: "text",
 });
 
 export const numberField = (field: Omit<ControlNumberField, "type"> = {}): ControlNumberField => ({
   ...field,
-  type: "number"
+  type: "number",
 });
 
-export const booleanField = (field: Omit<ControlBooleanField, "type"> = {}): ControlBooleanField => ({
+export const booleanField = (
+  field: Omit<ControlBooleanField, "type"> = {},
+): ControlBooleanField => ({
   ...field,
-  type: "boolean"
+  type: "boolean",
 });
 
 export const selectField = (field: Omit<ControlSelectField, "type">): ControlSelectField => ({
   ...field,
-  type: "select"
+  type: "select",
 });
 
 export const colorField = (field: Omit<ControlColorField, "type"> = {}): ControlColorField => ({
   ...field,
-  type: "color"
+  type: "color",
 });
 
 export const rangeField = (field: Omit<ControlRangeField, "type"> = {}): ControlRangeField => ({
@@ -204,17 +215,21 @@ export const rangeField = (field: Omit<ControlRangeField, "type"> = {}): Control
   max: 1,
   step: 0.01,
   ...field,
-  type: "range"
+  type: "range",
 });
 
-export const vector2Field = (field: Omit<ControlVector2Field, "type"> = {}): ControlVector2Field => ({
+export const vector2Field = (
+  field: Omit<ControlVector2Field, "type"> = {},
+): ControlVector2Field => ({
   ...field,
-  type: "vector2"
+  type: "vector2",
 });
 
-export const vector3Field = (field: Omit<ControlVector3Field, "type"> = {}): ControlVector3Field => ({
+export const vector3Field = (
+  field: Omit<ControlVector3Field, "type"> = {},
+): ControlVector3Field => ({
   ...field,
-  type: "vector3"
+  type: "vector3",
 });
 
 export const controlField: {
@@ -234,7 +249,7 @@ export const controlField: {
   select: selectField,
   text: textField,
   vector2: vector2Field,
-  vector3: vector3Field
+  vector3: vector3Field,
 };
 
 export function normalizeControlField(field: ControlField): ControlField {
@@ -243,7 +258,7 @@ export function normalizeControlField(field: ControlField): ControlField {
       min: 0,
       max: 1,
       step: 0.01,
-      ...field
+      ...field,
     };
   }
 
@@ -275,7 +290,9 @@ export function isVector2Value(value: unknown): value is ControlVector2Value {
 }
 
 export function isVector3Value(value: unknown): value is ControlVector3Value {
-  return isRecord(value) && isFiniteNumber(value.x) && isFiniteNumber(value.y) && isFiniteNumber(value.z);
+  return (
+    isRecord(value) && isFiniteNumber(value.x) && isFiniteNumber(value.y) && isFiniteNumber(value.z)
+  );
 }
 
 export function isOklchColor(value: string): boolean {

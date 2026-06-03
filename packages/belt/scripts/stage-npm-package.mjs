@@ -23,7 +23,7 @@ const publicEntrypoints = {
   "./vite": "vite",
   "./worktrees": "worktrees",
   "./worktrees/portless": "worktrees-portless",
-  "./worktrees/remix": "worktrees-remix"
+  "./worktrees/remix": "worktrees-remix",
 };
 
 const internalPackages = {
@@ -40,10 +40,11 @@ const internalPackages = {
   "@repo/tool-iterations-adapter-vite-prototypes": "tool-iterations-adapter-vite-prototypes",
   "@repo/tool-iterations-provider-prototypes": "tool-iterations-provider-prototypes",
   "@repo/tool-iterations-provider-worktrees": "tool-iterations-provider-worktrees",
-  "@repo/tool-iterations-provider-worktrees-extension-portless": "tool-iterations-provider-worktrees-extension-portless",
+  "@repo/tool-iterations-provider-worktrees-extension-portless":
+    "tool-iterations-provider-worktrees-extension-portless",
   "@repo/tool-worktrees": "tool-worktrees",
   "@repo/tool-worktrees-extension-portless": "tool-worktrees-extension-portless",
-  "@repo/tool-worktrees-renderer-remix": "tool-worktrees-renderer-remix"
+  "@repo/tool-worktrees-renderer-remix": "tool-worktrees-renderer-remix",
 };
 
 await rm(stagingRoot, { force: true, recursive: true });
@@ -51,7 +52,10 @@ await mkdir(path.join(stagingRoot, "_internal"), { recursive: true });
 
 await copyPublicEntrypoints();
 await copyInternalPackages();
-await cp(path.join(workspaceRoot, "packages/theme-css/dist/theme.css"), path.join(stagingRoot, "theme.css"));
+await cp(
+  path.join(workspaceRoot, "packages/theme-css/dist/theme.css"),
+  path.join(stagingRoot, "theme.css"),
+);
 await rewriteThemeCssAssetUrls();
 await rewriteInternalImports(stagingRoot);
 await writePackageJson();
@@ -153,31 +157,34 @@ async function writePackageJson() {
           specifier,
           {
             types: `./${fileName}.d.ts`,
-            default: `./${fileName}.js`
-          }
+            default: `./${fileName}.js`,
+          },
         ];
-      })
+      }),
     ),
     files: ["**/*"],
     dependencies: {
       "@effect/platform-node": "4.0.0-beta.66",
       effect: "4.0.0-beta.66",
-      geist: "^1.7.2"
+      geist: "^1.7.2",
     },
     peerDependencies: {
-      vite: "^6.3.5"
+      vite: "^6.3.5",
     },
     peerDependenciesMeta: {
       vite: {
-        optional: true
-      }
+        optional: true,
+      },
     },
     engines: {
-      node: ">=20"
-    }
+      node: ">=20",
+    },
   };
 
-  await writeFile(path.join(stagingRoot, "package.json"), `${JSON.stringify(packageJson, null, 2)}\n`);
+  await writeFile(
+    path.join(stagingRoot, "package.json"),
+    `${JSON.stringify(packageJson, null, 2)}\n`,
+  );
 }
 
 async function collectFiles(root) {
@@ -188,7 +195,7 @@ async function collectFiles(root) {
     const entryPath = path.join(root, entry.name);
 
     if (entry.isDirectory()) {
-      files.push(...await collectFiles(entryPath));
+      files.push(...(await collectFiles(entryPath)));
     } else {
       files.push(entryPath);
     }

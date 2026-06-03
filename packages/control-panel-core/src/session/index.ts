@@ -1,8 +1,5 @@
 import { Context, Effect, Layer } from "effect";
-import {
-  defineControlPanel,
-  type ControlPanelConfig
-} from "../config/index.js";
+import { defineControlPanel, type ControlPanelConfig } from "../config/index.js";
 import type { ControlFieldsetValueMap } from "../config/fields.js";
 import {
   CannotSaveDefaultsBaseError,
@@ -14,12 +11,9 @@ import {
   ControlSnapshotStoreWriteError,
   UnknownControlFieldsetError,
   UnknownControlSnapshotError,
-  type ControlSnapshotStoreError
+  type ControlSnapshotStoreError,
 } from "../errors.js";
-import {
-  ControlSnapshotStore,
-  type ControlSnapshotStoreData
-} from "../snapshot-store/index.js";
+import { ControlSnapshotStore, type ControlSnapshotStoreData } from "../snapshot-store/index.js";
 import {
   createControlPanelState,
   deleteControlSnapshot,
@@ -29,7 +23,7 @@ import {
   selectControlBase,
   type ControlBase,
   type ControlPanelState,
-  type ControlSnapshot
+  type ControlSnapshot,
 } from "../state/index.js";
 
 export type ControlPanelRouteState = {
@@ -54,9 +48,11 @@ export type ControlPanelSnapshotResponse = {
   readonly snapshot: ControlSnapshot;
 };
 
-export type ControlPanelSnapshotStateResponse = ControlPanelSnapshotResponse & ControlPanelStateResponse;
+export type ControlPanelSnapshotStateResponse = ControlPanelSnapshotResponse &
+  ControlPanelStateResponse;
 
-export type ControlPanelDeleteSnapshotResponse = ControlPanelStateResponse & ControlPanelSnapshotsResponse;
+export type ControlPanelDeleteSnapshotResponse = ControlPanelStateResponse &
+  ControlPanelSnapshotsResponse;
 
 export type SelectFieldsetRequest = {
   readonly fieldsetId: string;
@@ -96,126 +92,147 @@ export type ControlSessionShape = {
   readonly index: Effect.Effect<ControlPanelIndexResponse, ControlSessionError>;
   readonly state: Effect.Effect<ControlPanelStateResponse, ControlSessionError>;
   readonly selectFieldset: (
-    request: SelectFieldsetRequest
+    request: SelectFieldsetRequest,
   ) => Effect.Effect<ControlPanelStateResponse, ControlSessionError>;
   readonly selectBase: (
-    request: SelectBaseRequest
+    request: SelectBaseRequest,
   ) => Effect.Effect<ControlPanelStateResponse, ControlSessionError>;
   readonly snapshots: Effect.Effect<ControlPanelSnapshotsResponse, ControlSessionError>;
   readonly readSnapshot: (
-    request: SnapshotRequest
+    request: SnapshotRequest,
   ) => Effect.Effect<ControlPanelSnapshotResponse, ControlSessionError>;
   readonly branchSnapshot: (
-    request: BranchSnapshotRequest
+    request: BranchSnapshotRequest,
   ) => Effect.Effect<ControlPanelSnapshotStateResponse, ControlSessionError>;
   readonly saveSnapshot: (
-    request: SaveSnapshotRequest
+    request: SaveSnapshotRequest,
   ) => Effect.Effect<ControlPanelStateResponse, ControlSessionError>;
   readonly deleteSnapshot: (
-    request: SnapshotRequest
+    request: SnapshotRequest,
   ) => Effect.Effect<ControlPanelDeleteSnapshotResponse, ControlSessionError>;
 };
 
 export class ControlSession extends Context.Service<ControlSession, ControlSessionShape>()(
-  "@repo/control-panel-core/ControlSession"
+  "@repo/control-panel-core/ControlSession",
 ) {
   static layer(definition: ReturnType<typeof defineControlPanel>) {
     return Layer.effect(
       ControlSession,
-      Effect.gen(function*() {
+      Effect.gen(function* () {
         const store = yield* ControlSnapshotStore;
 
         return ControlSession.of({
-          index: Effect.fn("ControlSession.index")(function*() {
+          index: Effect.fn("ControlSession.index")(function* () {
             const data = yield* store.read(definition);
 
             return {
               config: definition,
-              state: toControlPanelRouteState(definition, data)
+              state: toControlPanelRouteState(definition, data),
             };
           })(),
-          state: Effect.fn("ControlSession.state")(function*() {
+          state: Effect.fn("ControlSession.state")(function* () {
             const data = yield* store.read(definition);
 
             return {
-              state: toControlPanelRouteState(definition, data)
+              state: toControlPanelRouteState(definition, data),
             };
           })(),
-          selectFieldset: Effect.fn("ControlSession.selectFieldset")(function*(request) {
+          selectFieldset: Effect.fn("ControlSession.selectFieldset")(function* (request) {
             const data = yield* store.read(definition);
             const state = yield* syncSession(() =>
-              selectActiveFieldset(toControlPanelState(definition, data), definition, request.fieldsetId)
+              selectActiveFieldset(
+                toControlPanelState(definition, data),
+                definition,
+                request.fieldsetId,
+              ),
             );
             const next = yield* store.write(definition, toSnapshotStoreData(data, state));
 
             return {
-              state: toControlPanelRouteState(definition, next)
+              state: toControlPanelRouteState(definition, next),
             };
           }),
-          selectBase: Effect.fn("ControlSession.selectBase")(function*(request) {
+          selectBase: Effect.fn("ControlSession.selectBase")(function* (request) {
             const data = yield* store.read(definition);
             const state = yield* syncSession(() =>
-              selectControlBase(toControlPanelState(definition, data), definition, request.fieldsetId, request.base)
+              selectControlBase(
+                toControlPanelState(definition, data),
+                definition,
+                request.fieldsetId,
+                request.base,
+              ),
             );
             const next = yield* store.write(definition, toSnapshotStoreData(data, state));
 
             return {
-              state: toControlPanelRouteState(definition, next)
+              state: toControlPanelRouteState(definition, next),
             };
           }),
-          snapshots: Effect.fn("ControlSession.snapshots")(function*() {
+          snapshots: Effect.fn("ControlSession.snapshots")(function* () {
             const data = yield* store.read(definition);
 
             return {
-              snapshots: data.snapshots
+              snapshots: data.snapshots,
             };
           })(),
-          readSnapshot: Effect.fn("ControlSession.readSnapshot")(function*(request) {
+          readSnapshot: Effect.fn("ControlSession.readSnapshot")(function* (request) {
             const data = yield* store.read(definition);
-            const snapshot = yield* getSnapshot(data.snapshots, request.fieldsetId, request.snapshotId);
+            const snapshot = yield* getSnapshot(
+              data.snapshots,
+              request.fieldsetId,
+              request.snapshotId,
+            );
 
             return {
-              snapshot
+              snapshot,
             };
           }),
-          branchSnapshot: Effect.fn("ControlSession.branchSnapshot")(function*(request) {
+          branchSnapshot: Effect.fn("ControlSession.branchSnapshot")(function* (request) {
             const snapshot = yield* store.create(definition, request.fieldsetId, {
               name: request.name,
-              values: request.values
+              values: request.values,
             });
             const data = yield* store.read(definition);
 
             return {
               snapshot,
-              state: toControlPanelRouteState(definition, data)
+              state: toControlPanelRouteState(definition, data),
             };
           }),
-          saveSnapshot: Effect.fn("ControlSession.saveSnapshot")(function*(request) {
+          saveSnapshot: Effect.fn("ControlSession.saveSnapshot")(function* (request) {
             const data = yield* store.read(definition);
             const state = yield* syncSession(() =>
-              saveControlSnapshot(toControlPanelState(definition, data), definition, request.fieldsetId, request.values)
+              saveControlSnapshot(
+                toControlPanelState(definition, data),
+                definition,
+                request.fieldsetId,
+                request.values,
+              ),
             );
             const next = yield* store.write(definition, toSnapshotStoreData(data, state));
 
             return {
-              state: toControlPanelRouteState(definition, next)
+              state: toControlPanelRouteState(definition, next),
             };
           }),
-          deleteSnapshot: Effect.fn("ControlSession.deleteSnapshot")(function*(request) {
+          deleteSnapshot: Effect.fn("ControlSession.deleteSnapshot")(function* (request) {
             const data = yield* store.read(definition);
             yield* getSnapshot(data.snapshots, request.fieldsetId, request.snapshotId);
             const state = yield* syncSession(() =>
-              deleteControlSnapshot(toControlPanelState(definition, data), request.snapshotId)
+              deleteControlSnapshot(toControlPanelState(definition, data), request.snapshotId),
             );
-            const next = yield* store.write(definition, toSnapshotStoreData(data, state, request.snapshotId));
+            const next = yield* store.write(
+              definition,
+              toSnapshotStoreData(data, state, request.snapshotId),
+            );
 
             return {
               state: toControlPanelRouteState(definition, next),
-              snapshots: next.snapshots
+              snapshots: next.snapshots,
             };
-          })
+          }),
         });
-      })
+      }),
     );
   }
 }
@@ -223,7 +240,7 @@ export class ControlSession extends Context.Service<ControlSession, ControlSessi
 function syncSession<A>(evaluate: () => A): Effect.Effect<A, ControlSessionError> {
   return Effect.try({
     try: evaluate,
-    catch: toControlSessionError
+    catch: toControlSessionError,
   });
 }
 
@@ -248,68 +265,88 @@ function toControlSessionError(cause: unknown): ControlSessionError {
 function toSnapshotStoreData(
   current: ControlSnapshotStoreData,
   state: ControlPanelState,
-  deletedSnapshotId?: string
+  deletedSnapshotId?: string,
 ): ControlSnapshotStoreData {
   const next: ControlSnapshotStoreData = {
     version: 1,
     activeBaseByFieldset: state.activeBaseByFieldset,
-    snapshots: current.snapshots.filter((snapshot) => snapshot.id !== deletedSnapshotId).map((snapshot) =>
-      state.snapshots.find((candidate) => candidate.id === snapshot.id) ?? snapshot
-    )
+    snapshots: current.snapshots
+      .filter((snapshot) => snapshot.id !== deletedSnapshotId)
+      .map(
+        (snapshot) => state.snapshots.find((candidate) => candidate.id === snapshot.id) ?? snapshot,
+      ),
   };
 
-  return state.activeFieldsetId === undefined ? next : {
-    ...next,
-    activeFieldsetId: state.activeFieldsetId
-  };
+  return state.activeFieldsetId === undefined
+    ? next
+    : {
+        ...next,
+        activeFieldsetId: state.activeFieldsetId,
+      };
 }
 
-function toControlPanelState(config: ControlPanelConfig, data: ControlSnapshotStoreData): ControlPanelState {
+function toControlPanelState(
+  config: ControlPanelConfig,
+  data: ControlSnapshotStoreData,
+): ControlPanelState {
   const snapshots = data.snapshots.filter((snapshot) => config.fieldsets[snapshot.fieldsetId]);
 
   if (data.activeBaseByFieldset === undefined) {
-    return createControlPanelState(config, data.activeFieldsetId === undefined ? { snapshots } : {
-      activeFieldsetId: data.activeFieldsetId,
-      snapshots
-    });
+    return createControlPanelState(
+      config,
+      data.activeFieldsetId === undefined
+        ? { snapshots }
+        : {
+            activeFieldsetId: data.activeFieldsetId,
+            snapshots,
+          },
+    );
   }
 
-  return createControlPanelState(config, data.activeFieldsetId === undefined
-    ? {
-      activeBaseByFieldset: data.activeBaseByFieldset,
-      snapshots
-    }
-    : {
-      activeFieldsetId: data.activeFieldsetId,
-      activeBaseByFieldset: data.activeBaseByFieldset,
-      snapshots
-    });
+  return createControlPanelState(
+    config,
+    data.activeFieldsetId === undefined
+      ? {
+          activeBaseByFieldset: data.activeBaseByFieldset,
+          snapshots,
+        }
+      : {
+          activeFieldsetId: data.activeFieldsetId,
+          activeBaseByFieldset: data.activeBaseByFieldset,
+          snapshots,
+        },
+  );
 }
 
-function toControlPanelRouteState(config: ControlPanelConfig, data: ControlSnapshotStoreData): ControlPanelRouteState {
+function toControlPanelRouteState(
+  config: ControlPanelConfig,
+  data: ControlSnapshotStoreData,
+): ControlPanelRouteState {
   const state = toControlPanelState(config, data);
   const currentValuesByFieldset = Object.fromEntries(
     Object.keys(config.fieldsets).map((fieldsetId) => [
       fieldsetId,
-      getCurrentFieldsetValues(state, config, fieldsetId)
-    ])
+      getCurrentFieldsetValues(state, config, fieldsetId),
+    ]),
   );
 
   const routeState = {
     activeBaseByFieldset: state.activeBaseByFieldset,
-    currentValuesByFieldset
+    currentValuesByFieldset,
   };
 
-  return state.activeFieldsetId === undefined ? routeState : {
-    ...routeState,
-    activeFieldsetId: state.activeFieldsetId
-  };
+  return state.activeFieldsetId === undefined
+    ? routeState
+    : {
+        ...routeState,
+        activeFieldsetId: state.activeFieldsetId,
+      };
 }
 
 function getSnapshot(
   snapshots: readonly ControlSnapshot[],
   fieldsetId: string,
-  snapshotId: string
+  snapshotId: string,
 ): Effect.Effect<ControlSnapshot, ControlSessionError> {
   const snapshot = snapshots.find((candidate) => candidate.id === snapshotId);
 
@@ -318,11 +355,13 @@ function getSnapshot(
   }
 
   if (snapshot.fieldsetId !== fieldsetId) {
-    return Effect.fail(new ControlSnapshotFieldsetMismatchError({
-      fieldsetId,
-      snapshotId,
-      snapshotFieldsetId: snapshot.fieldsetId
-    }));
+    return Effect.fail(
+      new ControlSnapshotFieldsetMismatchError({
+        fieldsetId,
+        snapshotId,
+        snapshotFieldsetId: snapshot.fieldsetId,
+      }),
+    );
   }
 
   return Effect.succeed(snapshot);

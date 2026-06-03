@@ -3,8 +3,5 @@
   "compilerOptions": {
     "jsx": "react-jsx"
   },
-  "files": [
-    "src/react.ts",
-    "src/render-performance.ts"
-  ]
+  "files": ["src/react.ts", "src/render-performance.ts"]
 }

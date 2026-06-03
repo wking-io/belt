@@ -58,7 +58,7 @@ export function createPrototypeGraphIdentity(args: {
       const query = params.toString();
 
       return `${basePath}${query ? `?${query}` : ""}${hash}`;
-    }
+    },
   };
 }
 

@@ -14,48 +14,54 @@ export * from "./schemas.js";
 export class DuplicateToolbarToolIdError extends Schema.TaggedErrorClass<DuplicateToolbarToolIdError>()(
   "DuplicateToolbarToolIdError",
   {
-    id: Schema.String
-  }
+    id: Schema.String,
+  },
 ) {}
 
 export class InvalidToolbarThemeVariableNameError extends Schema.TaggedErrorClass<InvalidToolbarThemeVariableNameError>()(
   "InvalidToolbarThemeVariableNameError",
   {
-    name: Schema.String
-  }
+    name: Schema.String,
+  },
 ) {}
 
-export type ToolbarRegistrationError = DuplicateToolbarToolIdError | InvalidToolbarThemeVariableNameError | SchemaError;
+export type ToolbarRegistrationError =
+  | DuplicateToolbarToolIdError
+  | InvalidToolbarThemeVariableNameError
+  | SchemaError;
 
 export type ToolHttpApi = HttpApi.AnyWithProps;
 export type ToolHttpApiLayer<ROut = never, E = unknown, RIn = unknown> = Layer.Layer<ROut, E, RIn>;
 export type ToolRuntimeLayer<ROut = never, E = unknown, RIn = unknown> = Layer.Layer<ROut, E, RIn>;
 
 const BeltCssVariableNameSchema = Schema.declare<string>(
-  (value): value is string => typeof value === "string" && value.startsWith("--belt-")
+  (value): value is string => typeof value === "string" && value.startsWith("--belt-"),
 );
 const BeltCssVariableValueSchema = NonEmptyStringSchema;
 const BeltThemeModeSchema = Schema.Literals(["light", "dark"]);
 const ThemeDefaultSchema = NonEmptyStringSchema;
 
-export const ToolHttpApiSchema = Schema.declare<ToolHttpApi>(
-  (value): value is ToolHttpApi => HttpApi.isHttpApi(value)
+export const ToolHttpApiSchema = Schema.declare<ToolHttpApi>((value): value is ToolHttpApi =>
+  HttpApi.isHttpApi(value),
 );
 export const ToolHttpApiLayerSchema = Schema.declare<ToolHttpApiLayer>(
-  (value): value is ToolHttpApiLayer => Layer.isLayer(value)
+  (value): value is ToolHttpApiLayer => Layer.isLayer(value),
 );
 export const ToolRuntimeLayerSchema = Schema.declare<ToolRuntimeLayer>(
-  (value): value is ToolRuntimeLayer => Layer.isLayer(value)
+  (value): value is ToolRuntimeLayer => Layer.isLayer(value),
 );
 
-export const ThemeVariablesSchema = Schema.Record(BeltCssVariableNameSchema, BeltCssVariableValueSchema);
+export const ThemeVariablesSchema = Schema.Record(
+  BeltCssVariableNameSchema,
+  BeltCssVariableValueSchema,
+);
 
 export const ToolbarThemeSchema = Schema.Struct({
   id: NonEmptyStringSchema,
   name: NonEmptyStringSchema,
   mode: BeltThemeModeSchema,
   extends: Schema.optionalKey(NonEmptyStringSchema),
-  variables: ThemeVariablesSchema
+  variables: ThemeVariablesSchema,
 });
 
 export type ToolbarTheme = Schema.Schema.Type<typeof ToolbarThemeSchema>;
@@ -64,8 +70,8 @@ export const ToolbarThemeConfigSchema = Schema.Union([
   ThemeDefaultSchema,
   Schema.Struct({
     default: Schema.optionalKey(ThemeDefaultSchema),
-    themes: Schema.optionalKey(Schema.Array(ToolbarThemeSchema))
-  })
+    themes: Schema.optionalKey(Schema.Array(ToolbarThemeSchema)),
+  }),
 ]);
 
 export type ToolbarThemeConfig = Schema.Schema.Type<typeof ToolbarThemeConfigSchema>;
@@ -76,7 +82,7 @@ export type ToolbarBuiltInThemeId = (typeof toolbarBuiltInThemeIds)[number];
 
 export const ToolbarToolSchema = Schema.Struct({
   id: NonEmptyStringSchema,
-  label: NonEmptyStringSchema
+  label: NonEmptyStringSchema,
 });
 
 export type ToolbarTool = Schema.Schema.Type<typeof ToolbarToolSchema>;
@@ -85,13 +91,13 @@ export const ToolDefinitionSchema = Schema.Struct({
   ...ToolbarToolSchema.fields,
   api: Schema.optionalKey(ToolHttpApiSchema),
   apiLayer: Schema.optionalKey(ToolHttpApiLayerSchema),
-  runtimeLayer: Schema.optionalKey(ToolRuntimeLayerSchema)
+  runtimeLayer: Schema.optionalKey(ToolRuntimeLayerSchema),
 });
 
 export type ToolDefinition<
   Api extends ToolHttpApi = ToolHttpApi,
   ApiLayer extends ToolHttpApiLayer = ToolHttpApiLayer,
-  RuntimeLayer extends ToolRuntimeLayer | undefined = ToolRuntimeLayer | undefined
+  RuntimeLayer extends ToolRuntimeLayer | undefined = ToolRuntimeLayer | undefined,
 > = ToolbarTool & {
   readonly api?: Api;
   readonly apiLayer?: ApiLayer;
@@ -100,20 +106,17 @@ export type ToolDefinition<
 
 export const ToolRegistrationSchema = Schema.Struct({
   tool: ToolDefinitionSchema,
-  config: Schema.optionalKey(Schema.Unknown)
+  config: Schema.optionalKey(Schema.Unknown),
 });
 
-export type ToolRegistration<
-  Config = unknown,
-  Tool extends ToolDefinition = ToolDefinition
-> = {
+export type ToolRegistration<Config = unknown, Tool extends ToolDefinition = ToolDefinition> = {
   readonly tool: Tool;
   readonly config?: Config;
 };
 
 export const ToolbarConfigSchema = Schema.Struct({
   theme: Schema.optionalKey(ToolbarThemeConfigSchema),
-  tools: Schema.Array(ToolRegistrationSchema)
+  tools: Schema.Array(ToolRegistrationSchema),
 });
 
 export type ToolbarConfig = Schema.Schema.Type<typeof ToolbarConfigSchema>;
@@ -128,27 +131,32 @@ export type ToolbarDefinition<Config extends ToolbarConfig = ToolbarConfig> = {
 
 export type ToolbarConfigSource = ToolbarConfig | ToolbarDefinition;
 
-export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function*(config: unknown) {
+export const validateToolbarConfig = Effect.fn("validateToolbarConfig")(function* (
+  config: unknown,
+) {
   const decoded = yield* Schema.decodeUnknownEffect(ToolbarConfigSchema)(config);
 
   return yield* validateDecodedToolbarConfig(decoded);
 });
 
-export const validateToolbarConfigExport = Effect.fn("validateToolbarConfigExport")(function*(value: unknown) {
+export const validateToolbarConfigExport = Effect.fn("validateToolbarConfigExport")(function* (
+  value: unknown,
+) {
   const config = getToolbarDefinitionConfig(value) ?? value;
 
   return yield* validateToolbarConfig(config);
 });
 
 function validateDecodedToolbarConfig(config: ToolbarConfig) {
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const duplicateId = findDuplicateToolId(config.tools.map((registration) => registration.tool));
 
     if (duplicateId) {
       return yield* new DuplicateToolbarToolIdError({ id: duplicateId });
     }
 
-    const invalidThemeVariableName = config.theme === undefined ? undefined : findInvalidThemeVariableName(config.theme);
+    const invalidThemeVariableName =
+      config.theme === undefined ? undefined : findInvalidThemeVariableName(config.theme);
 
     if (invalidThemeVariableName) {
       return yield* new InvalidToolbarThemeVariableNameError({ name: invalidThemeVariableName });
@@ -179,24 +187,26 @@ export function defineTool<const Tool extends ToolDefinition>(tool: Tool): Tool 
 }
 
 export function defineToolRegistration<const Registration extends ToolRegistration>(
-  registration: Registration
+  registration: Registration,
 ): Registration {
   Schema.decodeUnknownSync(ToolRegistrationSchema)(registration);
 
   return registration;
 }
 
-export function defineToolbar<const Config extends ToolbarConfig>(config: Config): ToolbarConfig & Config;
+export function defineToolbar<const Config extends ToolbarConfig>(
+  config: Config,
+): ToolbarConfig & Config;
 export function defineToolbar(config: ToolbarConfig): ToolbarConfig {
   return decodeToolbarConfigSync(config);
 }
 
 export function defineToolbarDefinition<const Config extends ToolbarConfig>(
-  definition: ToolbarDefinition<Config>
+  definition: ToolbarDefinition<Config>,
 ): ToolbarDefinition<ToolbarConfig & Config> {
   return {
     ...definition,
-    toolbarConfig: defineToolbar(definition.toolbarConfig)
+    toolbarConfig: defineToolbar(definition.toolbarConfig),
   };
 }
 
@@ -228,7 +238,7 @@ export function defineTheme(theme: ToolbarTheme): ToolbarTheme {
   const decoded = Schema.decodeUnknownSync(ToolbarThemeSchema)(theme);
 
   assertThemeVariableNames({
-    themes: [decoded]
+    themes: [decoded],
   });
 
   return decoded;
@@ -238,21 +248,19 @@ export function toToolbarToolMetadata(tool: ToolDefinition) {
   return {
     id: tool.id,
     label: tool.label,
-    routes: toToolbarToolApiRoutePaths(tool.api).toSorted()
+    routes: toToolbarToolApiRoutePaths(tool.api).toSorted(),
   };
 }
 
 export function toToolbarBackendConfig(config: ToolbarConfig): ToolbarBackendConfig {
   return {
     ...config,
-    tools: config.tools.map((registration) => registration.tool)
+    tools: config.tools.map((registration) => registration.tool),
   };
 }
 
-export function makeToolbarClient(options?: {
-  readonly baseUrl?: string | URL;
-}) {
-  return Effect.gen(function*() {
+export function makeToolbarClient(options?: { readonly baseUrl?: string | URL }) {
+  return Effect.gen(function* () {
     const baseUrl = options?.baseUrl ?? toolbarApiBasePath;
     const client = yield* HttpApiClient.make(ToolbarApi, { baseUrl });
 
@@ -260,10 +268,11 @@ export function makeToolbarClient(options?: {
       ...client,
       tool: <ApiId extends string, Groups extends HttpApiGroup.Any>(
         api: HttpApi.HttpApi<ApiId, Groups>,
-        toolId: string
-      ) => HttpApiClient.make(api, {
-        baseUrl: toolApiBaseUrl(baseUrl, toolId)
-      })
+        toolId: string,
+      ) =>
+        HttpApiClient.make(api, {
+          baseUrl: toolApiBaseUrl(baseUrl, toolId),
+        }),
     };
   });
 }
@@ -295,7 +304,8 @@ function findDuplicateToolId(tools: readonly ToolDefinition[]): string | undefin
 }
 
 function assertThemeVariableNames(theme: ToolbarThemeConfig | undefined) {
-  const invalidThemeVariableName = theme === undefined ? undefined : findInvalidThemeVariableName(theme);
+  const invalidThemeVariableName =
+    theme === undefined ? undefined : findInvalidThemeVariableName(theme);
 
   if (invalidThemeVariableName) {
     throw new InvalidToolbarThemeVariableNameError({ name: invalidThemeVariableName });

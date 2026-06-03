@@ -30,21 +30,23 @@ describe("prototypeIterationsVite", () => {
       plugins: [
         prototypeIterationsVite({
           appEntry: "/src/main.ts",
-          aliases: ["@/"]
-        })
+          aliases: ["@/"],
+        }),
       ],
       resolve: {
         alias: {
-          "@": path.join(fixtureRoot, "src")
-        }
-      }
+          "@": path.join(fixtureRoot, "src"),
+        },
+      },
     });
 
     const html = await server.transformIndexHtml(
       "/__prototype/one-file",
-      await readFile(path.join(fixtureRoot, "index.html"), "utf8")
+      await readFile(path.join(fixtureRoot, "index.html"), "utf8"),
     );
-    const resolved = await server.pluginContainer.resolveId("@/routes/Dashboard?prototype=one-file");
+    const resolved = await server.pluginContainer.resolveId(
+      "@/routes/Dashboard?prototype=one-file",
+    );
 
     assert.match(html, /\/src\/main\.ts\?prototype=one-file/);
     assert.ok(resolved);
@@ -76,31 +78,31 @@ async function createPrototypeFixture() {
   await mkdir(path.join(root, "prototypes", "button-shadow", "components"), { recursive: true });
   await writeFile(
     path.join(root, "index.html"),
-    `<div id="app"></div><script type="module" src="/src/main.ts"></script>`
+    `<div id="app"></div><script type="module" src="/src/main.ts"></script>`,
   );
   await writeFile(
     path.join(root, "src", "main.ts"),
-    `import { render } from "@/App";\ndocument.querySelector("#app")!.textContent = render();\n`
+    `import { render } from "@/App";\ndocument.querySelector("#app")!.textContent = render();\n`,
   );
   await writeFile(
     path.join(root, "src", "App.ts"),
-    `import { dashboard } from "@/routes/Dashboard";\nimport { button } from "@/components/Button";\nexport function render() { return dashboard + " " + button; }\n`
+    `import { dashboard } from "@/routes/Dashboard";\nimport { button } from "@/components/Button";\nexport function render() { return dashboard + " " + button; }\n`,
   );
   await writeFile(
     path.join(root, "src", "routes", "Dashboard.ts"),
-    `export const dashboard = "default-dashboard";\n`
+    `export const dashboard = "default-dashboard";\n`,
   );
   await writeFile(
     path.join(root, "src", "components", "Button.ts"),
-    `export const button = "default-button";\n`
+    `export const button = "default-button";\n`,
   );
   await writeFile(
     path.join(root, "prototypes", "one-file", "routes", "Dashboard.ts"),
-    `export const dashboard = "one-file-dashboard";\n`
+    `export const dashboard = "one-file-dashboard";\n`,
   );
   await writeFile(
     path.join(root, "prototypes", "button-shadow", "components", "Button.ts"),
-    `export const button = "shadow-button";\n`
+    `export const button = "shadow-button";\n`,
   );
 
   return root;
@@ -115,18 +117,18 @@ async function buildPrototype(root: string, prototypeName: string) {
       prototypeIterationsVite({
         appEntry: "/src/main.ts",
         aliases: ["@/"],
-        buildPrototype: prototypeName
-      })
+        buildPrototype: prototypeName,
+      }),
     ],
     resolve: {
       alias: {
-        "@": path.join(root, "src")
-      }
+        "@": path.join(root, "src"),
+      },
     },
     build: {
       emptyOutDir: true,
-      outDir: path.join(root, "dist-test", prototypeName)
-    }
+      outDir: path.join(root, "dist-test", prototypeName),
+    },
   });
 }
 

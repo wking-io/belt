@@ -572,9 +572,9 @@ function isToolbarBody(children: ReactNode): boolean {
     ? children.some(isToolbarBody)
     : Boolean(
         children &&
-          typeof children === "object" &&
-          "type" in children &&
-          children.type === ToolbarBodyShell,
+        typeof children === "object" &&
+        "type" in children &&
+        children.type === ToolbarBodyShell,
       );
 }
 
@@ -933,7 +933,12 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): ReactElement {
 export function ComboboxInput(props: ComboboxInputProps): ReactElement {
   const { className, ...inputProps } = props;
 
-  return <BaseCombobox.Input {...inputProps} className={mergeClassName("belt-input belt-text", className)} />;
+  return (
+    <BaseCombobox.Input
+      {...inputProps}
+      className={mergeClassName("belt-input belt-text", className)}
+    />
+  );
 }
 
 export function ComboboxList(props: ComboboxListProps): ReactElement {
@@ -971,7 +976,11 @@ export function ComboboxList(props: ComboboxListProps): ReactElement {
                 data-tone="neutral"
               >
                 <div className="belt-surface__inner">
-                  <ComboboxInput className="belt-combobox__search" data-size="xs" placeholder={placeholder} />
+                  <ComboboxInput
+                    className="belt-combobox__search"
+                    data-size="xs"
+                    placeholder={placeholder}
+                  />
                 </div>
               </div>
             ) : null}

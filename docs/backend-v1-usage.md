@@ -23,15 +23,15 @@ export default defineToolbar({
               {
                 id: "web",
                 label: "Web",
-                appName: "myapp"
-              }
-            ]
-          })
+                appName: "myapp",
+              },
+            ],
+          }),
         }),
-        prototypeIterations()
-      ]
-    })
-  ]
+        prototypeIterations(),
+      ],
+    }),
+  ],
 });
 ```
 
@@ -55,14 +55,14 @@ export default createToolbar({
               {
                 id: "web",
                 label: "Web",
-                appName: "myapp"
-              }
-            ]
-          })
-        })
-      ]
-    })
-  ]
+                appName: "myapp",
+              },
+            ],
+          }),
+        }),
+      ],
+    }),
+  ],
 });
 ```
 
@@ -125,9 +125,7 @@ import toolbarConfig from "./toolbar.config";
 
 const toolbarServer = createToolbarServer(toolbarConfig);
 
-const response = await toolbarServer.fetch(
-  new Request("http://local.test/__toolbar")
-);
+const response = await toolbarServer.fetch(new Request("http://local.test/__toolbar"));
 
 await toolbarServer.dispose();
 ```
@@ -169,9 +167,7 @@ import { defineConfig } from "vite";
 import toolbarConfig from "./toolbar.config";
 
 export default defineConfig({
-  plugins: [
-    toolbarVite(toolbarConfig)
-  ]
+  plugins: [toolbarVite(toolbarConfig)],
 });
 ```
 
@@ -208,14 +204,14 @@ portlessResolver({
       id: "web",
       label: "Web",
       appName: "myapp",
-      primary: true
+      primary: true,
     },
     {
       id: "docs",
       label: "Docs",
-      appName: "docs.myapp"
-    }
-  ]
+      appName: "docs.myapp",
+    },
+  ],
 });
 ```
 
@@ -248,10 +244,7 @@ import { defineConfig } from "vite";
 import toolbarConfig from "./toolbar.config";
 
 export default defineConfig({
-  plugins: [
-    toolbarVite(toolbarConfig),
-    prototypeIterationsVite()
-  ]
+  plugins: [toolbarVite(toolbarConfig), prototypeIterationsVite()],
 });
 ```
 

@@ -4,7 +4,7 @@ import {
   IterationProviderError,
   defineIterationProvider,
   type Iteration,
-  type IterationProvider
+  type IterationProvider,
 } from "@repo/tool-iterations";
 import { Effect, FileSystem, Path, Schema } from "effect";
 
@@ -14,10 +14,12 @@ export const PrototypeIterationsOptionsSchema = Schema.Struct({
   routePrefix: Schema.optionalKey(NonEmptyStringSchema),
   destinationId: Schema.optionalKey(NonEmptyStringSchema),
   destinationLabel: Schema.optionalKey(NonEmptyStringSchema),
-  includeDefault: Schema.optionalKey(Schema.Boolean)
+  includeDefault: Schema.optionalKey(Schema.Boolean),
 });
 
-export type PrototypeIterationsOptions = Schema.Schema.Type<typeof PrototypeIterationsOptionsSchema>;
+export type PrototypeIterationsOptions = Schema.Schema.Type<
+  typeof PrototypeIterationsOptionsSchema
+>;
 
 export type PrototypeMetadataRecord = {
   name: string;
@@ -36,8 +38,8 @@ export class PrototypeDiscoveryError extends Schema.TaggedErrorClass<PrototypeDi
   "PrototypeDiscoveryError",
   {
     prototypesDir: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export function prototypeIterations(options: PrototypeIterationsOptions = {}): IterationProvider {
@@ -48,18 +50,21 @@ export function prototypeIterations(options: PrototypeIterationsOptions = {}): I
     label: "Prototype overlays",
     list: () =>
       listPrototypeIterations(config).pipe(
-        Effect.mapError((cause) => new IterationProviderError({
-          providerId: "prototypes",
-          cause
-        })),
+        Effect.mapError(
+          (cause) =>
+            new IterationProviderError({
+              providerId: "prototypes",
+              cause,
+            }),
+        ),
         Effect.provide(NodeFileSystem.layer),
-        Effect.provide(NodePath.layer)
-      )
+        Effect.provide(NodePath.layer),
+      ),
   });
 }
 
-export const getPrototypeMetadata = Effect.fn("getPrototypeMetadata")(function*(
-  options: PrototypeIterationsOptions = {}
+export const getPrototypeMetadata = Effect.fn("getPrototypeMetadata")(function* (
+  options: PrototypeIterationsOptions = {},
 ) {
   const config = Schema.decodeUnknownSync(PrototypeIterationsOptionsSchema)(options);
   const path = yield* Path.Path;
@@ -68,79 +73,89 @@ export const getPrototypeMetadata = Effect.fn("getPrototypeMetadata")(function*(
   const routePrefix = normalizeRoutePrefix(config.routePrefix ?? "/__prototype/");
   const prototypes = yield* discoverPrototypes({
     prototypesDir,
-    includeDefault: config.includeDefault ?? true
+    includeDefault: config.includeDefault ?? true,
   });
-  const records = prototypes.map((name): PrototypeMetadataRecord => ({
-    name,
-    isDefault: name === "default",
-    routePath: joinPublicPath(routePrefix, name),
-    sourceDir: name === "default" ? null : path.join(prototypesDir, name)
-  }));
+  const records = prototypes.map(
+    (name): PrototypeMetadataRecord => ({
+      name,
+      isDefault: name === "default",
+      routePath: joinPublicPath(routePrefix, name),
+      sourceDir: name === "default" ? null : path.join(prototypesDir, name),
+    }),
+  );
 
   return {
     prototypes: records,
     routePrefix,
-    defaultPrototype: records.find((prototype) => prototype.isDefault)?.name ?? null
+    defaultPrototype: records.find((prototype) => prototype.isDefault)?.name ?? null,
   };
 });
 
-export const listPrototypeIterations = Effect.fn("listPrototypeIterations")(function*(
-  options: PrototypeIterationsOptions = {}
+export const listPrototypeIterations = Effect.fn("listPrototypeIterations")(function* (
+  options: PrototypeIterationsOptions = {},
 ) {
   const metadata = yield* getPrototypeMetadata(options);
   const destinationId = options.destinationId ?? "preview";
   const destinationLabel = options.destinationLabel ?? "Preview";
 
-  return metadata.prototypes.map((prototype): Iteration => ({
-    id: `prototype:${prototype.name}`,
-    label: prototype.name,
-    kind: "prototype",
-    current: false,
-    destinations: [
-      {
-        id: destinationId,
-        label: destinationLabel,
-        primary: true,
-        url: prototype.routePath
-      }
-    ],
-    metadata: {
-      isDefault: prototype.isDefault,
-      routePath: prototype.routePath,
-      sourceDir: prototype.sourceDir
-    }
-  }));
+  return metadata.prototypes.map(
+    (prototype): Iteration => ({
+      id: `prototype:${prototype.name}`,
+      label: prototype.name,
+      kind: "prototype",
+      current: false,
+      destinations: [
+        {
+          id: destinationId,
+          label: destinationLabel,
+          primary: true,
+          url: prototype.routePath,
+        },
+      ],
+      metadata: {
+        isDefault: prototype.isDefault,
+        routePath: prototype.routePath,
+        sourceDir: prototype.sourceDir,
+      },
+    }),
+  );
 });
 
-export const discoverPrototypes = Effect.fn("discoverPrototypes")(function*(options: {
+export const discoverPrototypes = Effect.fn("discoverPrototypes")(function* (options: {
   prototypesDir: string;
   includeDefault: boolean;
 }) {
   const fileSystem = yield* FileSystem.FileSystem;
   const prototypes = options.includeDefault ? ["default"] : [];
-  const exists = yield* fileSystem.exists(options.prototypesDir).pipe(
-    Effect.catch(() => Effect.succeed(false))
-  );
+  const exists = yield* fileSystem
+    .exists(options.prototypesDir)
+    .pipe(Effect.catch(() => Effect.succeed(false)));
 
   if (!exists) {
     return prototypes;
   }
 
   const entries = yield* fileSystem.readDirectory(options.prototypesDir).pipe(
-    Effect.mapError((cause) => new PrototypeDiscoveryError({
-      prototypesDir: options.prototypesDir,
-      cause
-    }))
+    Effect.mapError(
+      (cause) =>
+        new PrototypeDiscoveryError({
+          prototypesDir: options.prototypesDir,
+          cause,
+        }),
+    ),
   );
 
   for (const entry of entries) {
     const entryPath = `${options.prototypesDir}/${entry}`;
     const fileInfo = yield* fileSystem.stat(entryPath).pipe(
       Effect.map((info) => info as { readonly type?: string }),
-      Effect.mapError((cause) => new PrototypeDiscoveryError({
-        prototypesDir: options.prototypesDir,
-        cause
-      }))
+      Effect.mapError(
+        (cause) =>
+          new PrototypeDiscoveryError({
+            prototypesDir: options.prototypesDir,
+            cause,
+          }),
+      ),
     );
 
     if (fileInfo.type === "Directory" && entry !== "default") {

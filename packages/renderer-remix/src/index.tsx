@@ -408,7 +408,13 @@ export function Label(handle: Handle<LabelProps>) {
     const { children, class: classes, ...props } = handle.props;
 
     return (
-      <label {...props} class={classNames("belt-label belt-text", classes)} data-size="sm" data-weight="medium" data-emphasis="strong">
+      <label
+        {...props}
+        class={classNames("belt-label belt-text", classes)}
+        data-size="sm"
+        data-weight="medium"
+        data-emphasis="strong"
+      >
         {children}
       </label>
     );

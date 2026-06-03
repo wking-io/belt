@@ -50,13 +50,10 @@ it("sets the default font family and OpenType feature contract", async () => {
     /url\("\.\.\/node_modules\/geist\/dist\/fonts\/geist-pixel\/GeistPixel-Square\.woff2"\)/,
   );
   assert.match(css, /--belt-font-family:\s*"Geist Pixel Square",\s*"Geist Mono"/);
+  assert.match(css, /:where\(\.belt\)[\s\S]*font-family:\s*var\(--belt-font-family\)/);
   assert.match(
     css,
-    /:where\(\[class\^="belt-"\],[\s\S]*font-family:\s*var\(--belt-font-family\)/,
-  );
-  assert.match(
-    css,
-    /:where\(\[class\^="belt-"\],[\s\S]*font-feature-settings:\s*var\(--belt-font-feature-settings\)/,
+    /:where\(\.belt\)[\s\S]*font-feature-settings:\s*var\(--belt-font-feature-settings\)/,
   );
 
   assert.match(css, /--belt-font-feature-settings:\s*normal/);
@@ -202,18 +199,9 @@ it("sizes select popovers to their anchor width and combobox popovers to their c
     css,
     /\.belt-select__popup\)[\s\S]*inline-size:\s*calc\(var\(--anchor-width\) \+ calc\(var\(--belt-space\) \* 3\)\)/,
   );
-  assert.match(
-    css,
-    /\.belt-select__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
-  );
-  assert.match(
-    css,
-    /\.belt-combobox__popup\)[\s\S]*inline-size:\s*max-content/,
-  );
-  assert.match(
-    css,
-    /\.belt-combobox__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/,
-  );
+  assert.match(css, /\.belt-select__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/);
+  assert.match(css, /\.belt-combobox__popup\)[\s\S]*inline-size:\s*max-content/);
+  assert.match(css, /\.belt-combobox__popup\)[\s\S]*max-inline-size:\s*var\(--available-width\)/);
 });
 
 it("aligns combobox trigger and popup structure with select", async () => {
@@ -227,7 +215,10 @@ it("aligns combobox trigger and popup structure with select", async () => {
     css,
     /\.belt-menu__popup, \.belt-select__popup, \.belt-combobox__popup\)[\s\S]*border:\s*0[\s\S]*padding:\s*0/,
   );
-  assert.match(css, /\.belt-combobox__popup > \.belt-surface__inner\)[\s\S]*height:\s*auto/);
+  assert.match(
+    css,
+    /\.belt-menu__popup > \.belt-surface__inner,[\s\S]*\.belt-select__popup > \.belt-surface__inner,[\s\S]*\.belt-combobox__popup > \.belt-surface__inner[\s\S]*\)\s*\{[\s\S]*height:\s*auto/,
+  );
   assert.match(
     css,
     /\.belt-combobox__search-surface\)[\s\S]*width:\s*calc\(100% - calc\(var\(--belt-space\) \* 2\)\)/,

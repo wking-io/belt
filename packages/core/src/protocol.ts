@@ -14,7 +14,7 @@ export const toolbarApiRoutes: ToolbarApiRoutes = {
   root: "/__toolbar",
   tools: "/__toolbar/tools",
   tool: "/__toolbar/tools/:toolId",
-  toolRoute: "/__toolbar/tools/:toolId/*routePath"
+  toolRoute: "/__toolbar/tools/:toolId/*routePath",
 };
 
 export type ToolbarApiRelativeRoutes = {
@@ -24,7 +24,7 @@ export type ToolbarApiRelativeRoutes = {
 
 export const toolbarApiRelativeRoutes: ToolbarApiRelativeRoutes = {
   tool: "/tools/:toolId",
-  toolRoute: "/tools/:toolId/*"
+  toolRoute: "/tools/:toolId/*",
 };
 
 export function toolbarApiToolPath(toolId: string): string {
@@ -48,7 +48,10 @@ export function normalizeToolRoutePath(routePath: string): string {
     return "index";
   }
 
-  if (normalized === toolbarApiBasePath.replace(/^\/+/, "") || normalized.startsWith(`${toolbarApiBasePath.replace(/^\/+/, "")}/`)) {
+  if (
+    normalized === toolbarApiBasePath.replace(/^\/+/, "") ||
+    normalized.startsWith(`${toolbarApiBasePath.replace(/^\/+/, "")}/`)
+  ) {
     throw new Error("Tool route paths must be relative to the tool");
   }
 
@@ -79,7 +82,9 @@ export function toolApiRoutePath(toolId: string, routePath: string): string {
   return toolbarApiToolRoutePath(toolId, normalized);
 }
 
-export function toToolbarToolApiRoutePaths(api: HttpApi.AnyWithProps | undefined): readonly string[] {
+export function toToolbarToolApiRoutePaths(
+  api: HttpApi.AnyWithProps | undefined,
+): readonly string[] {
   if (!api) {
     return [];
   }
@@ -90,7 +95,7 @@ export function toToolbarToolApiRoutePaths(api: HttpApi.AnyWithProps | undefined
     onGroup: () => {},
     onEndpoint: ({ endpoint }) => {
       routePaths.push(normalizeToolRoutePath(endpoint.path));
-    }
+    },
   });
 
   return routePaths;
@@ -109,7 +114,7 @@ export const ToolbarErrorCodeSchema = Schema.Literals([
   "NOT_FOUND",
   "METHOD_NOT_ALLOWED",
   "UNKNOWN_TOOL",
-  "INTERNAL_ERROR"
+  "INTERNAL_ERROR",
 ]);
 
 export type ToolbarErrorCode = Schema.Schema.Type<typeof ToolbarErrorCodeSchema>;
@@ -117,7 +122,7 @@ export type ToolbarErrorCode = Schema.Schema.Type<typeof ToolbarErrorCodeSchema>
 export const ToolbarErrorSchema = Schema.Struct({
   code: ToolbarErrorCodeSchema,
   message: Schema.String,
-  details: Schema.optionalKey(Schema.Unknown)
+  details: Schema.optionalKey(Schema.Unknown),
 });
 
 export type ToolbarError = Schema.Schema.Type<typeof ToolbarErrorSchema>;
@@ -125,26 +130,26 @@ export type ToolbarError = Schema.Schema.Type<typeof ToolbarErrorSchema>;
 export const ToolbarToolMetadataSchema = Schema.Struct({
   id: ToolbarToolIdSchema,
   label: ToolbarToolLabelSchema,
-  routes: Schema.Array(ToolbarToolRoutePathSchema)
+  routes: Schema.Array(ToolbarToolRoutePathSchema),
 });
 
 export type ToolbarToolMetadata = Schema.Schema.Type<typeof ToolbarToolMetadataSchema>;
 
 export const ToolbarRootDataSchema = Schema.Struct({
   apiVersion: Schema.Literal(1),
-  tools: Schema.Array(ToolbarToolMetadataSchema)
+  tools: Schema.Array(ToolbarToolMetadataSchema),
 });
 
 export type ToolbarRootData = Schema.Schema.Type<typeof ToolbarRootDataSchema>;
 
 export const ToolbarToolsDataSchema = Schema.Struct({
-  tools: Schema.Array(ToolbarToolMetadataSchema)
+  tools: Schema.Array(ToolbarToolMetadataSchema),
 });
 
 export type ToolbarToolsData = Schema.Schema.Type<typeof ToolbarToolsDataSchema>;
 
 export const ToolbarToolDataSchema = Schema.Struct({
-  tool: ToolbarToolMetadataSchema
+  tool: ToolbarToolMetadataSchema,
 });
 
 export type ToolbarToolData = Schema.Schema.Type<typeof ToolbarToolDataSchema>;
@@ -152,12 +157,12 @@ export type ToolbarToolData = Schema.Schema.Type<typeof ToolbarToolDataSchema>;
 export const ToolbarSuccessEnvelopeSchema = <Data extends Schema.Schema<unknown>>(data: Data) =>
   Schema.Struct({
     ok: Schema.Literal(true),
-    data
+    data,
   });
 
 export const ToolbarErrorEnvelopeSchema = Schema.Struct({
   ok: Schema.Literal(false),
-  error: ToolbarErrorSchema
+  error: ToolbarErrorSchema,
 });
 
 export type ToolbarErrorEnvelope = Schema.Schema.Type<typeof ToolbarErrorEnvelopeSchema>;
@@ -172,13 +177,13 @@ export type ToolbarResponseEnvelope<Data> = ToolbarSuccessEnvelope<Data> | Toolb
 export function toolbarSuccess<Data>(data: Data): ToolbarSuccessEnvelope<Data> {
   return {
     ok: true,
-    data
+    data,
   };
 }
 
 export function toolbarError(error: ToolbarError): ToolbarErrorEnvelope {
   return {
     ok: false,
-    error
+    error,
   };
 }

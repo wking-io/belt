@@ -6,12 +6,12 @@ import { appendPrototypeToImports } from "./imports.js";
 import {
   createPrototypeModuleGraphResolver,
   isFileInside,
-  type PrototypeModuleGraphResolver
+  type PrototypeModuleGraphResolver,
 } from "./resolver.js";
 import {
   createPrototypeRuntimeModule,
   RESOLVED_VIRTUAL_MODULE_ID,
-  VIRTUAL_MODULE_ID
+  VIRTUAL_MODULE_ID,
 } from "./runtime.js";
 
 export type PrototypeOverlayViteOptions = {
@@ -28,7 +28,7 @@ export {
   VIRTUAL_MODULE_ID,
   createPrototypeGraphIdentity,
   createPrototypeRuntimeModule,
-  createPrototypeModuleGraphResolver
+  createPrototypeModuleGraphResolver,
 };
 export type { PrototypeGraphIdentity, PrototypeModuleGraphResolver };
 
@@ -55,7 +55,7 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
       aliases,
       identity,
       srcDir,
-      prototypesDir
+      prototypesDir,
     });
   }
 
@@ -103,7 +103,7 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
         html = injectPrototypeEntry(html, {
           appEntry,
           prototypeName,
-          identity
+          identity,
         });
 
         html = await viteServer.transformIndexHtml(url, html);
@@ -126,9 +126,9 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
         return injectPrototypeEntry(html, {
           appEntry,
           prototypeName,
-          identity
+          identity,
         });
-      }
+      },
     },
 
     resolveId(source, importer) {
@@ -150,7 +150,7 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
         return createPrototypeRuntimeModule({
           current: "default",
           prototypes: getPrototypes(),
-          routePrefix
+          routePrefix,
         });
       }
 
@@ -190,7 +190,7 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
         id,
         prototypeName,
         aliases,
-        identity
+        identity,
       });
 
       if (debug && result) {
@@ -198,7 +198,7 @@ export function prototypeIterationsVite(options: PrototypeOverlayViteOptions = {
       }
 
       return result;
-    }
+    },
   };
 
   return [plugin];
@@ -235,15 +235,15 @@ function isScriptModuleId(id: string, identity: PrototypeGraphIdentity): boolean
 
 function injectPrototypeEntry(
   html: string,
-  args: { appEntry: string; prototypeName: string; identity: PrototypeGraphIdentity }
+  args: { appEntry: string; prototypeName: string; identity: PrototypeGraphIdentity },
 ): string {
   const entryPattern = new RegExp(
-    `<script\\s+type=["']module["']\\s+src=["']${escapeRegExp(args.appEntry)}["']\\s*><\\/script>`
+    `<script\\s+type=["']module["']\\s+src=["']${escapeRegExp(args.appEntry)}["']\\s*><\\/script>`,
   );
 
   return html.replace(
     entryPattern,
-    `<script type="module" src="${args.identity.attach(args.appEntry, args.prototypeName)}"></script>`
+    `<script type="module" src="${args.identity.attach(args.appEntry, args.prototypeName)}"></script>`,
   );
 }
 

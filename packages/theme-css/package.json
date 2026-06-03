@@ -18,14 +18,14 @@
     "build:css": "tailwindcss -i ./src/theme.input.css -o ./dist/theme.css",
     "check": "tsc -p tsconfig.json"
   },
-  "engines": {
-    "node": ">=20"
+  "dependencies": {
+    "geist": "^1.7.2"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
     "tailwindcss": "^4.3.0"
   },
-  "dependencies": {
-    "geist": "^1.7.2"
+  "engines": {
+    "node": ">=20"
   }
 }

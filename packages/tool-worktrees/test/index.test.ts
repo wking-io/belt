@@ -13,12 +13,12 @@ import {
   makeWorktreesToolClient,
   parseGitWorktreeList,
   toWorktreeEntries,
-  worktreesTool
+  worktreesTool,
 } from "../src/index.ts";
 
 describe("parseGitWorktreeList", () => {
   it.effect("parses git worktree porcelain output", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const worktrees = yield* parseGitWorktreeList(`worktree /repo/myapp
 HEAD 1111111111111111111111111111111111111111
 branch refs/heads/main
@@ -32,18 +32,19 @@ branch refs/heads/fix-ui
         {
           branch: "main",
           detached: false,
-          path: "/repo/myapp"
+          path: "/repo/myapp",
         },
         {
           branch: "fix-ui",
           detached: false,
-          path: "/repo/myapp-fix-ui"
-        }
+          path: "/repo/myapp-fix-ui",
+        },
       ]);
-    }));
+    }),
+  );
 
   it.effect("parses detached worktrees with a defined detached branch label", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const worktrees = yield* parseGitWorktreeList(`worktree /repo/myapp-detached
 HEAD 3333333333333333333333333333333333333333
 detached
@@ -53,34 +54,35 @@ detached
         {
           branch: "detached",
           detached: true,
-          path: "/repo/myapp-detached"
-        }
+          path: "/repo/myapp-detached",
+        },
       ]);
-    }));
+    }),
+  );
 
   it.effect("returns an empty list for empty porcelain output", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const worktrees = yield* parseGitWorktreeList("");
 
       assert.deepStrictEqual(worktrees, []);
-    }));
+    }),
+  );
 
   it.effect("fails with a typed parse error when a block has no worktree path", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const error = yield* parseGitWorktreeList(`HEAD 4444444444444444444444444444444444444444
 branch refs/heads/main
-`).pipe(
-        Effect.flip
-      );
+`).pipe(Effect.flip);
 
       assert.ok(error instanceof GitWorktreeParseError);
       assert.strictEqual(error._tag, "GitWorktreeParseError");
-    }));
+    }),
+  );
 });
 
 describe("toWorktreeEntries", () => {
   it.effect("marks the current worktree by resolved worktree root path", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const entries = yield* toWorktreeEntries({
         currentPath: "/repo/myapp",
         resolvePath: (...segments) => segments.join("/"),
@@ -89,51 +91,54 @@ describe("toWorktreeEntries", () => {
             {
               id: "web",
               label: "Web",
-              url: `https://${worktree.branch}.myapp.localhost`
-            }
-          ]
+              url: `https://${worktree.branch}.myapp.localhost`,
+            },
+          ],
         },
         worktrees: [
           { branch: "main", detached: false, path: "/repo/myapp" },
-          { branch: "fix-ui", detached: false, path: "/repo/myapp-fix-ui" }
-        ]
+          { branch: "fix-ui", detached: false, path: "/repo/myapp-fix-ui" },
+        ],
       });
 
-      assert.deepStrictEqual(entries.map((entry) => [entry.branch, entry.current]), [
-        ["main", true],
-        ["fix-ui", false]
-      ]);
-    }));
+      assert.deepStrictEqual(
+        entries.map((entry) => [entry.branch, entry.current]),
+        [
+          ["main", true],
+          ["fix-ui", false],
+        ],
+      );
+    }),
+  );
 
   it.effect("surfaces resolver failures as typed errors", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const error = yield* toWorktreeEntries({
         currentPath: "/repo/myapp",
         resolvePath: (...segments) => segments.join("/"),
         resolver: {
-          resolve: () => Effect.fail("resolver exploded")
+          resolve: () => Effect.fail("resolver exploded"),
         },
-        worktrees: [
-          { branch: "main", detached: false, path: "/repo/myapp" }
-        ]
+        worktrees: [{ branch: "main", detached: false, path: "/repo/myapp" }],
       }).pipe(Effect.flip);
 
       assert.ok(error instanceof WorktreeResolverError);
       assert.strictEqual(error._tag, "WorktreeResolverError");
-    }));
+    }),
+  );
 });
 
 describe("worktreesTool", () => {
   it.effect("returns an empty worktree list outside a git repository", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const cwd = yield* Effect.promise(async () => mkdtemp(join(tmpdir(), "belt-worktrees-")));
 
       try {
         const registration = worktreesTool({
           cwd,
           resolver: {
-            resolve: () => []
-          }
+            resolve: () => [],
+          },
         });
         const tool = registration.tool;
         assert.ok(tool.api);
@@ -147,26 +152,28 @@ describe("worktreesTool", () => {
           await rm(cwd, { force: true, recursive: true });
         });
       }
-    }));
+    }),
+  );
 
   it.effect("calls the index route through the typed Worktrees tool client", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const cwd = yield* Effect.promise(async () => mkdtemp(join(tmpdir(), "belt-worktrees-")));
 
       try {
         const registration = worktreesTool({
           cwd,
           resolver: {
-            resolve: () => []
-          }
+            resolve: () => [],
+          },
         });
 
         const result = yield* withWorktreesHttpServer(registration.tool, (baseUrl) =>
-          Effect.gen(function*() {
+          Effect.gen(function* () {
             const client = yield* makeWorktreesToolClient({ baseUrl });
 
             return yield* client.worktrees.index();
-          }).pipe(Effect.provide(FetchHttpClient.layer)));
+          }).pipe(Effect.provide(FetchHttpClient.layer)),
+        );
 
         assert.deepStrictEqual(result, { worktrees: [] });
       } finally {
@@ -174,7 +181,8 @@ describe("worktreesTool", () => {
           await rm(cwd, { force: true, recursive: true });
         });
       }
-    }));
+    }),
+  );
 });
 
 function requestToolIndex(tool: ReturnType<typeof worktreesTool>["tool"]) {
@@ -185,20 +193,21 @@ function requestToolIndex(tool: ReturnType<typeof worktreesTool>["tool"]) {
   const app = HttpApiBuilder.layer(tool.api).pipe(
     Layer.provide(tool.apiLayer),
     Layer.provide(tool.runtimeLayer),
-    Layer.provide(HttpServer.layerServices)
+    Layer.provide(HttpServer.layerServices),
   );
   const { handler, dispose } = HttpRouter.toWebHandler(app);
 
-  return Effect.promise(() => handler(new Request("http://localhost/"), Context.empty() as Context.Context<unknown>))
-    .pipe(
-      Effect.flatMap((response) => Effect.promise(async (): Promise<unknown> => response.json())),
-      Effect.tap(() => Effect.promise(() => dispose()))
-    );
+  return Effect.promise(() =>
+    handler(new Request("http://localhost/"), Context.empty() as Context.Context<unknown>),
+  ).pipe(
+    Effect.flatMap((response) => Effect.promise(async (): Promise<unknown> => response.json())),
+    Effect.tap(() => Effect.promise(() => dispose())),
+  );
 }
 
 function withWorktreesHttpServer<A, E, R>(
   tool: ReturnType<typeof worktreesTool>["tool"],
-  run: (baseUrl: string) => Effect.Effect<A, E, R>
+  run: (baseUrl: string) => Effect.Effect<A, E, R>,
 ) {
   if (!tool.api || !tool.apiLayer || !tool.runtimeLayer) {
     return Effect.die(new Error("Worktrees tool API registration is missing"));
@@ -209,18 +218,19 @@ function withWorktreesHttpServer<A, E, R>(
       const app = HttpApiBuilder.layer(tool.api).pipe(
         Layer.provide(tool.apiLayer),
         Layer.provide(tool.runtimeLayer),
-        Layer.provide(HttpServer.layerServices)
+        Layer.provide(HttpServer.layerServices),
       );
       const { handler, dispose } = HttpRouter.toWebHandler(app);
       const server = createServer(async (req, res) => {
         try {
           const incomingUrl = new URL(req.url ?? "/", "http://localhost");
-          const routePath = incomingUrl.pathname.replace(/^\/__toolbar\/tools\/worktrees/, "") || "/";
+          const routePath =
+            incomingUrl.pathname.replace(/^\/__toolbar\/tools\/worktrees/, "") || "/";
           const response = await handler(
             new Request(new URL(`${routePath}${incomingUrl.search}`, "http://localhost"), {
-              method: req.method
+              method: req.method,
             }),
-            Context.empty() as Context.Context<unknown>
+            Context.empty() as Context.Context<unknown>,
           );
 
           await writeResponse(res, response);
@@ -244,11 +254,11 @@ function withWorktreesHttpServer<A, E, R>(
         close: async () => {
           await dispose();
           await closeServer(server);
-        }
+        },
       };
     }),
     ({ baseUrl }) => run(baseUrl),
-    ({ close }) => Effect.promise(close)
+    ({ close }) => Effect.promise(close),
   );
 }
 

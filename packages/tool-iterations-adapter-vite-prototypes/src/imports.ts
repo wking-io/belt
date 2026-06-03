@@ -18,7 +18,7 @@ export async function appendPrototypeToImports(args: {
     args.code,
     ts.ScriptTarget.Latest,
     true,
-    getScriptKind(args.id, args.identity)
+    getScriptKind(args.id, args.identity),
   );
   const rewritten = new MagicString(args.code);
   let changed = false;
@@ -33,7 +33,7 @@ export async function appendPrototypeToImports(args: {
     rewritten.overwrite(
       node.getStart(sourceFile) + 1,
       node.getEnd() - 1,
-      args.identity.attach(specifier, args.prototypeName)
+      args.identity.attach(specifier, args.prototypeName),
     );
     changed = true;
   }
@@ -78,7 +78,7 @@ export async function appendPrototypeToImports(args: {
 
   return {
     code: rewritten.toString(),
-    map: null
+    map: null,
   };
 }
 

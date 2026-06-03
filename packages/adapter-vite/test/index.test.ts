@@ -10,7 +10,7 @@ import { toolbarVite } from "../src/index.ts";
 
 describe("Vite Toolbar adapter", () => {
   it.effect("mounts the Toolbar API under /__toolbar", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const mounted = mountToolbarVite();
 
       assert.strictEqual(mounted.path, toolbarApiBasePath);
@@ -27,31 +27,33 @@ describe("Vite Toolbar adapter", () => {
             {
               id: "worktrees",
               label: "Worktrees",
-              routes: ["index"]
-            }
-          ]
-        }
+              routes: ["index"],
+            },
+          ],
+        },
       });
 
       mounted.close();
-    }));
+    }),
+  );
 
   it.effect("translates mounted child paths into Toolbar API requests", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const mounted = mountToolbarVite();
       const response = yield* Effect.promise(() => mounted.fetch("/tools/worktrees/"));
       const body = yield* json(response);
 
       assert.strictEqual(response.status, 200);
       assert.deepStrictEqual(body, {
-        worktrees: []
+        worktrees: [],
       });
 
       mounted.close();
-    }));
+    }),
+  );
 
   it.effect("preserves Toolbar API protocol errors", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const mounted = mountToolbarVite();
       const response = yield* Effect.promise(() => mounted.fetch("/tools/missing"));
       const body = yield* json(response);
@@ -61,35 +63,31 @@ describe("Vite Toolbar adapter", () => {
         ok: false,
         error: {
           code: "UNKNOWN_TOOL",
-          message: "Unknown tool"
-        }
+          message: "Unknown tool",
+        },
       });
 
       mounted.close();
-    }));
+    }),
+  );
 });
 
 const WorktreesIndexResponseSchema = Schema.Struct({
-  worktrees: Schema.Array(Schema.Unknown)
+  worktrees: Schema.Array(Schema.Unknown),
 });
 
-class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
-  .add(
-    HttpApiEndpoint.get("index", normalizeRoute("index"), {
-      success: WorktreesIndexResponseSchema
-    })
-  )
-{}
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test").add(
+  HttpApiEndpoint.get("index", normalizeRoute("index"), {
+    success: WorktreesIndexResponseSchema,
+  }),
+) {}
 
-class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
-  .add(WorktreesTestApiGroup)
-{}
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api").add(WorktreesTestApiGroup) {}
 
 const WorktreesTestApiHandlers = HttpApiBuilder.group(
   WorktreesTestApi,
   "worktrees-test",
-  (handlers) =>
-    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+  (handlers) => handlers.handle("index", () => Effect.succeed({ worktrees: [] })),
 );
 
 const testConfig = defineToolbar({
@@ -99,10 +97,10 @@ const testConfig = defineToolbar({
         api: WorktreesTestApi,
         apiLayer: WorktreesTestApiHandlers,
         id: "worktrees",
-        label: "Worktrees"
-      }
-    }
-  ]
+        label: "Worktrees",
+      },
+    },
+  ],
 });
 
 function mountToolbarVite() {
@@ -115,12 +113,14 @@ function mountToolbarVite() {
     throw new Error("Vite plugin did not expose configureServer");
   }
 
-  plugin.configureServer(testViteServer({
-    use: (mountPath: string, nextHandler: Connect.NextHandleFunction) => {
-      path = mountPath;
-      handler = nextHandler;
-    }
-  }));
+  plugin.configureServer(
+    testViteServer({
+      use: (mountPath: string, nextHandler: Connect.NextHandleFunction) => {
+        path = mountPath;
+        handler = nextHandler;
+      },
+    }),
+  );
 
   if (!handler) {
     throw new Error("Vite plugin did not register middleware");
@@ -150,7 +150,7 @@ function mountToolbarVite() {
     },
     close() {
       server.close();
-    }
+    },
   };
 }
 

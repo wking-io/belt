@@ -28,7 +28,7 @@ const server = http.createServer(
       console.error(error);
       return new Response("Internal Server Error", { status: 500 });
     }
-  })
+  }),
 );
 
 server.listen(port, () => {
@@ -49,8 +49,8 @@ async function themeCssResponse(): Promise<Response> {
   return new Response(await readFile(themeCssFilePath, "utf8"), {
     headers: {
       "cache-control": "no-store",
-      "content-type": "text/css; charset=utf-8"
-    }
+      "content-type": "text/css; charset=utf-8",
+    },
   });
 }
 
@@ -61,13 +61,13 @@ async function clientScriptResponse(): Promise<Response> {
   const result = await build({
     bundle: true,
     define: {
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development")
+      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
     },
     entryPoints: [fileURLToPath(new URL("./app/client.ts", import.meta.url))],
     format: "esm",
     platform: "browser",
     sourcemap: "inline",
-    write: false
+    write: false,
   });
 
   const output = result.outputFiles[0]?.text;
@@ -79,7 +79,7 @@ async function clientScriptResponse(): Promise<Response> {
   return new Response(output, {
     headers: {
       "cache-control": "no-store",
-      "content-type": "text/javascript; charset=utf-8"
-    }
+      "content-type": "text/javascript; charset=utf-8",
+    },
   });
 }

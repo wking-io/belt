@@ -1,4 +1,11 @@
-import { defineTool, defineToolRegistration, makeToolbarClient, normalizeRoute, type ToolDefinition, type ToolRegistration } from "@repo/core";
+import {
+  defineTool,
+  defineToolRegistration,
+  makeToolbarClient,
+  normalizeRoute,
+  type ToolDefinition,
+  type ToolRegistration,
+} from "@repo/core";
 import { Context, Effect, Layer, Schema } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
@@ -15,7 +22,7 @@ import {
   type DiscoveredWorktree,
   type WorktreeDestinationResolver,
   type WorktreeDiscoveryError,
-  type WorktreeIterationsOptions
+  type WorktreeIterationsOptions,
 } from "@repo/tool-iterations-provider-worktrees";
 import type { Iteration } from "@repo/tool-iterations";
 
@@ -24,7 +31,7 @@ export {
   GitWorktreeParseError,
   NoGitRepositoryError,
   WorktreeResolverError,
-  parseGitWorktreeList
+  parseGitWorktreeList,
 };
 export type { DiscoveredWorktree, WorktreeDiscoveryError };
 
@@ -52,10 +59,10 @@ export type WorktreeDiscoveryOptions = WorktreeIterationsOptions;
 
 export type WorktreeDiscoveryShape = {
   readonly discover: (
-    cwd?: string
+    cwd?: string,
   ) => Effect.Effect<readonly DiscoveredWorktree[], WorktreeDiscoveryError, unknown>;
   readonly list: (
-    options: WorktreeDiscoveryOptions
+    options: WorktreeDiscoveryOptions,
   ) => Effect.Effect<readonly WorktreeEntry[], WorktreeDiscoveryError, unknown>;
 };
 
@@ -64,7 +71,7 @@ export const WorktreeDestinationSchema = Schema.Struct({
   label: Schema.String,
   url: Schema.String,
   primary: Schema.optionalKey(Schema.Boolean),
-  reachable: Schema.optionalKey(Schema.Boolean)
+  reachable: Schema.optionalKey(Schema.Boolean),
 });
 
 export const WorktreeEntrySchema = Schema.Struct({
@@ -72,57 +79,59 @@ export const WorktreeEntrySchema = Schema.Struct({
   branch: Schema.String,
   path: Schema.String,
   current: Schema.Boolean,
-  destinations: Schema.Array(WorktreeDestinationSchema)
+  destinations: Schema.Array(WorktreeDestinationSchema),
 });
 
 export const WorktreesIndexResponseSchema = Schema.Struct({
-  worktrees: Schema.Array(WorktreeEntrySchema)
+  worktrees: Schema.Array(WorktreeEntrySchema),
 });
 export type WorktreesIndexResponse = Schema.Schema.Type<typeof WorktreesIndexResponseSchema>;
 
 export class WorktreeDiscovery extends Context.Service<WorktreeDiscovery, WorktreeDiscoveryShape>()(
-  "@repo/tool-worktrees/WorktreeDiscovery"
+  "@repo/tool-worktrees/WorktreeDiscovery",
 ) {
   static readonly layer = Layer.succeed(
     WorktreeDiscovery,
     WorktreeDiscovery.of({
-      discover: Effect.fn("WorktreeDiscovery.discover")(function*(cwd?: string) {
+      discover: Effect.fn("WorktreeDiscovery.discover")(function* (cwd?: string) {
         const discovery = yield* IterationWorktreeDiscovery;
 
         return yield* discovery.discover(cwd);
       }),
-      list: Effect.fn("WorktreeDiscovery.list")(function*(options: WorktreeDiscoveryOptions) {
+      list: Effect.fn("WorktreeDiscovery.list")(function* (options: WorktreeDiscoveryOptions) {
         const discovery = yield* IterationWorktreeDiscovery;
         const iterations = yield* discovery.list(options);
 
         return iterations.map(toWorktreeEntry);
-      })
-    })
+      }),
+    }),
   );
 }
 
 export const WorktreeDiscoveryLive = Layer.mergeAll(
   WorktreeDiscovery.layer,
-  IterationWorktreeDiscoveryLive
+  IterationWorktreeDiscoveryLive,
 );
 
 export class WorktreesToolApiGroup extends HttpApiGroup.make("worktrees")
   .add(
     HttpApiEndpoint.get("index", normalizeRoute("index"), {
-      success: WorktreesIndexResponseSchema
-    })
+      success: WorktreesIndexResponseSchema,
+    }),
   )
-  .annotateMerge(OpenApi.annotations({
-    title: "Worktrees"
-  }))
-{}
+  .annotateMerge(
+    OpenApi.annotations({
+      title: "Worktrees",
+    }),
+  ) {}
 
 export class WorktreesToolApi extends HttpApi.make("worktrees-tool-api")
   .add(WorktreesToolApiGroup)
-  .annotateMerge(OpenApi.annotations({
-    title: "Belt Worktrees Tool API"
-  }))
-{}
+  .annotateMerge(
+    OpenApi.annotations({
+      title: "Belt Worktrees Tool API",
+    }),
+  ) {}
 
 export const worktreesToolId = "worktrees";
 export type WorktreesToolClientOptions = {
@@ -144,8 +153,8 @@ export function worktreesTool(options: WorktreesToolOptions): WorktreesToolRegis
       apiLayer: worktreesToolApiLayer(options),
       id: worktreesToolId,
       label: "Worktrees",
-      runtimeLayer: WorktreeDiscoveryLive
-    })
+      runtimeLayer: WorktreeDiscoveryLive,
+    }),
   });
 }
 
@@ -153,25 +162,24 @@ export function worktreesToolApiLayer(options: WorktreesToolOptions) {
   return HttpApiBuilder.group(
     WorktreesToolApi,
     "worktrees",
-    Effect.fn("WorktreesToolApi.handlers")(function*(handlers) {
+    Effect.fn("WorktreesToolApi.handlers")(function* (handlers) {
       const discovery = yield* WorktreeDiscovery;
 
       return handlers.handle("index", () =>
-        Effect.gen(function*() {
-          const worktrees = yield* discovery.list(options).pipe(
-            Effect.catchTag("NoGitRepositoryError", () => Effect.succeed([]))
-          );
+        Effect.gen(function* () {
+          const worktrees = yield* discovery
+            .list(options)
+            .pipe(Effect.catchTag("NoGitRepositoryError", () => Effect.succeed([])));
 
           return { worktrees };
-        }).pipe(
-          Effect.orDie
-        ));
-    })
+        }).pipe(Effect.orDie),
+      );
+    }),
   );
 }
 
 export function makeWorktreesToolClient(options?: WorktreesToolClientOptions) {
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const toolbar = yield* makeToolbarClient(options);
 
     return yield* toolbar.tool(WorktreesToolApi, worktreesToolId);
@@ -184,12 +192,12 @@ export function createWorktreesClient(options?: WorktreesToolClientOptions) {
       makeWorktreesToolClient(options).pipe(
         Effect.flatMap((client) => client.worktrees.index()),
         Effect.provide(FetchHttpClient.layer),
-        Effect.runPromise
-      )
+        Effect.runPromise,
+      ),
   };
 }
 
-export const toWorktreeEntries = Effect.fn("toWorktreeEntries")(function*(options: {
+export const toWorktreeEntries = Effect.fn("toWorktreeEntries")(function* (options: {
   readonly currentPath: string;
   readonly resolvePath: (...segments: readonly string[]) => string;
   readonly resolver: WorktreeUrlResolver;
@@ -209,7 +217,7 @@ function toWorktreeEntry(iteration: Iteration): WorktreeEntry {
     branch,
     path,
     current: iteration.current,
-    destinations: iteration.destinations
+    destinations: iteration.destinations,
   };
 }
 

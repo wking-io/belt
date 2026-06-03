@@ -9,7 +9,7 @@ body {
 }
 
 .preview-shell svg.belt-icon,
-.preview-shell .belt-status-banner__icon>svg,
+.preview-shell .belt-status-banner__icon > svg,
 .preview-shell .belt-combobox .belt-ghost-button svg {
   display: block;
   flex: 0 0 auto;
@@ -31,7 +31,11 @@ body {
 
 .preview-shell {
   background:
-    linear-gradient(180deg, color-mix(in oklch, var(--belt-color-elevation-2), transparent 35%), transparent 360px),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--belt-color-elevation-2), transparent 35%),
+      transparent 360px
+    ),
     var(--belt-color-elevation-1);
   color: var(--belt-color-elevation-1-foreground);
   display: grid;
@@ -221,7 +225,7 @@ body {
   justify-content: stretch;
 }
 
-.preview-worktree-row>div:first-child {
+.preview-worktree-row > div:first-child {
   display: grid;
   gap: 3px;
   min-width: 0;

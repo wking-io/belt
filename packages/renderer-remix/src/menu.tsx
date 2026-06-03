@@ -89,8 +89,8 @@ type MenuListChildProps = Omit<
 
 export interface SubmenuProps
   extends
-  Omit<Props<"div">, "children" | "name" | "type" | "value">,
-  Omit<MenuItemOptions, "label" | "name" | "type" | "checked"> {
+    Omit<Props<"div">, "children" | "name" | "type" | "value">,
+    Omit<MenuItemOptions, "label" | "name" | "type" | "checked"> {
   readonly children?: RemixNode;
   readonly label: RemixNode;
   readonly listProps?: MenuListChildProps;
@@ -829,27 +829,27 @@ function SubmenuTrigger(
             signal.addEventListener("abort", () => childMenu.unregisterTrigger(node));
           }),
           !disabled &&
-          parent && [
-            on("click", () => {
-              parent.highlight(handle.id, { focus: true });
-              void childMenu.open({ focus: false, strategy: "none" });
-            }),
-            on("focus", () => {
-              parent.highlight(handle.id);
-              scheduleOpen();
-            }),
-            on("blur", clearScheduledOpen),
-            on("pointermove", () => {
-              parent.highlight(handle.id, { focus: true });
-              scheduleOpen();
-            }),
-            on("pointerleave", (event) => {
-              clearScheduledOpen();
-              if (parent.activeId === handle.id && shouldClearHighlightOnPointerLeave(event)) {
-                parent.highlight(null);
-              }
-            }),
-          ],
+            parent && [
+              on("click", () => {
+                parent.highlight(handle.id, { focus: true });
+                void childMenu.open({ focus: false, strategy: "none" });
+              }),
+              on("focus", () => {
+                parent.highlight(handle.id);
+                scheduleOpen();
+              }),
+              on("blur", clearScheduledOpen),
+              on("pointermove", () => {
+                parent.highlight(handle.id, { focus: true });
+                scheduleOpen();
+              }),
+              on("pointerleave", (event) => {
+                clearScheduledOpen();
+                if (parent.activeId === handle.id && shouldClearHighlightOnPointerLeave(event)) {
+                  parent.highlight(null);
+                }
+              }),
+            ],
           mix,
         ]}
       >

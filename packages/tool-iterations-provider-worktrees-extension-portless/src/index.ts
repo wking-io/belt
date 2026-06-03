@@ -7,15 +7,17 @@ export const PortlessDestinationOptionsSchema = Schema.Struct({
   label: Schema.optionalKey(NonEmptyStringSchema),
   appName: NonEmptyStringSchema,
   tld: Schema.optionalKey(NonEmptyStringSchema),
-  primary: Schema.optionalKey(Schema.Boolean)
+  primary: Schema.optionalKey(Schema.Boolean),
 });
 
-export type PortlessDestinationOptions = Schema.Schema.Type<typeof PortlessDestinationOptionsSchema>;
+export type PortlessDestinationOptions = Schema.Schema.Type<
+  typeof PortlessDestinationOptionsSchema
+>;
 
 export const PortlessResolverOptionsSchema = Schema.Struct({
   tld: Schema.optionalKey(NonEmptyStringSchema),
   mainBranches: Schema.optionalKey(Schema.Array(NonEmptyStringSchema)),
-  destinations: Schema.NonEmptyArray(PortlessDestinationOptionsSchema)
+  destinations: Schema.NonEmptyArray(PortlessDestinationOptionsSchema),
 });
 
 export type PortlessResolverOptions = Schema.Schema.Type<typeof PortlessResolverOptionsSchema>;
@@ -41,10 +43,10 @@ export function portlessResolver(options: PortlessResolverOptions): WorktreeDest
           id: destination.id ?? destination.appName,
           label: destination.label ?? destination.appName,
           primary: destination.primary ?? index === 0,
-          url: `https://${hostname}`
+          url: `https://${hostname}`,
         };
       });
-    }
+    },
   };
 }
 

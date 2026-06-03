@@ -46,7 +46,7 @@ export function createPrototypeModuleGraphResolver(args: {
         relativePath,
         srcDir: args.srcDir,
         prototypesDir: args.prototypesDir,
-        identity: args.identity
+        identity: args.identity,
       });
     },
 
@@ -61,7 +61,7 @@ export function createPrototypeModuleGraphResolver(args: {
       const relativePath = getLoadedRelativePath({
         filePath: cleanRequest,
         srcDir: args.srcDir,
-        prototypesDir: args.prototypesDir
+        prototypesDir: args.prototypesDir,
       });
 
       if (!relativePath) {
@@ -75,9 +75,9 @@ export function createPrototypeModuleGraphResolver(args: {
         relativePath,
         srcDir: args.srcDir,
         prototypesDir: args.prototypesDir,
-        identity: args.identity
+        identity: args.identity,
       });
-    }
+    },
   };
 }
 
@@ -105,7 +105,7 @@ export function resolveFile(basePath: string): string | null {
   const candidates = [
     basePath,
     ...extensions.map((extension) => `${basePath}${extension}`),
-    ...extensions.map((extension) => path.join(basePath, `index${extension}`))
+    ...extensions.map((extension) => path.join(basePath, `index${extension}`)),
   ];
 
   return candidates.find(isFile) ?? null;
@@ -134,7 +134,7 @@ function resolvePrototypeModule(args: {
     prototypeName: args.prototypeName,
     relativePath: args.relativePath,
     srcDir: args.srcDir,
-    prototypesDir: args.prototypesDir
+    prototypesDir: args.prototypesDir,
   });
 
   if (!resolved) {
@@ -147,7 +147,7 @@ function resolvePrototypeModule(args: {
     cleanRequest: args.cleanRequest,
     filePath: resolved.filePath,
     resolvedId: args.identity.attach(resolved.filePath, args.prototypeName),
-    source: resolved.source
+    source: resolved.source,
   };
 }
 
