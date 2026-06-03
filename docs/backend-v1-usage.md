@@ -35,9 +35,9 @@ export default defineToolbar({
 });
 ```
 
-Tool Registration is explicit. Installing a Tool package does not make it available; the app must add it to `tools`.
+Tool Registration is explicit. Installing a Tool package does not make it available; the app must add a Tool Registration to `tools`. Built-in tool helpers return Tool Registrations.
 
-Config discovery can also load a Toolbar Definition produced by a renderer package's `createToolbar`. The backend extracts the same Tool Registration from the definition, so one export can be used by application rendering and backend setup:
+Config discovery can also load a Toolbar Definition produced by a renderer package's `createToolbar`. The backend extracts the Tool Definitions from the registrations in that definition, so one export can be used by application rendering and backend setup:
 
 ```ts
 import { createToolbar } from "@riff-refine/belt/react";
@@ -113,7 +113,7 @@ Tool packages define their own mounted Effect HTTP APIs under `/__toolbar/tools/
 
 The public Belt server entrypoint uses Tool-declared default runtime layers for built-in tools. Host apps register tools in config; they do not need to manually provide built-in tool layers such as the Control Panel snapshot store.
 
-Tests and custom hosts can replace a built-in Tool runtime by registering a fully wired Tool definition. In that case, provide the Tool's `apiLayer` with the custom services and omit the Tool's default `runtimeLayer` before passing the config to `createToolbarServer`.
+Tests and custom hosts can replace a built-in Tool runtime by registering a fully wired Tool Definition inside a Tool Registration. In that case, provide the Tool Definition's `apiLayer` with the custom services and omit the Tool's default `runtimeLayer` before passing the config to `createToolbarServer`.
 
 ## Direct Fetch Server
 

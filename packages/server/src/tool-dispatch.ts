@@ -18,7 +18,7 @@ export class ToolbarToolDispatch extends Context.Service<ToolbarToolDispatch, {
       const config = yield* ToolbarConfig;
 
       return ToolbarToolDispatch.of({
-        metadata: Effect.succeed(config.tools.map(toToolbarToolMetadata)),
+        metadata: Effect.succeed(config.tools.map((registration) => toToolbarToolMetadata(registration.tool))),
         tool: Effect.fn("ToolbarToolDispatch.tool")(function*(toolId) {
           const tool = findTool(config, toolId);
 
@@ -45,5 +45,5 @@ export class ToolbarProtocolError extends Schema.TaggedErrorClass<ToolbarProtoco
 ) {}
 
 function findTool(config: ToolbarConfigData, toolId: string): ToolDefinition | undefined {
-  return config.tools.find((candidate) => candidate.id === toolId);
+  return config.tools.find((candidate) => candidate.tool.id === toolId)?.tool;
 }

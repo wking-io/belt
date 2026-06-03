@@ -36,13 +36,13 @@ it.effect("loads a valid module config through the Effect service", () =>
       yield* writeTempFile(
         cwd,
         "toolbar.config.mjs",
-        "export default { tools: [{ id: 'worktrees', label: 'Worktrees' }] };\n"
+        "export default { tools: [{ tool: { id: 'worktrees', label: 'Worktrees' } }] };\n"
       );
       const configService = yield* ToolbarConfigService;
 
       const config = yield* configService.load({ cwd });
 
-      assert.deepStrictEqual(config.tools, [{ id: "worktrees", label: "Worktrees" }]);
+      assert.deepStrictEqual(config.tools, [{ tool: { id: "worktrees", label: "Worktrees" } }]);
     })
   )));
 
@@ -55,14 +55,14 @@ it.effect("loads a Toolbar Definition module export through the Effect service",
         "toolbar.config.mjs",
         [
           `import { defineToolbar } from ${JSON.stringify(coreUrl)};`,
-          "export default defineToolbar({ tools: [{ id: 'worktrees', label: 'Worktrees' }] });"
+          "export default defineToolbar({ tools: [{ tool: { id: 'worktrees', label: 'Worktrees' } }] });"
         ].join("\n")
       );
       const configService = yield* ToolbarConfigService;
 
       const config = yield* configService.load({ cwd });
 
-      assert.deepStrictEqual(config.tools, [{ id: "worktrees", label: "Worktrees" }]);
+      assert.deepStrictEqual(config.tools, [{ tool: { id: "worktrees", label: "Worktrees" } }]);
     })
   )));
 
@@ -99,7 +99,7 @@ it.effect("fails with InvalidToolbarConfigExportError when the default export is
 it.effect("fails with InvalidToolbarConfigExportError when a Toolbar Definition contains invalid config", () =>
   withLive(withTempDir((cwd) =>
     Effect.gen(function*() {
-      yield* writeTempFile(cwd, "toolbar.config.mjs", "export default { toolbarConfig: { tools: [{ id: 'bad' }] } };\n");
+      yield* writeTempFile(cwd, "toolbar.config.mjs", "export default { toolbarConfig: { tools: [{ tool: { id: 'bad' } }] } };\n");
       const configService = yield* ToolbarConfigService;
 
       const tag = yield* Effect.catchTag(
@@ -164,10 +164,10 @@ it.effect("provides a loaded toolbar config as a service layer", () =>
   Effect.gen(function*() {
     const config = yield* ToolbarConfig;
 
-    assert.deepStrictEqual(config.tools, [{ id: "worktrees", label: "Worktrees" }]);
+    assert.deepStrictEqual(config.tools, [{ tool: { id: "worktrees", label: "Worktrees" } }]);
   }).pipe(
     Effect.provide(ToolbarConfig.layer(defineToolbar({
-      tools: [{ id: "worktrees", label: "Worktrees" }]
+      tools: [{ tool: { id: "worktrees", label: "Worktrees" } }]
     })))
   ));
 

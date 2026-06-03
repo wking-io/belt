@@ -261,7 +261,7 @@ A navigable local URL exposed by a worktree for an app, service, or documentatio
 _Avoid_: Worktree URL, port
 
 **Tool Registration**:
-The explicit application code that selects which **Tools** are available in a **Toolbar Wrapper**.
+The explicit **Toolbar Config** entry that selects a **Tool** for a **Toolbar Wrapper**, wrapping the backend **Tool Definition** and optional frontend-safe tool config.
 _Avoid_: Auto-discovery, package scanning
 
 **Toolbar Config**:

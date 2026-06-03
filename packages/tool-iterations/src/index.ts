@@ -1,4 +1,4 @@
-import { defineTool, makeToolbarClient, normalizeRoute, type ToolDefinition } from "@repo/core";
+import { defineTool, defineToolRegistration, makeToolbarClient, normalizeRoute, type ToolDefinition, type ToolRegistration } from "@repo/core";
 import { Effect, Schema } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup, OpenApi } from "effect/unstable/httpapi";
@@ -93,16 +93,20 @@ export type IterationsToolDefinition = ToolDefinition<
   undefined
 >;
 
+export type IterationsToolRegistration = ToolRegistration<unknown, IterationsToolDefinition>;
+
 export function defineIterationProvider<const Provider extends IterationProvider>(provider: Provider): Provider {
   return provider;
 }
 
-export function iterationsTool(options: IterationsToolOptions): IterationsToolDefinition {
-  return defineTool({
-    api: IterationsToolApi,
-    apiLayer: iterationsToolApiLayer(options),
-    id: iterationsToolId,
-    label: "Iterations"
+export function iterationsTool(options: IterationsToolOptions): IterationsToolRegistration {
+  return defineToolRegistration({
+    tool: defineTool({
+      api: IterationsToolApi,
+      apiLayer: iterationsToolApiLayer(options),
+      id: iterationsToolId,
+      label: "Iterations"
+    })
   });
 }
 

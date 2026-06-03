@@ -13,12 +13,14 @@ import {
 } from "../src/index.tsx";
 
 it("defines the Render Performance tool metadata", () => {
-  const tool = renderPerformanceTool();
+  const registration = renderPerformanceTool();
 
   assert.strictEqual(renderPerformanceToolId, "render-performance");
-  assert.deepStrictEqual(tool, {
-    id: "render-performance",
-    label: "Render Performance",
+  assert.deepStrictEqual(registration, {
+    tool: {
+      id: "render-performance",
+      label: "Render Performance",
+    },
   });
 });
 

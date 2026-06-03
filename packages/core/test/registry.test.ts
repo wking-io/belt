@@ -11,6 +11,7 @@ import {
   ToolbarThemeConfigSchema,
   ToolbarThemeSchema,
   ToolDefinitionSchema,
+  ToolRegistrationSchema,
   ToolbarToolSchema,
   normalizeRoute,
   toToolbarToolMetadata,
@@ -23,14 +24,20 @@ it.effect("validates explicit tool registration", () =>
     const config = yield* validateToolbarConfig({
       tools: [
         {
-          api: TestToolApi,
-          id: "worktrees",
-          label: "Worktrees"
+          tool: {
+            api: TestToolApi,
+            id: "worktrees",
+            label: "Worktrees"
+          },
+          config: {
+            placement: "left"
+          }
         }
       ]
     });
 
-    assert.strictEqual(config.tools[0]?.id, "worktrees");
+    assert.strictEqual(config.tools[0]?.tool.id, "worktrees");
+    assert.deepStrictEqual(config.tools[0]?.config, { placement: "left" });
   }));
 
 it.effect("validates toolbar theme config in string and object forms", () =>
@@ -97,6 +104,24 @@ it.effect("validates tool definitions with schema-backed reference fields", () =
     assert.strictEqual(tool.api, TestToolApi);
   }));
 
+it.effect("validates tool registrations with schema-backed tool definitions", () =>
+  Effect.gen(function*() {
+    const registration = yield* Schema.decodeUnknownEffect(ToolRegistrationSchema)({
+      tool: {
+        api: TestToolApi,
+        id: "worktrees",
+        label: "Worktrees"
+      },
+      config: {
+        placement: "left"
+      }
+    });
+
+    assert.strictEqual(registration.tool.id, "worktrees");
+    assert.strictEqual(registration.tool.api, TestToolApi);
+    assert.deepStrictEqual(registration.config, { placement: "left" });
+  }));
+
 it("throws from defineTool for invalid tool definitions", () => {
   assert.throws(() =>
     defineTool({
@@ -124,8 +149,8 @@ it.effect("fails validation for duplicate tool ids with a typed error", () =>
     const duplicateId = yield* Effect.catchTag(
       validateToolbarConfig({
         tools: [
-          { id: "worktrees", label: "Worktrees" },
-          { id: "worktrees", label: "Worktrees again" }
+          { tool: { id: "worktrees", label: "Worktrees" } },
+          { tool: { id: "worktrees", label: "Worktrees again" } }
         ]
       }),
       "DuplicateToolbarToolIdError",
@@ -140,8 +165,8 @@ it("throws a typed error from defineToolbar for invalid module config registrati
     () =>
       defineToolbar({
         tools: [
-          { id: "worktrees", label: "Worktrees" },
-          { id: "worktrees", label: "Worktrees again" }
+          { tool: { id: "worktrees", label: "Worktrees" } },
+          { tool: { id: "worktrees", label: "Worktrees again" } }
         ]
       }),
     DuplicateToolbarToolIdError
@@ -186,7 +211,7 @@ it("preserves configured theme registration from defineToolbar", () => {
 it("extracts backend config from a Toolbar Definition", () => {
   const definition = defineToolbarDefinition({
     toolbarConfig: {
-      tools: [{ id: "worktrees", label: "Worktrees" }]
+      tools: [{ tool: { id: "worktrees", label: "Worktrees" } }]
     }
   });
 

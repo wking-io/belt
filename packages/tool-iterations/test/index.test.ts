@@ -61,11 +61,11 @@ describe("listIterations", () => {
 
 describe("iterationsTool", () => {
   it("registers the canonical Iterations tool identity", () => {
-    const tool = iterationsTool({ providers: [] });
+    const registration = iterationsTool({ providers: [] });
 
-    assert.strictEqual(tool.id, "iterations");
-    assert.strictEqual(tool.label, "Iterations");
-    assert.ok(tool.api);
-    assert.ok(tool.apiLayer);
+    assert.strictEqual(registration.tool.id, "iterations");
+    assert.strictEqual(registration.tool.label, "Iterations");
+    assert.ok(registration.tool.api);
+    assert.ok(registration.tool.apiLayer);
   });
 });

@@ -189,10 +189,12 @@ const WorktreesTestApiHandlers = HttpApiBuilder.group(
 const testConfig = defineToolbar({
   tools: [
     {
-      api: WorktreesTestApi,
-      apiLayer: WorktreesTestApiHandlers,
-      id: "worktrees",
-      label: "Worktrees"
+      tool: {
+        api: WorktreesTestApi,
+        apiLayer: WorktreesTestApiHandlers,
+        id: "worktrees",
+        label: "Worktrees"
+      }
     }
   ]
 });

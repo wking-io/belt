@@ -7,7 +7,7 @@ import {
   toolbarApiRoutes,
   toolbarApiToolPath,
   toolApiRoutePath,
-  type ToolbarConfig as ToolbarConfigData
+  type ToolDefinition
 } from "@repo/core";
 import { Effect, Layer } from "effect";
 import { createToolbarRouteHandler } from "../../adapter-remix/src/index.ts";
@@ -342,8 +342,11 @@ function controlPanelHarness(initial: ControlSnapshotStoreData = emptySnapshotSt
   const config = defineToolbar({
     tools: [
       {
-        ...withoutDefaultRuntime(registration.tool),
-        apiLayer: Layer.provide(requiredApiLayer(registration.tool), snapshotStoreLayer)
+        config: registration.config,
+        tool: {
+          ...withoutDefaultRuntime(registration.tool),
+          apiLayer: Layer.provide(requiredApiLayer(registration.tool), snapshotStoreLayer)
+        }
       }
     ]
   });
@@ -396,7 +399,7 @@ function testStoreLayer(persistence: {
   );
 }
 
-function requiredApiLayer(tool: ToolbarConfigData["tools"][number]) {
+function requiredApiLayer(tool: ToolDefinition) {
   if (!tool.apiLayer) {
     throw new Error("Control Panel tool API layer is missing");
   }
@@ -404,7 +407,7 @@ function requiredApiLayer(tool: ToolbarConfigData["tools"][number]) {
   return tool.apiLayer;
 }
 
-function withoutDefaultRuntime<Tool extends ToolbarConfigData["tools"][number]>(
+function withoutDefaultRuntime<Tool extends ToolDefinition>(
   tool: Tool
 ): Omit<Tool, "runtimeLayer"> {
   const { runtimeLayer: _defaultRuntimeLayer, ...toolWithoutDefaultRuntime } = tool;

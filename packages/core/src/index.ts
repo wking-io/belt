@@ -98,12 +98,29 @@ export type ToolDefinition<
   readonly runtimeLayer?: RuntimeLayer;
 };
 
+export const ToolRegistrationSchema = Schema.Struct({
+  tool: ToolDefinitionSchema,
+  config: Schema.optionalKey(Schema.Unknown)
+});
+
+export type ToolRegistration<
+  Config = unknown,
+  Tool extends ToolDefinition = ToolDefinition
+> = {
+  readonly tool: Tool;
+  readonly config?: Config;
+};
+
 export const ToolbarConfigSchema = Schema.Struct({
   theme: Schema.optionalKey(ToolbarThemeConfigSchema),
-  tools: Schema.Array(ToolDefinitionSchema)
+  tools: Schema.Array(ToolRegistrationSchema)
 });
 
 export type ToolbarConfig = Schema.Schema.Type<typeof ToolbarConfigSchema>;
+
+export type ToolbarBackendConfig = Omit<ToolbarConfig, "tools"> & {
+  readonly tools: readonly ToolDefinition[];
+};
 
 export type ToolbarDefinition<Config extends ToolbarConfig = ToolbarConfig> = {
   readonly toolbarConfig: Config;
@@ -125,7 +142,7 @@ export const validateToolbarConfigExport = Effect.fn("validateToolbarConfigExpor
 
 function validateDecodedToolbarConfig(config: ToolbarConfig) {
   return Effect.gen(function*() {
-    const duplicateId = findDuplicateToolId(config.tools);
+    const duplicateId = findDuplicateToolId(config.tools.map((registration) => registration.tool));
 
     if (duplicateId) {
       return yield* new DuplicateToolbarToolIdError({ id: duplicateId });
@@ -144,7 +161,7 @@ function validateDecodedToolbarConfig(config: ToolbarConfig) {
 function decodeToolbarConfigSync(config: unknown): ToolbarConfig {
   const decoded = Schema.decodeUnknownSync(ToolbarConfigSchema)(config);
 
-  const duplicateId = findDuplicateToolId(decoded.tools);
+  const duplicateId = findDuplicateToolId(decoded.tools.map((registration) => registration.tool));
 
   if (duplicateId) {
     throw new DuplicateToolbarToolIdError({ id: duplicateId });
@@ -159,6 +176,14 @@ export function defineTool<const Tool extends ToolDefinition>(tool: Tool): Tool 
   Schema.decodeUnknownSync(ToolDefinitionSchema)(tool);
 
   return tool;
+}
+
+export function defineToolRegistration<const Registration extends ToolRegistration>(
+  registration: Registration
+): Registration {
+  Schema.decodeUnknownSync(ToolRegistrationSchema)(registration);
+
+  return registration;
 }
 
 export function defineToolbar<const Config extends ToolbarConfig>(config: Config): ToolbarConfig & Config;
@@ -179,7 +204,11 @@ export function isToolbarDefinition(value: unknown): value is ToolbarDefinition 
   return getToolbarDefinitionConfig(value) !== undefined;
 }
 
-export function extractToolbarConfig(source: ToolbarConfigSource): ToolbarConfig {
+export function extractToolbarConfig(source: ToolbarConfigSource): ToolbarBackendConfig {
+  return toToolbarBackendConfig(resolveToolbarConfig(source));
+}
+
+export function resolveToolbarConfig(source: ToolbarConfigSource): ToolbarConfig {
   return decodeToolbarConfigSync(getToolbarDefinitionConfig(source) ?? source);
 }
 
@@ -210,6 +239,13 @@ export function toToolbarToolMetadata(tool: ToolDefinition) {
     id: tool.id,
     label: tool.label,
     routes: toToolbarToolApiRoutePaths(tool.api).toSorted()
+  };
+}
+
+export function toToolbarBackendConfig(config: ToolbarConfig): ToolbarBackendConfig {
+  return {
+    ...config,
+    tools: config.tools.map((registration) => registration.tool)
   };
 }
 

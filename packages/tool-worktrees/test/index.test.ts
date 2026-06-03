@@ -129,12 +129,13 @@ describe("worktreesTool", () => {
       const cwd = yield* Effect.promise(async () => mkdtemp(join(tmpdir(), "belt-worktrees-")));
 
       try {
-        const tool = worktreesTool({
+        const registration = worktreesTool({
           cwd,
           resolver: {
             resolve: () => []
           }
         });
+        const tool = registration.tool;
         assert.ok(tool.api);
         assert.ok(tool.apiLayer);
 
@@ -153,14 +154,14 @@ describe("worktreesTool", () => {
       const cwd = yield* Effect.promise(async () => mkdtemp(join(tmpdir(), "belt-worktrees-")));
 
       try {
-        const tool = worktreesTool({
+        const registration = worktreesTool({
           cwd,
           resolver: {
             resolve: () => []
           }
         });
 
-        const result = yield* withWorktreesHttpServer(tool, (baseUrl) =>
+        const result = yield* withWorktreesHttpServer(registration.tool, (baseUrl) =>
           Effect.gen(function*() {
             const client = yield* makeWorktreesToolClient({ baseUrl });
 
@@ -176,7 +177,7 @@ describe("worktreesTool", () => {
     }));
 });
 
-function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
+function requestToolIndex(tool: ReturnType<typeof worktreesTool>["tool"]) {
   if (!tool.api || !tool.apiLayer || !tool.runtimeLayer) {
     return Effect.die(new Error("Worktrees tool API registration is missing"));
   }
@@ -196,7 +197,7 @@ function requestToolIndex(tool: ReturnType<typeof worktreesTool>) {
 }
 
 function withWorktreesHttpServer<A, E, R>(
-  tool: ReturnType<typeof worktreesTool>,
+  tool: ReturnType<typeof worktreesTool>["tool"],
   run: (baseUrl: string) => Effect.Effect<A, E, R>
 ) {
   if (!tool.api || !tool.apiLayer || !tool.runtimeLayer) {

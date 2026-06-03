@@ -1,4 +1,4 @@
-import { NonEmptyStringSchema, type ToolDefinition } from "@repo/core";
+import { NonEmptyStringSchema, type ToolDefinition, type ToolRegistration } from "@repo/core";
 import { Effect, Schema } from "effect";
 import {
   ControlFieldSchema,
@@ -41,9 +41,8 @@ export type ControlPanelDefinition<Fieldsets extends ControlFieldsetMap = Contro
 export type ControlPanelRegistration<
   Fieldsets extends ControlFieldsetMap = ControlFieldsetMap,
   Tool extends ToolDefinition = ToolDefinition
-> = {
+> = ToolRegistration<ControlPanelDefinition<Fieldsets>, Tool> & {
   readonly config: ControlPanelDefinition<Fieldsets>;
-  readonly tool: Tool;
 };
 
 export type ControlFieldsetValues<Fieldset extends ControlFieldset> = {
