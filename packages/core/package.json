@@ -13,10 +13,10 @@
     "build": "tsc -p tsconfig.build.json",
     "check": "tsc -p tsconfig.json"
   },
-  "engines": {
-    "node": ">=20"
-  },
   "dependencies": {
     "effect": "4.0.0-beta.66"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

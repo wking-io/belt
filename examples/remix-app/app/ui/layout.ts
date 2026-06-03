@@ -22,32 +22,32 @@ const appChrome = css({
   textRendering: "optimizeLegibility",
   WebkitFontSmoothing: "antialiased",
   "& *, & *::before, & *::after": {
-    boxSizing: "border-box"
+    boxSizing: "border-box",
   },
   ".app-shell": {
     display: "grid",
     gap: "28px",
     marginInline: "auto",
     maxWidth: "1120px",
-    padding: "28px"
+    padding: "28px",
   },
   ".app-header": {
     alignItems: "center",
     display: "flex",
     gap: "16px",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   ".app-brand": {
     color: "var(--belt-color-elevation-1-foreground-strong)",
     fontSize: "14px",
     fontWeight: 700,
     lineHeight: 1,
-    margin: 0
+    margin: 0,
   },
   ".app-nav": {
     alignItems: "center",
     display: "flex",
-    gap: "10px"
+    gap: "10px",
   },
   ".app-nav-link": {
     borderRadius: "var(--belt-radius)",
@@ -57,18 +57,15 @@ const appChrome = css({
     lineHeight: 1,
     paddingBlock: "8px",
     paddingInline: "10px",
-    textDecoration: "none"
+    textDecoration: "none",
   },
   ".app-nav-link:hover": {
     backgroundColor: "var(--belt-color-elevation-2-hover)",
-    color: "var(--belt-color-elevation-1-foreground)"
-  }
+    color: "var(--belt-color-elevation-1-foreground)",
+  },
 });
 
-export function layout(options: {
-  readonly children?: RemixNode;
-  readonly title: string;
-}) {
+export function layout(options: { readonly children?: RemixNode; readonly title: string }) {
   return document({
     bodyMix: appChrome,
     title: options.title,
@@ -84,10 +81,14 @@ export function layout(options: {
           "nav",
           { className: "app-nav" },
           createElement("a", { className: "app-nav-link", href: routes.home.href() }, "Home"),
-          createElement("a", { className: "app-nav-link", href: routes.primitives.index.href() }, "Primitives")
-        )
+          createElement(
+            "a",
+            { className: "app-nav-link", href: routes.primitives.index.href() },
+            "Primitives",
+          ),
+        ),
       ),
-      options.children
-    )
+      options.children,
+    ),
   });
 }

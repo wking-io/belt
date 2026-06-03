@@ -32,7 +32,7 @@ import {
   ControlSnapshotPersistence,
   ControlSnapshotStore,
   type ControlSnapshot,
-  type ControlPanelValues
+  type ControlPanelValues,
 } from "../src/index.ts";
 
 it("defines a control panel config with v1 field builders", () => {
@@ -47,16 +47,16 @@ it("defines a control panel config with v1 field builders", () => {
             default: "comfortable",
             options: [
               { label: "Compact", value: "compact" },
-              { label: "Comfortable", value: "comfortable" }
-            ]
+              { label: "Comfortable", value: "comfortable" },
+            ],
           }),
           accent: controlField.color({ default: "oklch(62% 0.2 260)" }),
           scale: controlField.range({ min: 0, max: 2, step: 0.1, default: 1 }),
           offset: controlField.vector2({ default: { x: 1, y: 2 } }),
-          rotation: controlField.vector3({ default: { x: 0, y: 90, z: 0 } })
-        }
-      }
-    }
+          rotation: controlField.vector3({ default: { x: 0, y: 90, z: 0 } }),
+        },
+      },
+    },
   });
 
   assert.strictEqual(config.fieldsets.hero.fields.title.type, "text");
@@ -68,17 +68,17 @@ it("normalizes range constraints without materializing field defaults", () => {
     fieldsets: {
       scene: {
         fields: {
-          opacity: controlField.range()
-        }
-      }
-    }
+          opacity: controlField.range(),
+        },
+      },
+    },
   });
 
   assert.deepStrictEqual(config.fieldsets.scene.fields.opacity, {
     type: "range",
     min: 0,
     max: 1,
-    step: 0.01
+    step: 0.01,
   });
 });
 
@@ -93,16 +93,16 @@ it("exposes internal defaults separately from normalized config", () => {
           density: controlField.select({
             options: [
               { label: "Compact", value: "compact" },
-              { label: "Comfortable", value: "comfortable" }
-            ]
+              { label: "Comfortable", value: "comfortable" },
+            ],
           }),
           accent: controlField.color(),
           scale: controlField.range(),
           offset: controlField.vector2(),
-          rotation: controlField.vector3()
-        }
-      }
-    }
+          rotation: controlField.vector3(),
+        },
+      },
+    },
   });
 
   assert.deepStrictEqual(getControlPanelDefaults(config), {
@@ -114,8 +114,8 @@ it("exposes internal defaults separately from normalized config", () => {
       accent: "oklch(0% 0 0)",
       scale: 0,
       offset: { x: 0, y: 0 },
-      rotation: { x: 0, y: 0, z: 0 }
-    }
+      rotation: { x: 0, y: 0, z: 0 },
+    },
   });
 });
 
@@ -126,10 +126,10 @@ it("computes a shallow config hash from fieldset ids, field ids, and field types
         label: "Scene",
         fields: {
           title: controlField.text({ label: "Title", default: "Hello" }),
-          scale: controlField.range({ min: 0, max: 10, step: 1, default: 2 })
-        }
-      }
-    }
+          scale: controlField.range({ min: 0, max: 10, step: 1, default: 2 }),
+        },
+      },
+    },
   });
   const copyOnlyChange = defineControlPanel({
     fieldsets: {
@@ -137,31 +137,31 @@ it("computes a shallow config hash from fieldset ids, field ids, and field types
         label: "Scene controls",
         fields: {
           title: controlField.text({ label: "Headline", default: "Goodbye" }),
-          scale: controlField.range({ min: -10, max: 10, step: 0.5, default: 4 })
-        }
-      }
-    }
+          scale: controlField.range({ min: -10, max: 10, step: 0.5, default: 4 }),
+        },
+      },
+    },
   });
   const shapeChange = defineControlPanel({
     fieldsets: {
       scene: {
         fields: {
           title: controlField.text(),
-          enabled: controlField.boolean()
-        }
-      }
-    }
+          enabled: controlField.boolean(),
+        },
+      },
+    },
   });
   const reorderOnlyChange = defineControlPanel({
     fieldsets: {
       scene: {
         fields: {
           scale: controlField.range({ min: 0, max: 10, step: 1, default: 2 }),
-          title: controlField.text({ label: "Title", default: "Hello" })
+          title: controlField.text({ label: "Title", default: "Hello" }),
         },
-        label: "Scene"
-      }
-    }
+        label: "Scene",
+      },
+    },
   });
 
   assert.strictEqual(first.configHash, getControlConfigHash(first));
@@ -178,10 +178,10 @@ it("infers control values from a defined control panel config", () => {
           title: controlField.text({ default: "Hello" }),
           count: controlField.number({ default: 2 }),
           visible: controlField.boolean({ default: true }),
-          position: controlField.vector3({ default: { x: 1, y: 2, z: 3 } })
-        }
-      }
-    }
+          position: controlField.vector3({ default: { x: 1, y: 2, z: 3 } }),
+        },
+      },
+    },
   });
 
   const values: ControlPanelValues<typeof config> = {
@@ -189,42 +189,43 @@ it("infers control values from a defined control panel config", () => {
       title: "Updated",
       count: 3,
       visible: false,
-      position: { x: 0, y: 1, z: 2 }
-    }
+      position: { x: 0, y: 1, z: 2 },
+    },
   };
 
   assert.strictEqual(values.scene.position.z, 2);
 });
 
 it.effect("validates control panel config through an Effect API", () =>
-  Effect.gen(function*() {
+  Effect.gen(function* () {
     const config = yield* validateControlPanel({
       fieldsets: {
         empty: {
-          fields: {}
-        }
-      }
+          fields: {},
+        },
+      },
     });
 
     assert.deepStrictEqual(config, {
       configHash: getControlConfigHash(config),
       fieldsets: {
         empty: {
-          fields: {}
-        }
-      }
+          fields: {},
+        },
+      },
     });
-  }));
+  }),
+);
 
 it("registers the control panel as a toolbar tool", () => {
   const registration = controlPanelTool({
     fieldsets: {
       layout: {
         fields: {
-          width: controlField.number({ default: 640 })
-        }
-      }
-    }
+          width: controlField.number({ default: 640 }),
+        },
+      },
+    },
   });
 
   assert.strictEqual(registration.tool.id, controlPanelToolId);
@@ -242,8 +243,8 @@ it("registers the control panel as a toolbar tool", () => {
       "snapshots/save",
       "state",
       "state/select-base",
-      "state/select-fieldset"
-    ]
+      "state/select-fieldset",
+    ],
   });
 });
 
@@ -254,12 +255,12 @@ it("throws for invalid field ids", () => {
         fieldsets: {
           scene: {
             fields: {
-              "bad field": controlField.text()
-            }
-          }
-        }
+              "bad field": controlField.text(),
+            },
+          },
+        },
       }),
-    InvalidControlFieldIdError
+    InvalidControlFieldIdError,
   );
 });
 
@@ -270,12 +271,12 @@ it("throws for empty select options", () => {
         fieldsets: {
           scene: {
             fields: {
-              density: controlField.select({ options: [] })
-            }
-          }
-        }
+              density: controlField.select({ options: [] }),
+            },
+          },
+        },
       }),
-    EmptyControlSelectOptionsError
+    EmptyControlSelectOptionsError,
   );
 });
 
@@ -288,13 +289,13 @@ it("throws for select defaults outside static options", () => {
             fields: {
               density: controlField.select({
                 default: "loose",
-                options: [{ label: "Compact", value: "compact" }]
-              })
-            }
-          }
-        }
+                options: [{ label: "Compact", value: "compact" }],
+              }),
+            },
+          },
+        },
       }),
-    InvalidControlSelectDefaultError
+    InvalidControlSelectDefaultError,
   );
 });
 
@@ -308,14 +309,14 @@ it("throws for duplicate select option values", () => {
               density: controlField.select({
                 options: [
                   { label: "Compact", value: "compact" },
-                  { label: "Compact again", value: "compact" }
-                ]
-              })
-            }
-          }
-        }
+                  { label: "Compact again", value: "compact" },
+                ],
+              }),
+            },
+          },
+        },
       }),
-    DuplicateControlSelectOptionValueError
+    DuplicateControlSelectOptionValueError,
   );
 });
 
@@ -325,11 +326,11 @@ it("throws for color defaults with alpha", () => {
       fieldsets: {
         scene: {
           fields: {
-            accent: controlField.color({ default: "oklch(62% 0.2 260 / 0.5)" })
-          }
-        }
-      }
-    })
+            accent: controlField.color({ default: "oklch(62% 0.2 260 / 0.5)" }),
+          },
+        },
+      },
+    }),
   );
 });
 
@@ -340,12 +341,12 @@ it("throws for invalid range constraints", () => {
         fieldsets: {
           scene: {
             fields: {
-              opacity: controlField.range({ min: 1, max: 0 })
-            }
-          }
-        }
+              opacity: controlField.range({ min: 1, max: 0 }),
+            },
+          },
+        },
       }),
-    InvalidControlRangeError
+    InvalidControlRangeError,
   );
 });
 
@@ -354,15 +355,15 @@ it("creates active state with defaults base separate from active fieldset", () =
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Hello" })
-        }
+          title: controlField.text({ default: "Hello" }),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number({ default: 2 })
-        }
-      }
-    }
+          zoom: controlField.number({ default: 2 }),
+        },
+      },
+    },
   });
   const state = createControlPanelState(config);
   const next = selectActiveFieldset(state, config, "camera");
@@ -379,38 +380,42 @@ it("branches snapshots scoped to one fieldset and tracks active bases per fields
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text()
-        }
+          title: controlField.text(),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number()
-        }
-      }
-    }
+          zoom: controlField.number(),
+        },
+      },
+    },
   });
   const initial = createControlPanelState(config);
   const withSceneSnapshot = branchControlSnapshot(initial, config, "scene", {
     id: "scene-a",
     name: "Scene A",
-    values: { title: "Draft" }
+    values: { title: "Draft" },
   });
   const withCameraSnapshot = branchControlSnapshot(withSceneSnapshot, config, "camera", {
     id: "camera-a",
     name: "Camera A",
-    values: { zoom: 4 }
+    values: { zoom: 4 },
   });
 
   assert.deepStrictEqual(getActiveControlBase(withCameraSnapshot, "scene"), {
     type: "snapshot",
-    snapshotId: "scene-a"
+    snapshotId: "scene-a",
   });
   assert.deepStrictEqual(getActiveControlBase(withCameraSnapshot, "camera"), {
     type: "snapshot",
-    snapshotId: "camera-a"
+    snapshotId: "camera-a",
   });
-  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "scene"), { title: "Draft" });
-  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "camera"), { zoom: 4 });
+  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "scene"), {
+    title: "Draft",
+  });
+  assert.deepStrictEqual(getCurrentFieldsetValues(withCameraSnapshot, config, "camera"), {
+    zoom: 4,
+  });
 });
 
 it("restores snapshots with missing, unknown, and incompatible values falling back to defaults", () => {
@@ -424,13 +429,13 @@ it("restores snapshots with missing, unknown, and incompatible values falling ba
             default: "comfortable",
             options: [
               { label: "Compact", value: "compact" },
-              { label: "Comfortable", value: "comfortable" }
-            ]
+              { label: "Comfortable", value: "comfortable" },
+            ],
           }),
-          position: controlField.vector2({ default: { x: 1, y: 2 } })
-        }
-      }
-    }
+          position: controlField.vector2({ default: { x: 1, y: 2 } }),
+        },
+      },
+    },
   });
   const snapshot: ControlSnapshot = {
     id: "snapshot-a",
@@ -440,15 +445,15 @@ it("restores snapshots with missing, unknown, and incompatible values falling ba
       enabled: "yes",
       density: "stale",
       position: { x: 9 },
-      unknown: "ignored"
-    }
+      unknown: "ignored",
+    },
   };
 
   assert.deepStrictEqual(restoreControlSnapshot(config, snapshot), {
     title: "Untitled",
     enabled: true,
     density: "comfortable",
-    position: { x: 1, y: 2 }
+    position: { x: 1, y: 2 },
   });
 });
 
@@ -457,21 +462,27 @@ it("saves changes only when a snapshot base is active", () => {
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text()
-        }
-      }
-    }
+          title: controlField.text(),
+        },
+      },
+    },
   });
   const state = createControlPanelState(config);
 
-  assert.throws(() => saveControlSnapshot(state, config, "scene", { title: "Saved" }), CannotSaveDefaultsBaseError);
+  assert.throws(
+    () => saveControlSnapshot(state, config, "scene", { title: "Saved" }),
+    CannotSaveDefaultsBaseError,
+  );
 
   const branched = branchControlSnapshot(state, config, "scene", {
     id: "scene-a",
     name: "Scene A",
-    values: { title: "Draft" }
+    values: { title: "Draft" },
   });
-  const saved = saveControlSnapshot(branched, config, "scene", { title: "Saved", unknown: "ignored" });
+  const saved = saveControlSnapshot(branched, config, "scene", {
+    title: "Saved",
+    unknown: "ignored",
+  });
 
   assert.deepStrictEqual(getCurrentFieldsetValues(saved, config, "scene"), { title: "Saved" });
 });
@@ -481,38 +492,40 @@ it("deletes active snapshots by returning only that fieldset to defaults", () =>
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Default scene" })
-        }
+          title: controlField.text({ default: "Default scene" }),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number({ default: 1 })
-        }
-      }
-    }
+          zoom: controlField.number({ default: 1 }),
+        },
+      },
+    },
   });
   const state = branchControlSnapshot(
     branchControlSnapshot(createControlPanelState(config), config, "scene", {
       id: "scene-a",
       name: "Scene A",
-      values: { title: "Snapshot scene" }
+      values: { title: "Snapshot scene" },
     }),
     config,
     "camera",
     {
       id: "camera-a",
       name: "Camera A",
-      values: { zoom: 5 }
-    }
+      values: { zoom: 5 },
+    },
   );
   const next = deleteControlSnapshot(state, "scene-a");
 
   assert.deepStrictEqual(getActiveControlBase(next, "scene"), defaultsBase);
   assert.deepStrictEqual(getActiveControlBase(next, "camera"), {
     type: "snapshot",
-    snapshotId: "camera-a"
+    snapshotId: "camera-a",
   });
-  assert.deepStrictEqual(getCurrentFieldsetValues(next, config, "scene"), { title: "Default scene" });
+  assert.deepStrictEqual(getCurrentFieldsetValues(next, config, "scene"), {
+    title: "Default scene",
+  });
   assert.deepStrictEqual(getCurrentFieldsetValues(next, config, "camera"), { zoom: 5 });
 });
 
@@ -521,15 +534,15 @@ it("discards changes by returning current base values without changing base sele
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Default" })
-        }
-      }
-    }
+          title: controlField.text({ default: "Default" }),
+        },
+      },
+    },
   });
   const state = branchControlSnapshot(createControlPanelState(config), config, "scene", {
     id: "scene-a",
     name: "Scene A",
-    values: { title: "Snapshot" }
+    values: { title: "Snapshot" },
   });
   const defaults = selectControlBase(state, config, "scene", defaultsBase);
 
@@ -542,15 +555,15 @@ it("rejects duplicate snapshot ids and duplicate snapshot names per fieldset", (
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text()
-        }
-      }
-    }
+          title: controlField.text(),
+        },
+      },
+    },
   });
   const state = branchControlSnapshot(createControlPanelState(config), config, "scene", {
     id: "scene-a",
     name: "Scene A",
-    values: { title: "A" }
+    values: { title: "A" },
   });
 
   assert.throws(
@@ -558,37 +571,43 @@ it("rejects duplicate snapshot ids and duplicate snapshot names per fieldset", (
       branchControlSnapshot(state, config, "scene", {
         id: "scene-a",
         name: "Scene B",
-        values: { title: "B" }
+        values: { title: "B" },
       }),
-    DuplicateControlSnapshotIdError
+    DuplicateControlSnapshotIdError,
   );
   assert.throws(
     () =>
       branchControlSnapshot(state, config, "scene", {
         id: "scene-b",
         name: "Scene A",
-        values: { title: "B" }
+        values: { title: "B" },
       }),
-    DuplicateControlSnapshotNameError
+    DuplicateControlSnapshotNameError,
   );
 });
 
 it("models the v1 snapshot actions", () => {
-  assert.deepStrictEqual(controlSnapshotActions, ["saveChanges", "branchSnapshot", "discardChanges", "deleteSnapshot"]);
+  assert.deepStrictEqual(controlSnapshotActions, [
+    "saveChanges",
+    "branchSnapshot",
+    "discardChanges",
+    "deleteSnapshot",
+  ]);
 });
 
 const emptySnapshotStoreLayer = Layer.provide(
   ControlSnapshotStore.layer,
   Layer.mergeAll(
     Layer.succeed(ControlSnapshotPersistence)({
-      load: () => Effect.succeed({
-        version: 1,
-        snapshots: []
-      }),
-      save: () => Effect.void
+      load: () =>
+        Effect.succeed({
+          version: 1,
+          snapshots: [],
+        }),
+      save: () => Effect.void,
     }),
     Layer.succeed(IdGenerator)({
-      next: (prefix) => Effect.succeed(prefix ? `${prefix}_test-id` : "test-id")
-    })
-  )
+      next: (prefix) => Effect.succeed(prefix ? `${prefix}_test-id` : "test-id"),
+    }),
+  ),
 );

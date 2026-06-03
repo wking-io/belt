@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@remix-run/ui": "0.1.1",
-    "@riff-refine/belt": "workspace:*",
     "@repo/adapter-remix": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/renderer-remix": "workspace:*",
@@ -18,13 +17,14 @@
     "@repo/tool-worktrees": "workspace:*",
     "@repo/tool-worktrees-extension-portless": "workspace:*",
     "@repo/tool-worktrees-renderer-remix": "workspace:*",
+    "@riff-refine/belt": "workspace:*",
     "remix": "3.0.0-beta.0"
-  },
-  "engines": {
-    "node": ">=24.3.0"
   },
   "devDependencies": {
     "esbuild": "^0.25.12",
     "tsx": "^4.22.2"
+  },
+  "engines": {
+    "node": ">=24.3.0"
   }
 }

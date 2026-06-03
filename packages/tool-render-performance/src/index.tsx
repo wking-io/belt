@@ -1,4 +1,9 @@
-import { defineTool, defineToolRegistration, type ToolDefinition, type ToolRegistration } from "@repo/core";
+import {
+  defineTool,
+  defineToolRegistration,
+  type ToolDefinition,
+  type ToolRegistration,
+} from "@repo/core";
 import {
   Button,
   GhostButton,
@@ -6,16 +11,15 @@ import {
   type GhostButtonProps,
   type PanelProps,
 } from "@repo/renderer-react";
-import {
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
 export const renderPerformanceToolId = "render-performance";
 
 export type RenderPerformanceToolDefinition = ToolDefinition;
-export type RenderPerformanceToolRegistration = ToolRegistration<unknown, RenderPerformanceToolDefinition>;
+export type RenderPerformanceToolRegistration = ToolRegistration<
+  unknown,
+  RenderPerformanceToolDefinition
+>;
 
 export type LongAnimationFrameSummary = {
   readonly duration: number;
@@ -159,7 +163,7 @@ export function renderPerformanceTool(): RenderPerformanceToolRegistration {
     tool: defineTool({
       id: renderPerformanceToolId,
       label: "Render Performance",
-    })
+    }),
   });
 }
 
@@ -434,9 +438,7 @@ export function RenderPerformanceToolbarButtonChart(props: {
 }): ReactElement {
   return (
     <RenderPerformanceToolbarButtonChartLayout
-      chart={
-        <RenderPerformanceJankFlamegraph axis emptySampleCount={0} history={props.history} />
-      }
+      chart={<RenderPerformanceJankFlamegraph axis emptySampleCount={0} history={props.history} />}
       label="Jank"
       size={props.size}
       value={props.current === undefined ? "--%" : formatJank(props.current.jank)}
@@ -461,7 +463,9 @@ export function RenderPerformanceInpToolbarButtonChart(props: {
       label="INP"
       size={props.size}
       value={
-        props.current === undefined ? "--ms" : formatMilliseconds(props.current.interactionLatencyMs)
+        props.current === undefined
+          ? "--ms"
+          : formatMilliseconds(props.current.interactionLatencyMs)
       }
     />
   );
@@ -540,11 +544,7 @@ function RenderPerformanceToolbarMetricItem(
         {metric === "jank" ? (
           <RenderPerformanceToolbarButtonChart current={current} history={history} size={size} />
         ) : metric === "inp" ? (
-          <RenderPerformanceInpToolbarButtonChart
-            current={current}
-            history={history}
-            size={size}
-          />
+          <RenderPerformanceInpToolbarButtonChart current={current} history={history} size={size} />
         ) : (
           <RenderPerformanceLayoutShiftToolbarButtonChart
             history={history}
@@ -568,11 +568,7 @@ export function RenderPerformanceLayoutShiftToolbarButtonChart(props: {
   return (
     <RenderPerformanceToolbarButtonChartLayout
       chart={
-        <RenderPerformanceLayoutShiftEventStrip
-          axis
-          emptySampleCount={0}
-          history={props.history}
-        />
+        <RenderPerformanceLayoutShiftEventStrip axis emptySampleCount={0} history={props.history} />
       }
       label="CLS"
       size={props.size}
@@ -608,7 +604,11 @@ export function RenderPerformanceDrawer(props: {
   const layoutShiftSession = props.snapshot.layoutShiftSession;
 
   return (
-    <div aria-label="Render performance details" className="belt-render-performance-drawer" role="dialog">
+    <div
+      aria-label="Render performance details"
+      className="belt-render-performance-drawer"
+      role="dialog"
+    >
       <div className="belt-render-performance-drawer__panel">
         <div className="belt-render-performance-drawer__body">
           <div className="belt-render-performance-drawer__header">
@@ -664,7 +664,9 @@ export function RenderPerformanceDrawer(props: {
             />
             <RenderPerformanceMetric
               label="INP"
-              value={current === undefined ? "--" : formatMilliseconds(current.interactionLatencyMs)}
+              value={
+                current === undefined ? "--" : formatMilliseconds(current.interactionLatencyMs)
+              }
             />
             <RenderPerformanceMetric
               label="CLS"
@@ -813,9 +815,7 @@ export function RenderPerformanceLayoutShiftEventStrip(props: {
         const layoutShift = sample?.layoutShift ?? 0;
         const hasShift = layoutShift > 0;
         const severity = getLayoutShiftSeverity(layoutShift, thresholds);
-        const heightPercent = hasShift
-          ? Math.min(100, (layoutShift / thresholds.danger) * 100)
-          : 0;
+        const heightPercent = hasShift ? Math.min(100, (layoutShift / thresholds.danger) * 100) : 0;
 
         return (
           <span

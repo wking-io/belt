@@ -9,7 +9,7 @@ import {
   createToolbar as createRemixToolbar,
   createToolbarRouteHandler,
   defineControlPanel,
-  textField
+  textField,
 } from "@riff-refine/belt/remix";
 import {
   controlPanelTool as reactControlPanelTool,
@@ -17,11 +17,11 @@ import {
   createToolbarRendererModel,
   defineControlPanel as reactDefineControlPanel,
   numberField,
-  RenderPerformanceMeter
+  RenderPerformanceMeter,
 } from "@riff-refine/belt/react";
 import {
   mountRenderPerformanceMeter,
-  renderPerformanceTool
+  renderPerformanceTool,
 } from "@riff-refine/belt/render-performance";
 import { iterationsTool } from "@riff-refine/belt/iterations";
 import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
@@ -64,8 +64,8 @@ describe("@riff-refine/belt facade exports", () => {
     assert.deepStrictEqual(registration, {
       tool: {
         id: "render-performance",
-        label: "Render Performance"
-      }
+        label: "Render Performance",
+      },
     });
   });
 
@@ -80,25 +80,25 @@ describe("@riff-refine/belt facade exports", () => {
               default: "draft",
               options: [
                 { label: "Draft", value: "draft" },
-                { label: "Final", value: "final" }
-              ]
-            })
-          }
-        }
-      }
+                { label: "Final", value: "final" },
+              ],
+            }),
+          },
+        },
+      },
     });
     const toolbar = createRemixToolbar({
-      tools: [registration]
+      tools: [registration],
     });
 
     const panel = defineControlPanel({
       fieldsets: {
         camera: {
           fields: {
-            zoom: controlField.range({ default: 0.5 })
-          }
-        }
-      }
+            zoom: controlField.range({ default: 0.5 }),
+          },
+        },
+      },
     });
 
     assert.strictEqual(toolbar.toolbarConfig.tools[0]?.tool.id, "control-panel");
@@ -110,10 +110,10 @@ describe("@riff-refine/belt facade exports", () => {
       fieldsets: {
         scene: {
           fields: {
-            intensity: numberField({ default: 2 })
-          }
-        }
-      }
+            intensity: numberField({ default: 2 }),
+          },
+        },
+      },
     });
     const registration = reactControlPanelTool(panel);
 
@@ -128,22 +128,26 @@ describe("@riff-refine/belt facade exports", () => {
       fieldsets: {
         scene: {
           fields: {
-            title: textField({ default: "Preview" })
-          }
-        }
-      }
+            title: textField({ default: "Preview" }),
+          },
+        },
+      },
     });
     const config = defineToolbar({
-      tools: [registration]
+      tools: [registration],
     });
     const server = createToolbarServer(config);
     const remix = createToolbarRouteHandler(config);
 
     try {
-      const request = new Request(new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"));
+      const request = new Request(
+        new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"),
+      );
       const serverResponse = await server.fetch(request);
       const remixResponse = await remix({
-        request: new Request(new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"))
+        request: new Request(
+          new URL(toolApiRoutePath("control-panel", "index"), "http://belt.local"),
+        ),
       });
 
       assert.strictEqual(serverResponse.status, 200);
@@ -153,13 +157,13 @@ describe("@riff-refine/belt facade exports", () => {
         state: {
           activeFieldsetId: "scene",
           activeBaseByFieldset: {
-            scene: { type: "defaults" }
+            scene: { type: "defaults" },
           },
           currentValuesByFieldset: {
             scene: {
-              title: "Preview"
-            }
-          }
+              title: "Preview",
+            },
+          },
         },
       });
     } finally {

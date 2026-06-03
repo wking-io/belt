@@ -9,7 +9,7 @@ When code needs a service, yield that service inside the Effect method that uses
 Prefer:
 
 ```ts
-const list = Effect.fn("WorktreeDiscovery.list")(function*(options) {
+const list = Effect.fn("WorktreeDiscovery.list")(function* (options) {
   const childProcess = yield* ChildProcessSpawner;
   const path = yield* Path.Path;
 
@@ -23,13 +23,13 @@ const list = Effect.fn("WorktreeDiscovery.list")(function*(options) {
 Avoid:
 
 ```ts
-const childProcess = yield* ChildProcessSpawner;
+const childProcess = yield * ChildProcessSpawner;
 
-const gitOutput = Effect.fn("gitOutput")(function*(command) {
+const gitOutput = Effect.fn("gitOutput")(function* (command) {
   return yield* childProcess.string(command);
 });
 
-const list = Effect.fn("WorktreeDiscovery.list")(function*(options) {
+const list = Effect.fn("WorktreeDiscovery.list")(function* (options) {
   const output = yield* gitOutput(command);
   return output;
 });

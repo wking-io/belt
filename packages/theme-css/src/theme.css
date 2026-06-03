@@ -6,14 +6,16 @@
   src: url("../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2") format("woff2");
 }
 
-:where([class^="belt-"],
+:where(
+  [class^="belt-"],
   [class*=" belt-"],
   [class^="belt-"] *,
   [class*=" belt-"] *,
   [class^="belt-"]::before,
   [class^="belt-"]::after,
   [class*=" belt-"]::before,
-  [class*=" belt-"]::after) {
+  [class*=" belt-"]::after
+) {
   box-sizing: border-box;
   font-family: var(--belt-font-family);
   font-feature-settings: var(--belt-font-feature-settings);
@@ -472,10 +474,14 @@
   --belt-color-elevation-1-inset: light-dark(var(--belt-neutral-4), var(--belt-neutral-14));
   --belt-color-elevation-1-highlight: light-dark(var(--white), var(--belt-neutral-9));
   --belt-color-elevation-1-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-3));
-  --belt-color-elevation-1-foreground-subtle: light-dark(var(--belt-neutral-8),
-      var(--belt-neutral-6));
-  --belt-color-elevation-1-foreground-strong: light-dark(var(--belt-neutral-12),
-      var(--belt-neutral-1));
+  --belt-color-elevation-1-foreground-subtle: light-dark(
+    var(--belt-neutral-8),
+    var(--belt-neutral-6)
+  );
+  --belt-color-elevation-1-foreground-strong: light-dark(
+    var(--belt-neutral-12),
+    var(--belt-neutral-1)
+  );
 
   --belt-color-elevation-2: light-dark(var(--belt-neutral-2), var(--belt-neutral-11));
   --belt-color-elevation-2-hover: light-dark(var(--belt-neutral-1), var(--belt-neutral-10));
@@ -483,10 +489,14 @@
   --belt-color-elevation-2-inset: light-dark(var(--belt-neutral-5), var(--belt-neutral-13));
   --belt-color-elevation-2-highlight: light-dark(var(--white), var(--belt-neutral-9));
   --belt-color-elevation-2-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-2));
-  --belt-color-elevation-2-foreground-subtle: light-dark(var(--belt-neutral-8),
-      var(--belt-neutral-4));
-  --belt-color-elevation-2-foreground-strong: light-dark(var(--belt-neutral-12),
-      var(--belt-neutral-1));
+  --belt-color-elevation-2-foreground-subtle: light-dark(
+    var(--belt-neutral-8),
+    var(--belt-neutral-4)
+  );
+  --belt-color-elevation-2-foreground-strong: light-dark(
+    var(--belt-neutral-12),
+    var(--belt-neutral-1)
+  );
 
   --belt-color-elevation-3: light-dark(var(--belt-neutral-1), var(--belt-neutral-10));
   --belt-color-elevation-3-hover: light-dark(var(--white), var(--belt-neutral-9));
@@ -494,17 +504,27 @@
   --belt-color-elevation-3-inset: light-dark(var(--belt-neutral-6), var(--belt-neutral-12));
   --belt-color-elevation-3-highlight: light-dark(var(--white), var(--belt-neutral-9));
   --belt-color-elevation-3-foreground: light-dark(var(--belt-neutral-10), var(--belt-neutral-1));
-  --belt-color-elevation-3-foreground-subtle: light-dark(var(--belt-neutral-8),
-      var(--belt-neutral-2));
-  --belt-color-elevation-3-foreground-strong: light-dark(var(--belt-neutral-12),
-      var(--belt-neutral-1));
+  --belt-color-elevation-3-foreground-subtle: light-dark(
+    var(--belt-neutral-8),
+    var(--belt-neutral-2)
+  );
+  --belt-color-elevation-3-foreground-strong: light-dark(
+    var(--belt-neutral-12),
+    var(--belt-neutral-1)
+  );
 
-  --belt-color-border: light-dark(color-mix(in oklch, var(--belt-neutral-14) 20%, transparent),
-      color-mix(in oklch, var(--belt-neutral-1) 20%, transparent));
-  --belt-color-border-subtle: light-dark(color-mix(in oklch, var(--belt-neutral-14) 10%, transparent),
-      color-mix(in oklch, var(--belt-neutral-1) 10%, transparent));
-  --belt-color-border-strong: light-dark(color-mix(in oklch, var(--belt-neutral-14) 30%, transparent),
-      color-mix(in oklch, var(--belt-neutral-1) 30%, transparent));
+  --belt-color-border: light-dark(
+    color-mix(in oklch, var(--belt-neutral-14) 20%, transparent),
+    color-mix(in oklch, var(--belt-neutral-1) 20%, transparent)
+  );
+  --belt-color-border-subtle: light-dark(
+    color-mix(in oklch, var(--belt-neutral-14) 10%, transparent),
+    color-mix(in oklch, var(--belt-neutral-1) 10%, transparent)
+  );
+  --belt-color-border-strong: light-dark(
+    color-mix(in oklch, var(--belt-neutral-14) 30%, transparent),
+    color-mix(in oklch, var(--belt-neutral-1) 30%, transparent)
+  );
 
   --belt-color-primary: light-dark(var(--belt-primary-5), var(--belt-primary-6));
   --belt-color-focus: var(--belt-color-primary);
@@ -513,16 +533,24 @@
   --belt-color-primary-highlight: light-dark(var(--belt-primary-2), var(--belt-primary-3));
   --belt-color-primary-foreground: light-dark(var(--belt-primary-10), var(--belt-primary-11));
   --belt-color-primary-foreground-subtle: light-dark(var(--belt-primary-8), var(--belt-primary-9));
-  --belt-color-primary-foreground-strong: light-dark(var(--belt-primary-13),
-      var(--belt-primary-14));
+  --belt-color-primary-foreground-strong: light-dark(
+    var(--belt-primary-13),
+    var(--belt-primary-14)
+  );
   --belt-color-primary-border: light-dark(var(--belt-primary-8), var(--belt-primary-14));
   --belt-color-primary-overlay: color-mix(in oklch, var(--belt-color-primary) 20%, transparent);
-  --belt-color-primary-overlay-foreground: light-dark(var(--belt-primary-10),
-      var(--belt-primary-3));
-  --belt-color-primary-overlay-foreground-subtle: light-dark(var(--belt-primary-8),
-      var(--belt-primary-5));
-  --belt-color-primary-overlay-foreground-strong: light-dark(var(--belt-primary-12),
-      var(--belt-primary-1));
+  --belt-color-primary-overlay-foreground: light-dark(
+    var(--belt-primary-10),
+    var(--belt-primary-3)
+  );
+  --belt-color-primary-overlay-foreground-subtle: light-dark(
+    var(--belt-primary-8),
+    var(--belt-primary-5)
+  );
+  --belt-color-primary-overlay-foreground-strong: light-dark(
+    var(--belt-primary-12),
+    var(--belt-primary-1)
+  );
 
   --belt-color-info: light-dark(var(--belt-info-5), var(--belt-info-6));
   --belt-color-info-hover: light-dark(var(--belt-info-6), var(--belt-info-5));
@@ -543,16 +571,24 @@
   --belt-color-success-highlight: light-dark(var(--belt-success-2), var(--belt-success-3));
   --belt-color-success-foreground: light-dark(var(--belt-success-10), var(--belt-success-11));
   --belt-color-success-foreground-subtle: light-dark(var(--belt-success-8), var(--belt-success-9));
-  --belt-color-success-foreground-strong: light-dark(var(--belt-success-13),
-      var(--belt-success-14));
+  --belt-color-success-foreground-strong: light-dark(
+    var(--belt-success-13),
+    var(--belt-success-14)
+  );
   --belt-color-success-border: light-dark(var(--belt-success-8), var(--belt-success-14));
   --belt-color-success-overlay: color-mix(in oklch, var(--belt-color-success) 20%, transparent);
-  --belt-color-success-overlay-foreground: light-dark(var(--belt-success-10),
-      var(--belt-success-3));
-  --belt-color-success-overlay-foreground-subtle: light-dark(var(--belt-success-8),
-      var(--belt-success-5));
-  --belt-color-success-overlay-foreground-strong: light-dark(var(--belt-success-12),
-      var(--belt-success-1));
+  --belt-color-success-overlay-foreground: light-dark(
+    var(--belt-success-10),
+    var(--belt-success-3)
+  );
+  --belt-color-success-overlay-foreground-subtle: light-dark(
+    var(--belt-success-8),
+    var(--belt-success-5)
+  );
+  --belt-color-success-overlay-foreground-strong: light-dark(
+    var(--belt-success-12),
+    var(--belt-success-1)
+  );
 
   --belt-color-warning: light-dark(var(--belt-warning-5), var(--belt-warning-6));
   --belt-color-warning-hover: light-dark(var(--belt-warning-6), var(--belt-warning-5));
@@ -560,16 +596,24 @@
   --belt-color-warning-highlight: light-dark(var(--belt-warning-2), var(--belt-warning-3));
   --belt-color-warning-foreground: light-dark(var(--belt-warning-10), var(--belt-warning-11));
   --belt-color-warning-foreground-subtle: light-dark(var(--belt-warning-8), var(--belt-warning-9));
-  --belt-color-warning-foreground-strong: light-dark(var(--belt-warning-13),
-      var(--belt-warning-14));
+  --belt-color-warning-foreground-strong: light-dark(
+    var(--belt-warning-13),
+    var(--belt-warning-14)
+  );
   --belt-color-warning-border: light-dark(var(--belt-warning-8), var(--belt-warning-14));
   --belt-color-warning-overlay: color-mix(in oklch, var(--belt-color-warning) 20%, transparent);
-  --belt-color-warning-overlay-foreground: light-dark(var(--belt-warning-10),
-      var(--belt-warning-3));
-  --belt-color-warning-overlay-foreground-subtle: light-dark(var(--belt-warning-8),
-      var(--belt-warning-5));
-  --belt-color-warning-overlay-foreground-strong: light-dark(var(--belt-warning-12),
-      var(--belt-warning-1));
+  --belt-color-warning-overlay-foreground: light-dark(
+    var(--belt-warning-10),
+    var(--belt-warning-3)
+  );
+  --belt-color-warning-overlay-foreground-subtle: light-dark(
+    var(--belt-warning-8),
+    var(--belt-warning-5)
+  );
+  --belt-color-warning-overlay-foreground-strong: light-dark(
+    var(--belt-warning-12),
+    var(--belt-warning-1)
+  );
 
   --belt-color-danger: light-dark(var(--belt-danger-5), var(--belt-danger-6));
   --belt-color-danger-hover: light-dark(var(--belt-danger-6), var(--belt-danger-5));
@@ -581,10 +625,14 @@
   --belt-color-danger-border: light-dark(var(--belt-danger-8), var(--belt-danger-14));
   --belt-color-danger-overlay: color-mix(in oklch, var(--belt-color-danger) 20%, transparent);
   --belt-color-danger-overlay-foreground: light-dark(var(--belt-danger-10), var(--belt-danger-3));
-  --belt-color-danger-overlay-foreground-subtle: light-dark(var(--belt-danger-8),
-      var(--belt-danger-5));
-  --belt-color-danger-overlay-foreground-strong: light-dark(var(--belt-danger-12),
-      var(--belt-danger-1));
+  --belt-color-danger-overlay-foreground-subtle: light-dark(
+    var(--belt-danger-8),
+    var(--belt-danger-5)
+  );
+  --belt-color-danger-overlay-foreground-strong: light-dark(
+    var(--belt-danger-12),
+    var(--belt-danger-1)
+  );
 
   --belt-space: 0.25rem;
 
@@ -722,10 +770,12 @@
   position: relative;
 }
 
-:where(.belt-surface[data-control]:focus-visible,
+:where(
+  .belt-surface[data-control]:focus-visible,
   .belt-surface:has(> [data-control]:focus-visible),
   .belt-surface:has(> .belt-surface__inner > [data-control]:focus-visible),
-  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)) {
+  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)
+) {
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--belt-color-focus) 20%, transparent);
 }
 
@@ -810,10 +860,12 @@
   --belt-surface-foreground-strong: var(--belt-color-danger-foreground-strong);
 }
 
-:where(.belt-surface[data-control]:focus-visible,
+:where(
+  .belt-surface[data-control]:focus-visible,
   .belt-surface:has(> [data-control]:focus-visible),
   .belt-surface:has(> .belt-surface__inner > [data-control]:focus-visible),
-  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)) {
+  .belt-surface:has(> .belt-surface__inner > .belt-input:focus-visible)
+) {
   --belt-surface-border: color-mix(in oklch, var(--belt-color-focus) 60%, transparent);
 }
 
@@ -828,11 +880,13 @@
   /* --belt-button-text-shadow-color: light-dark(transparent, color-mix(in oklch, var(--belt-neutral-14) 25%, transparent)); */
 
   appearance: none;
-  background: linear-gradient(to bottom,
-      var(--belt-button-bg-from),
-      var(--belt-button-bg-via),
-      var(--belt-button-bg-via),
-      var(--belt-button-bg-to));
+  background: linear-gradient(
+    to bottom,
+    var(--belt-button-bg-from),
+    var(--belt-button-bg-via),
+    var(--belt-button-bg-via),
+    var(--belt-button-bg-to)
+  );
   border: none;
   border-radius: var(--belt-child-radius, var(--belt-radius));
   color: var(--belt-surface-foreground);
@@ -1348,9 +1402,11 @@
 }
 
 :where(.belt-status-banner) {
-  --belt-status-banner-bg: color-mix(in oklch,
-      var(--belt-color-elevation-1-foreground) 15%,
-      transparent);
+  --belt-status-banner-bg: color-mix(
+    in oklch,
+    var(--belt-color-elevation-1-foreground) 15%,
+    transparent
+  );
   --belt-status-banner-border: var(--belt-color-elevation-1-foreground-subtle);
   --belt-status-banner-foreground: var(--belt-color-elevation-1-foreground);
   --belt-status-banner-icon-color: var(--belt-color-elevation-1-foreground-subtle);
@@ -1450,7 +1506,8 @@
   box-shadow:
     0.5px 0.5px 0 0.5px color-mix(in oklch, var(--belt-neutral-14) 50%, transparent),
     inset 0 0.5px 0 var(--belt-color-elevation-3-highlight),
-    inset 0.5px 0.5px 0 color-mix(in oklch, var(--belt-color-elevation-3-highlight) 65%, transparent);
+    inset 0.5px 0.5px 0
+      color-mix(in oklch, var(--belt-color-elevation-3-highlight) 65%, transparent);
   inline-size: 4px;
 }
 
@@ -1472,13 +1529,15 @@ body:has(> .belt-toolbar-host) {
   block-size: calc(100dvh - var(--belt-toolbar-reserved-block-size, 42px));
   overflow: auto;
   padding-block-end: 0;
-  border-bottom: 1px solid color-mix(in oklch, var(--belt-color-elevation-1-foreground-subtle) 15%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklch, var(--belt-color-elevation-1-foreground-subtle) 15%, transparent);
   box-shadow: 0 1px 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
 }
 
 body:has(.belt-render-performance-drawer) {
   border-bottom-right-radius: var(--belt-radius-outer);
-  border-right: 1px solid color-mix(in oklch, var(--belt-color-elevation-1-foreground-subtle) 15%, transparent);
+  border-right: 1px solid
+    color-mix(in oklch, var(--belt-color-elevation-1-foreground-subtle) 15%, transparent);
   box-shadow: 1px 0 3px 0 color-mix(in oklch, var(--belt-black) 50%, transparent);
   inline-size: calc(100dvw - min(420px, calc(100dvw - 16px)));
   overflow: auto;
@@ -1577,7 +1636,10 @@ body:has(.belt-render-performance-drawer)::-webkit-scrollbar-corner {
   top: 0;
 }
 
-:where(.belt-render-performance-toolbar-chart[data-size="compact"] .belt-render-performance-toolbar-chart__graph) {
+:where(
+  .belt-render-performance-toolbar-chart[data-size="compact"]
+    .belt-render-performance-toolbar-chart__graph
+) {
   left: calc(var(--belt-space) * -1.5);
   right: calc(var(--belt-space) * -1.5);
 }
@@ -1688,32 +1750,84 @@ body:has(.belt-render-performance-drawer)::-webkit-scrollbar-corner {
   border-radius: 0;
 }
 
-:where(.belt-render-performance-chart-bar[data-height="0"]) { block-size: 0%; }
-:where(.belt-render-performance-chart-bar[data-height="4"]) { block-size: 4%; }
-:where(.belt-render-performance-chart-bar[data-height="8"]) { block-size: 8%; }
-:where(.belt-render-performance-chart-bar[data-height="12"]) { block-size: 12%; }
-:where(.belt-render-performance-chart-bar[data-height="16"]) { block-size: 16%; }
-:where(.belt-render-performance-chart-bar[data-height="20"]) { block-size: 20%; }
-:where(.belt-render-performance-chart-bar[data-height="24"]) { block-size: 24%; }
-:where(.belt-render-performance-chart-bar[data-height="28"]) { block-size: 28%; }
-:where(.belt-render-performance-chart-bar[data-height="32"]) { block-size: 32%; }
-:where(.belt-render-performance-chart-bar[data-height="36"]) { block-size: 36%; }
-:where(.belt-render-performance-chart-bar[data-height="40"]) { block-size: 40%; }
-:where(.belt-render-performance-chart-bar[data-height="44"]) { block-size: 44%; }
-:where(.belt-render-performance-chart-bar[data-height="48"]) { block-size: 48%; }
-:where(.belt-render-performance-chart-bar[data-height="52"]) { block-size: 52%; }
-:where(.belt-render-performance-chart-bar[data-height="56"]) { block-size: 56%; }
-:where(.belt-render-performance-chart-bar[data-height="60"]) { block-size: 60%; }
-:where(.belt-render-performance-chart-bar[data-height="64"]) { block-size: 64%; }
-:where(.belt-render-performance-chart-bar[data-height="68"]) { block-size: 68%; }
-:where(.belt-render-performance-chart-bar[data-height="72"]) { block-size: 72%; }
-:where(.belt-render-performance-chart-bar[data-height="76"]) { block-size: 76%; }
-:where(.belt-render-performance-chart-bar[data-height="80"]) { block-size: 80%; }
-:where(.belt-render-performance-chart-bar[data-height="84"]) { block-size: 84%; }
-:where(.belt-render-performance-chart-bar[data-height="88"]) { block-size: 88%; }
-:where(.belt-render-performance-chart-bar[data-height="92"]) { block-size: 92%; }
-:where(.belt-render-performance-chart-bar[data-height="96"]) { block-size: 96%; }
-:where(.belt-render-performance-chart-bar[data-height="100"]) { block-size: 100%; }
+:where(.belt-render-performance-chart-bar[data-height="0"]) {
+  block-size: 0%;
+}
+:where(.belt-render-performance-chart-bar[data-height="4"]) {
+  block-size: 4%;
+}
+:where(.belt-render-performance-chart-bar[data-height="8"]) {
+  block-size: 8%;
+}
+:where(.belt-render-performance-chart-bar[data-height="12"]) {
+  block-size: 12%;
+}
+:where(.belt-render-performance-chart-bar[data-height="16"]) {
+  block-size: 16%;
+}
+:where(.belt-render-performance-chart-bar[data-height="20"]) {
+  block-size: 20%;
+}
+:where(.belt-render-performance-chart-bar[data-height="24"]) {
+  block-size: 24%;
+}
+:where(.belt-render-performance-chart-bar[data-height="28"]) {
+  block-size: 28%;
+}
+:where(.belt-render-performance-chart-bar[data-height="32"]) {
+  block-size: 32%;
+}
+:where(.belt-render-performance-chart-bar[data-height="36"]) {
+  block-size: 36%;
+}
+:where(.belt-render-performance-chart-bar[data-height="40"]) {
+  block-size: 40%;
+}
+:where(.belt-render-performance-chart-bar[data-height="44"]) {
+  block-size: 44%;
+}
+:where(.belt-render-performance-chart-bar[data-height="48"]) {
+  block-size: 48%;
+}
+:where(.belt-render-performance-chart-bar[data-height="52"]) {
+  block-size: 52%;
+}
+:where(.belt-render-performance-chart-bar[data-height="56"]) {
+  block-size: 56%;
+}
+:where(.belt-render-performance-chart-bar[data-height="60"]) {
+  block-size: 60%;
+}
+:where(.belt-render-performance-chart-bar[data-height="64"]) {
+  block-size: 64%;
+}
+:where(.belt-render-performance-chart-bar[data-height="68"]) {
+  block-size: 68%;
+}
+:where(.belt-render-performance-chart-bar[data-height="72"]) {
+  block-size: 72%;
+}
+:where(.belt-render-performance-chart-bar[data-height="76"]) {
+  block-size: 76%;
+}
+:where(.belt-render-performance-chart-bar[data-height="80"]) {
+  block-size: 80%;
+}
+:where(.belt-render-performance-chart-bar[data-height="84"]) {
+  block-size: 84%;
+}
+:where(.belt-render-performance-chart-bar[data-height="88"]) {
+  block-size: 88%;
+}
+:where(.belt-render-performance-chart-bar[data-height="92"]) {
+  block-size: 92%;
+}
+:where(.belt-render-performance-chart-bar[data-height="96"]) {
+  block-size: 96%;
+}
+:where(.belt-render-performance-chart-bar[data-height="100"]) {
+  block-size: 100%;
+}
 
 :where(.belt-render-performance-chart-bar[data-severity="none"]) {
   background-color: transparent;
@@ -1976,8 +2090,10 @@ html:has(> body > .belt-toolbar-host) {
   width: calc(100% - calc(var(--belt-space) * 2));
 }
 
-:where(.belt-combobox__trigger:not(:disabled):not(:active):hover,
-  .belt-combobox__trigger:not(:disabled):not(:active):focus-visible) {
+:where(
+  .belt-combobox__trigger:not(:disabled):not(:active):hover,
+  .belt-combobox__trigger:not(:disabled):not(:active):focus-visible
+) {
   color: var(--belt-surface-foreground);
 }
 
@@ -1991,10 +2107,12 @@ html:has(> body > .belt-toolbar-host) {
   max-inline-size: var(--available-width);
 }
 
-:where(.belt-menu__list,
+:where(
+  .belt-menu__list,
   .belt-select__list,
   .belt-combobox__list,
-  .belt-combobox > [popover] [role="listbox"]) {
+  .belt-combobox > [popover] [role="listbox"]
+) {
   display: grid;
   gap: calc(var(--belt-space) * 1);
   padding: calc(var(--belt-space) * 1);
@@ -2006,9 +2124,11 @@ html:has(> body > .belt-toolbar-host) {
   padding: 0;
 }
 
-:where(.belt-menu__popup > .belt-surface__inner,
+:where(
+  .belt-menu__popup > .belt-surface__inner,
   .belt-select__popup > .belt-surface__inner,
-  .belt-combobox__popup > .belt-surface__inner) {
+  .belt-combobox__popup > .belt-surface__inner
+) {
   height: auto;
 }
 
@@ -2030,15 +2150,19 @@ html:has(> body > .belt-toolbar-host) {
   justify-content: space-between;
 }
 
-:where(.belt-menu__item[data-highlighted],
+:where(
+  .belt-menu__item[data-highlighted],
   .belt-select__item[data-highlighted],
-  .belt-combobox__item[data-highlighted]) {
+  .belt-combobox__item[data-highlighted]
+) {
   background-color: var(--belt-surface-hover);
 }
 
-:where(.belt-select__item[aria-selected="true"],
+:where(
+  .belt-select__item[aria-selected="true"],
   .belt-combobox__item[aria-selected="true"],
-  .belt-combobox__item[data-selected]) {
+  .belt-combobox__item[data-selected]
+) {
   background-color: var(--belt-color-primary);
   color: var(--belt-color-primary-foreground);
 }
@@ -2047,12 +2171,14 @@ html:has(> body > .belt-toolbar-host) {
   display: none;
 }
 
-:where(.belt-menu__item[data-disabled],
+:where(
+  .belt-menu__item[data-disabled],
   .belt-menu__item[aria-disabled="true"],
   .belt-select__item[data-disabled],
   .belt-select__item[aria-disabled="true"],
   .belt-combobox__item[data-disabled],
-  .belt-combobox__item[aria-disabled="true"]) {
+  .belt-combobox__item[aria-disabled="true"]
+) {
   cursor: not-allowed;
   opacity: 0.5;
 }

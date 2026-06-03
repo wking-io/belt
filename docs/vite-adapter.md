@@ -11,9 +11,7 @@ import { defineConfig } from "vite";
 import toolbarConfig from "./toolbar.config";
 
 export default defineConfig({
-  plugins: [
-    toolbarVite(toolbarConfig)
-  ]
+  plugins: [toolbarVite(toolbarConfig)],
 });
 ```
 
@@ -34,7 +32,7 @@ You can override the mount path if an app needs a different explicit route:
 
 ```ts
 toolbarVite(toolbarConfig, {
-  mountPath: "/internal/toolbar"
+  mountPath: "/internal/toolbar",
 });
 ```
 
@@ -51,11 +49,9 @@ import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
 export default defineToolbar({
   tools: [
     iterationsTool({
-      providers: [
-        prototypeIterations()
-      ]
-    })
-  ]
+      providers: [prototypeIterations()],
+    }),
+  ],
 });
 ```
 
@@ -67,10 +63,7 @@ import { defineConfig } from "vite";
 import toolbarConfig from "./toolbar.config";
 
 export default defineConfig({
-  plugins: [
-    toolbarVite(toolbarConfig),
-    prototypeIterationsVite()
-  ]
+  plugins: [toolbarVite(toolbarConfig), prototypeIterationsVite()],
 });
 ```
 
@@ -80,7 +73,7 @@ If the app entry is not `/src/main.tsx`, pass the same entry path to the adapter
 
 ```ts
 prototypeIterationsVite({
-  appEntry: "/src/main.ts"
+  appEntry: "/src/main.ts",
 });
 ```
 
@@ -88,6 +81,6 @@ For production prototype gallery builds, pass `buildPrototype` to build one prot
 
 ```ts
 prototypeIterationsVite({
-  buildPrototype: "pricing-test"
+  buildPrototype: "pricing-test",
 });
 ```

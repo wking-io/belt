@@ -10,17 +10,17 @@ import {
   DuplicateControlSnapshotNameError,
   UnknownControlFieldsetError,
   type ControlSnapshotPersistenceError,
-  type ControlSnapshotStoreError
+  type ControlSnapshotStoreError,
 } from "../errors.js";
 import {
   isCompatibleControlFieldValue,
   type ControlFieldsetValueMap,
-  type ControlSnapshotValueMap
+  type ControlSnapshotValueMap,
 } from "../config/fields.js";
 import {
   pickKnownFieldValues,
   createControlPanelState,
-  type ControlSnapshot
+  type ControlSnapshot,
 } from "../state/index.js";
 import type { ControlBase } from "../state/index.js";
 
@@ -42,21 +42,23 @@ export type ControlSnapshotStoreData = {
 
 export type ControlSnapshotPersistenceShape = {
   readonly load: () => Effect.Effect<unknown, ControlSnapshotPersistenceError, never>;
-  readonly save: (data: ControlSnapshotStoreData) => Effect.Effect<void, ControlSnapshotPersistenceError, never>;
+  readonly save: (
+    data: ControlSnapshotStoreData,
+  ) => Effect.Effect<void, ControlSnapshotPersistenceError, never>;
 };
 
 export type ControlSnapshotStoreShape = {
   readonly read: (
-    config: ControlPanelConfig
+    config: ControlPanelConfig,
   ) => Effect.Effect<ControlSnapshotStoreData, ControlSnapshotStoreError>;
   readonly write: (
     config: ControlPanelConfig,
-    data: ControlSnapshotStoreData
+    data: ControlSnapshotStoreData,
   ) => Effect.Effect<ControlSnapshotStoreData, ControlSnapshotStoreError>;
   readonly create: (
     config: ControlPanelConfig,
     fieldsetId: string,
-    snapshot: SnapshotStoreWriteOptions
+    snapshot: SnapshotStoreWriteOptions,
   ) => Effect.Effect<ControlSnapshot, ControlSnapshotStoreError>;
 };
 
@@ -64,25 +66,28 @@ export const ControlSnapshotSchema = Schema.Struct({
   id: NonEmptyStringSchema,
   name: NonEmptyStringSchema,
   fieldsetId: NonEmptyStringSchema,
-  values: Schema.Record(Schema.String, Schema.Unknown)
+  values: Schema.Record(Schema.String, Schema.Unknown),
 });
 
 export const ControlDefaultsBaseSchema = Schema.Struct({
-  type: Schema.Literal("defaults")
+  type: Schema.Literal("defaults"),
 });
 
 export const ControlSnapshotBaseSchema = Schema.Struct({
   type: Schema.Literal("snapshot"),
-  snapshotId: NonEmptyStringSchema
+  snapshotId: NonEmptyStringSchema,
 });
 
-export const ControlBaseSchema = Schema.Union([ControlDefaultsBaseSchema, ControlSnapshotBaseSchema]);
+export const ControlBaseSchema = Schema.Union([
+  ControlDefaultsBaseSchema,
+  ControlSnapshotBaseSchema,
+]);
 
 export const ControlSnapshotStoreDataSchema = Schema.Struct({
   version: Schema.Literal(1),
   activeFieldsetId: Schema.optionalKey(NonEmptyStringSchema),
   activeBaseByFieldset: Schema.optionalKey(Schema.Record(NonEmptyStringSchema, ControlBaseSchema)),
-  snapshots: Schema.Array(ControlSnapshotSchema)
+  snapshots: Schema.Array(ControlSnapshotSchema),
 });
 
 export const controlSnapshotStoreDirectory = ".toolbar/control-panel";
@@ -94,128 +99,188 @@ export class ControlSnapshotPersistence extends Context.Service<
   ControlSnapshotPersistenceShape
 >()("@repo/control-panel-core/ControlSnapshotPersistence") {}
 
-export class ControlSnapshotStore extends Context.Service<ControlSnapshotStore, ControlSnapshotStoreShape>()(
-  "@repo/control-panel-core/ControlSnapshotStore"
-) {
+export class ControlSnapshotStore extends Context.Service<
+  ControlSnapshotStore,
+  ControlSnapshotStoreShape
+>()("@repo/control-panel-core/ControlSnapshotStore") {
   static readonly layer = Layer.effect(
     ControlSnapshotStore,
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const ids = yield* IdGenerator;
       const persistence = yield* ControlSnapshotPersistence;
 
       return ControlSnapshotStore.of({
-        read: Effect.fn("ControlSnapshotStore.read")(function*(config) {
+        read: Effect.fn("ControlSnapshotStore.read")(function* (config) {
           const persisted = yield* persistence.load();
-          const decoded = yield* decodeSnapshotStoreDataEffect("ControlSnapshotPersistence.load", persisted);
+          const decoded = yield* decodeSnapshotStoreDataEffect(
+            "ControlSnapshotPersistence.load",
+            persisted,
+          );
 
-          return yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.read", config, decoded);
+          return yield* validateSnapshotStoreDataEffect(
+            "ControlSnapshotStore.read",
+            config,
+            decoded,
+          );
         }),
-        write: Effect.fn("ControlSnapshotStore.write")(function*(config, data) {
-          const validated = yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.write", config, data);
+        write: Effect.fn("ControlSnapshotStore.write")(function* (config, data) {
+          const validated = yield* validateSnapshotStoreDataEffect(
+            "ControlSnapshotStore.write",
+            config,
+            data,
+          );
           yield* persistence.save(validated);
 
           return validated;
         }),
-        create: Effect.fn("ControlSnapshotStore.create")(function*(config, fieldsetId, snapshot) {
+        create: Effect.fn("ControlSnapshotStore.create")(function* (config, fieldsetId, snapshot) {
           const id = yield* ids.next("snapshot");
           const persisted = yield* persistence.load();
-          const decoded = yield* decodeSnapshotStoreDataEffect("ControlSnapshotPersistence.load", persisted);
-          const current = yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.create", config, decoded);
+          const decoded = yield* decodeSnapshotStoreDataEffect(
+            "ControlSnapshotPersistence.load",
+            persisted,
+          );
+          const current = yield* validateSnapshotStoreDataEffect(
+            "ControlSnapshotStore.create",
+            config,
+            decoded,
+          );
 
           const snapshotValues = yield* Effect.try({
             try: () => pickKnownFieldValues(config, fieldsetId, snapshot.values),
-            catch: (cause) => mapSnapshotStoreValidationError("ControlSnapshotStore.create", cause)
+            catch: (cause) => mapSnapshotStoreValidationError("ControlSnapshotStore.create", cause),
           });
           const nextSnapshot: ControlSnapshot = {
             id,
             name: snapshot.name,
             fieldsetId,
-            values: snapshotValues
+            values: snapshotValues,
           };
 
           const nextActiveBaseByFieldset: Readonly<Record<string, ControlBase>> = {
             ...current.activeBaseByFieldset,
             [fieldsetId]: {
               type: "snapshot",
-              snapshotId: id
-            }
+              snapshotId: id,
+            },
           };
           const nextStore: ControlSnapshotStoreData = {
             version: 1,
             activeBaseByFieldset: nextActiveBaseByFieldset,
-            snapshots: [...current.snapshots, nextSnapshot]
+            snapshots: [...current.snapshots, nextSnapshot],
           };
-          const next = yield* validateSnapshotStoreDataEffect("ControlSnapshotStore.create", config, current.activeFieldsetId === undefined
-            ? nextStore
-            : {
-              ...nextStore,
-              activeFieldsetId: current.activeFieldsetId
-            });
+          const next = yield* validateSnapshotStoreDataEffect(
+            "ControlSnapshotStore.create",
+            config,
+            current.activeFieldsetId === undefined
+              ? nextStore
+              : {
+                  ...nextStore,
+                  activeFieldsetId: current.activeFieldsetId,
+                },
+          );
           yield* persistence.save(next);
 
           return nextSnapshot;
-        })
+        }),
       });
-    })
+    }),
   );
 }
 
 export function controlSnapshotFileSystemPersistenceLayer(
-  options: ControlSnapshotFileSystemPersistenceOptions = {}
+  options: ControlSnapshotFileSystemPersistenceOptions = {},
 ) {
   return Layer.effect(
     ControlSnapshotPersistence,
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const cwd = options.cwd ?? process.cwd();
 
       return ControlSnapshotPersistence.of({
-        load: Effect.fn("ControlSnapshotPersistence.load")(function*() {
-          const storePath = path.resolve(cwd, controlSnapshotStoreDirectory, controlSnapshotStoreFilename);
-          const exists = yield* fs.exists(storePath).pipe(Effect.catch(() => Effect.succeed(false)));
+        load: Effect.fn("ControlSnapshotPersistence.load")(function* () {
+          const storePath = path.resolve(
+            cwd,
+            controlSnapshotStoreDirectory,
+            controlSnapshotStoreFilename,
+          );
+          const exists = yield* fs
+            .exists(storePath)
+            .pipe(Effect.catch(() => Effect.succeed(false)));
 
           if (!exists) {
             return emptyControlSnapshotStore();
           }
 
-          const raw = yield* fs.readFileString(storePath).pipe(
-            Effect.mapError((cause) => new ControlSnapshotStoreReadError({ path: storePath, cause }))
-          );
+          const raw = yield* fs
+            .readFileString(storePath)
+            .pipe(
+              Effect.mapError(
+                (cause) => new ControlSnapshotStoreReadError({ path: storePath, cause }),
+              ),
+            );
 
           return yield* Effect.try({
             try: () => JSON.parse(raw),
-            catch: (cause) => new ControlSnapshotStoreParseError({ path: storePath, cause })
+            catch: (cause) => new ControlSnapshotStoreParseError({ path: storePath, cause }),
           });
         }),
-        save: Effect.fn("ControlSnapshotPersistence.save")(function*(data) {
-          const storePath = path.resolve(cwd, controlSnapshotStoreDirectory, controlSnapshotStoreFilename);
+        save: Effect.fn("ControlSnapshotPersistence.save")(function* (data) {
+          const storePath = path.resolve(
+            cwd,
+            controlSnapshotStoreDirectory,
+            controlSnapshotStoreFilename,
+          );
           const storeDirectory = path.dirname(storePath);
           const gitignorePath = path.resolve(cwd, ".gitignore");
 
-          yield* fs.makeDirectory(storeDirectory, { recursive: true }).pipe(
-            Effect.mapError((cause) => new ControlSnapshotStoreWriteError({ path: storeDirectory, cause }))
-          );
+          yield* fs
+            .makeDirectory(storeDirectory, { recursive: true })
+            .pipe(
+              Effect.mapError(
+                (cause) => new ControlSnapshotStoreWriteError({ path: storeDirectory, cause }),
+              ),
+            );
 
-          const gitignoreExists = yield* fs.exists(gitignorePath).pipe(Effect.catch(() => Effect.succeed(false)));
-          const currentGitignore = gitignoreExists ? yield* fs.readFileString(gitignorePath).pipe(
-            Effect.mapError((cause) => new ControlSnapshotStoreReadError({ path: gitignorePath, cause }))
-          ) : "";
+          const gitignoreExists = yield* fs
+            .exists(gitignorePath)
+            .pipe(Effect.catch(() => Effect.succeed(false)));
+          const currentGitignore = gitignoreExists
+            ? yield* fs
+                .readFileString(gitignorePath)
+                .pipe(
+                  Effect.mapError(
+                    (cause) => new ControlSnapshotStoreReadError({ path: gitignorePath, cause }),
+                  ),
+                )
+            : "";
           const gitignoreEntries = currentGitignore.split(/\r?\n/);
 
           if (!gitignoreEntries.includes(controlSnapshotStoreGitignoreEntry)) {
-            const prefix = currentGitignore.length === 0 || currentGitignore.endsWith("\n") ? currentGitignore : `${currentGitignore}\n`;
-            yield* fs.writeFileString(gitignorePath, `${prefix}${controlSnapshotStoreGitignoreEntry}\n`).pipe(
-              Effect.mapError((cause) => new ControlSnapshotStoreWriteError({ path: gitignorePath, cause }))
-            );
+            const prefix =
+              currentGitignore.length === 0 || currentGitignore.endsWith("\n")
+                ? currentGitignore
+                : `${currentGitignore}\n`;
+            yield* fs
+              .writeFileString(gitignorePath, `${prefix}${controlSnapshotStoreGitignoreEntry}\n`)
+              .pipe(
+                Effect.mapError(
+                  (cause) => new ControlSnapshotStoreWriteError({ path: gitignorePath, cause }),
+                ),
+              );
           }
 
-          yield* fs.writeFileString(storePath, `${JSON.stringify(data, null, 2)}\n`).pipe(
-            Effect.mapError((cause) => new ControlSnapshotStoreWriteError({ path: storePath, cause }))
-          );
-        })
+          yield* fs
+            .writeFileString(storePath, `${JSON.stringify(data, null, 2)}\n`)
+            .pipe(
+              Effect.mapError(
+                (cause) => new ControlSnapshotStoreWriteError({ path: storePath, cause }),
+              ),
+            );
+        }),
       });
-    })
+    }),
   );
 }
 
@@ -224,64 +289,84 @@ export const ControlSnapshotFileSystemPersistenceLive = controlSnapshotFileSyste
 export const ControlSnapshotStoreLive = Layer.provide(
   ControlSnapshotStore.layer,
   Layer.mergeAll(
-    Layer.provide(ControlSnapshotFileSystemPersistenceLive, Layer.mergeAll(NodeFileSystem.layer, NodePath.layer)),
-    IdGenerator.layer
-  )
+    Layer.provide(
+      ControlSnapshotFileSystemPersistenceLive,
+      Layer.mergeAll(NodeFileSystem.layer, NodePath.layer),
+    ),
+    IdGenerator.layer,
+  ),
 );
 
 function emptyControlSnapshotStore(): ControlSnapshotStoreData {
   return {
     version: 1,
-    snapshots: []
+    snapshots: [],
   };
 }
 
 function validateSnapshotStoreData(
   config: ControlPanelConfig,
-  data: ControlSnapshotStoreData
+  data: ControlSnapshotStoreData,
 ): ControlSnapshotStoreData {
   const snapshots = data.snapshots.map((snapshot) => validateStoredSnapshot(config, snapshot));
   assertUniqueStoredSnapshots(snapshots);
   const stateOptions = {
-    activeBaseByFieldset: sanitizeActiveBaseByFieldset(config, snapshots, data.activeBaseByFieldset),
-    snapshots: snapshots.filter((snapshot) => config.fieldsets[snapshot.fieldsetId])
+    activeBaseByFieldset: sanitizeActiveBaseByFieldset(
+      config,
+      snapshots,
+      data.activeBaseByFieldset,
+    ),
+    snapshots: snapshots.filter((snapshot) => config.fieldsets[snapshot.fieldsetId]),
   };
-  const activeFieldsetId = data.activeFieldsetId && config.fieldsets[data.activeFieldsetId] ? data.activeFieldsetId : undefined;
-  const state = createControlPanelState(config, activeFieldsetId === undefined ? stateOptions : {
-    ...stateOptions,
-    activeFieldsetId
-  });
+  const activeFieldsetId =
+    data.activeFieldsetId && config.fieldsets[data.activeFieldsetId]
+      ? data.activeFieldsetId
+      : undefined;
+  const state = createControlPanelState(
+    config,
+    activeFieldsetId === undefined
+      ? stateOptions
+      : {
+          ...stateOptions,
+          activeFieldsetId,
+        },
+  );
 
   const validated: ControlSnapshotStoreData = {
     version: 1,
     activeBaseByFieldset: state.activeBaseByFieldset,
-    snapshots
+    snapshots,
   };
 
-  return state.activeFieldsetId === undefined ? validated : {
-    ...validated,
-    activeFieldsetId: state.activeFieldsetId
-  };
+  return state.activeFieldsetId === undefined
+    ? validated
+    : {
+        ...validated,
+        activeFieldsetId: state.activeFieldsetId,
+      };
 }
 
 function validateSnapshotStoreDataEffect(
   source: string,
   config: ControlPanelConfig,
-  data: ControlSnapshotStoreData
+  data: ControlSnapshotStoreData,
 ) {
   return Effect.try({
     try: () => validateSnapshotStoreData(config, data),
-    catch: (cause) => mapSnapshotStoreValidationError(source, cause)
+    catch: (cause) => mapSnapshotStoreValidationError(source, cause),
   });
 }
 
 function decodeSnapshotStoreDataEffect(source: string, data: unknown) {
   return Schema.decodeUnknownEffect(ControlSnapshotStoreDataSchema)(data).pipe(
-    Effect.mapError((cause) => new ControlSnapshotStoreParseError({ path: source, cause }))
+    Effect.mapError((cause) => new ControlSnapshotStoreParseError({ path: source, cause })),
   );
 }
 
-function mapSnapshotStoreValidationError(source: string, cause: unknown): ControlSnapshotStoreError {
+function mapSnapshotStoreValidationError(
+  source: string,
+  cause: unknown,
+): ControlSnapshotStoreError {
   if (
     cause instanceof UnknownControlFieldsetError ||
     cause instanceof DuplicateControlSnapshotIdError ||
@@ -293,21 +378,24 @@ function mapSnapshotStoreValidationError(source: string, cause: unknown): Contro
   return new ControlSnapshotStoreParseError({ path: source, cause });
 }
 
-function validateStoredSnapshot(config: ControlPanelConfig, snapshot: ControlSnapshot): ControlSnapshot {
+function validateStoredSnapshot(
+  config: ControlPanelConfig,
+  snapshot: ControlSnapshot,
+): ControlSnapshot {
   if (!config.fieldsets[snapshot.fieldsetId]) {
     return snapshot;
   }
 
   return {
     ...snapshot,
-    values: sanitizeSnapshotValues(config, snapshot.fieldsetId, snapshot.values)
+    values: sanitizeSnapshotValues(config, snapshot.fieldsetId, snapshot.values),
   };
 }
 
 function sanitizeSnapshotValues(
   config: ControlPanelConfig,
   fieldsetId: string,
-  values: ControlSnapshotValueMap
+  values: ControlSnapshotValueMap,
 ): ControlSnapshotValueMap {
   const fieldset = config.fieldsets[fieldsetId];
 
@@ -344,7 +432,7 @@ function assertUniqueStoredSnapshots(snapshots: readonly ControlSnapshot[]): voi
     if (names.has(snapshot.name)) {
       throw new DuplicateControlSnapshotNameError({
         fieldsetId: snapshot.fieldsetId,
-        name: snapshot.name
+        name: snapshot.name,
       });
     }
 
@@ -356,7 +444,7 @@ function assertUniqueStoredSnapshots(snapshots: readonly ControlSnapshot[]): voi
 function sanitizeActiveBaseByFieldset(
   config: ControlPanelConfig,
   snapshots: readonly ControlSnapshot[],
-  activeBaseByFieldset: Readonly<Record<string, ControlBase>> = {}
+  activeBaseByFieldset: Readonly<Record<string, ControlBase>> = {},
 ): Readonly<Record<string, ControlBase>> {
   const sanitized: Record<string, ControlBase> = {};
 
@@ -365,7 +453,9 @@ function sanitizeActiveBaseByFieldset(
 
     if (
       activeBase?.type === "snapshot" &&
-      snapshots.some((snapshot) => snapshot.id === activeBase.snapshotId && snapshot.fieldsetId === fieldsetId)
+      snapshots.some(
+        (snapshot) => snapshot.id === activeBase.snapshotId && snapshot.fieldsetId === fieldsetId,
+      )
     ) {
       sanitized[fieldsetId] = activeBase;
       continue;

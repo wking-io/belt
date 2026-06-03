@@ -4,39 +4,42 @@ import { BackendPattern, BackendPatternInputSchema, IdGenerator } from "../src/i
 
 it.effect("runs the baseline Effect service/layer/schema pattern", () =>
   Effect.provide(
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const input = yield* Schema.decodeUnknownEffect(BackendPatternInputSchema)({
-        name: "Belt"
+        name: "Belt",
       });
       const service = yield* BackendPattern;
 
       assert.strictEqual(yield* service.greet(input), "hello Belt");
     }),
-    BackendPattern.layer
-  ));
+    BackendPattern.layer,
+  ),
+);
 
 it.effect("uses tagged errors for recoverable backend failures", () =>
   Effect.provide(
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const service = yield* BackendPattern;
       const message = yield* Effect.catchTag(
         service.greet({ name: "   " }),
         "BackendPatternError",
-        (error) => Effect.succeed(error.message)
+        (error) => Effect.succeed(error.message),
       );
 
       assert.strictEqual(message, "name is required");
     }),
-    BackendPattern.layer
-  ));
+    BackendPattern.layer,
+  ),
+);
 
 it.effect("generates shared ids with optional prefixes", () =>
   Effect.provide(
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const ids = yield* IdGenerator;
       const id = yield* ids.next("snapshot");
 
       assert.match(id, /^snapshot_[0-9a-f-]{36}$/);
     }),
-    IdGenerator.layer
-  ));
+    IdGenerator.layer,
+  ),
+);

@@ -42,8 +42,12 @@
   --color-belt-primary-control-hover: var(--belt-color-primary-control-hover);
   --color-belt-primary-control-active: var(--belt-color-primary-control-active);
   --color-belt-primary-control-foreground: var(--belt-color-primary-control-foreground);
-  --color-belt-primary-control-foreground-subtle: var(--belt-color-primary-control-foreground-subtle);
-  --color-belt-primary-control-foreground-strong: var(--belt-color-primary-control-foreground-strong);
+  --color-belt-primary-control-foreground-subtle: var(
+    --belt-color-primary-control-foreground-subtle
+  );
+  --color-belt-primary-control-foreground-strong: var(
+    --belt-color-primary-control-foreground-strong
+  );
 
   --color-belt-info: var(--belt-color-info);
   --color-belt-info-foreground: var(--belt-color-info-foreground);
@@ -64,8 +68,12 @@
   --color-belt-success-control-hover: var(--belt-color-success-control-hover);
   --color-belt-success-control-active: var(--belt-color-success-control-active);
   --color-belt-success-control-foreground: var(--belt-color-success-control-foreground);
-  --color-belt-success-control-foreground-subtle: var(--belt-color-success-control-foreground-subtle);
-  --color-belt-success-control-foreground-strong: var(--belt-color-success-control-foreground-strong);
+  --color-belt-success-control-foreground-subtle: var(
+    --belt-color-success-control-foreground-subtle
+  );
+  --color-belt-success-control-foreground-strong: var(
+    --belt-color-success-control-foreground-strong
+  );
 
   --color-belt-warning: var(--belt-color-warning);
   --color-belt-warning-foreground: var(--belt-color-warning-foreground);
@@ -75,8 +83,12 @@
   --color-belt-warning-control-hover: var(--belt-color-warning-control-hover);
   --color-belt-warning-control-active: var(--belt-color-warning-control-active);
   --color-belt-warning-control-foreground: var(--belt-color-warning-control-foreground);
-  --color-belt-warning-control-foreground-subtle: var(--belt-color-warning-control-foreground-subtle);
-  --color-belt-warning-control-foreground-strong: var(--belt-color-warning-control-foreground-strong);
+  --color-belt-warning-control-foreground-subtle: var(
+    --belt-color-warning-control-foreground-subtle
+  );
+  --color-belt-warning-control-foreground-strong: var(
+    --belt-color-warning-control-foreground-strong
+  );
 
   --color-belt-danger: var(--belt-color-danger);
   --color-belt-danger-foreground: var(--belt-color-danger-foreground);

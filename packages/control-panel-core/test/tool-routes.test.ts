@@ -14,7 +14,7 @@ import {
   ControlSnapshotStore,
   type ControlPanelRegistration,
   type ControlPanelConfig,
-  type ControlSnapshotStoreData
+  type ControlSnapshotStoreData,
 } from "../src/index.ts";
 
 it("defines the Control Panel routes as an Effect HTTP API", () => {
@@ -25,9 +25,9 @@ it("defines the Control Panel routes as an Effect HTTP API", () => {
     onEndpoint: ({ endpoint }) => {
       endpoints.push({
         method: endpoint.method,
-        path: endpoint.path
+        path: endpoint.path,
       });
-    }
+    },
   });
 
   assert.deepStrictEqual(endpoints, [
@@ -39,40 +39,41 @@ it("defines the Control Panel routes as an Effect HTTP API", () => {
     { method: "POST", path: "/snapshots/read" },
     { method: "POST", path: "/snapshots/branch" },
     { method: "POST", path: "/snapshots/save" },
-    { method: "POST", path: "/snapshots/delete" }
+    { method: "POST", path: "/snapshots/delete" },
   ]);
 });
 
 it.effect("returns config and persisted active state from the index route", () => {
   let persisted: unknown = {
     version: 1,
-    snapshots: []
+    snapshots: [],
   };
   const registration = controlPanelTool({
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Hello" })
-        }
+          title: controlField.text({ default: "Hello" }),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number({ default: 2 })
-        }
-      }
-    }
+          zoom: controlField.number({ default: 2 }),
+        },
+      },
+    },
   });
 
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const server = controlPanelServer(registration, {
       load: () => Effect.succeed(persisted),
-      save: (data) => Effect.sync(() => {
-        persisted = data;
-      })
+      save: (data) =>
+        Effect.sync(() => {
+          persisted = data;
+        }),
     });
-    const response = yield* json(yield* Effect.promise(() =>
-      server.fetch(request(controlPanelRoutePaths.index, "GET"))
-    ));
+    const response = yield* json(
+      yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.index, "GET"))),
+    );
 
     assert.deepStrictEqual(response, {
       config: registration.config,
@@ -80,17 +81,17 @@ it.effect("returns config and persisted active state from the index route", () =
         activeFieldsetId: "scene",
         activeBaseByFieldset: {
           scene: { type: "defaults" },
-          camera: { type: "defaults" }
+          camera: { type: "defaults" },
         },
         currentValuesByFieldset: {
           scene: { title: "Hello" },
-          camera: { zoom: 2 }
-        }
-      }
+          camera: { zoom: 2 },
+        },
+      },
     });
     assert.deepStrictEqual(persisted, {
       version: 1,
-      snapshots: []
+      snapshots: [],
     });
     yield* Effect.promise(() => server.dispose());
   });
@@ -99,59 +100,62 @@ it.effect("returns config and persisted active state from the index route", () =
 it.effect("persists active fieldset selection across route reads", () => {
   let persisted: unknown = {
     version: 1,
-    snapshots: []
+    snapshots: [],
   };
   const registration = controlPanelTool({
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text()
-        }
+          title: controlField.text(),
+        },
       },
       camera: {
         fields: {
-          zoom: controlField.number()
-        }
-      }
-    }
+          zoom: controlField.number(),
+        },
+      },
+    },
   });
 
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const server = controlPanelServer(registration, {
       load: () => Effect.succeed(persisted),
-      save: (data) => Effect.sync(() => {
-        persisted = data;
-      })
+      save: (data) =>
+        Effect.sync(() => {
+          persisted = data;
+        }),
     });
 
     yield* Effect.promise(() =>
-      server.fetch(request(controlPanelRoutePaths.selectFieldset, "POST", { fieldsetId: "camera" }))
+      server.fetch(
+        request(controlPanelRoutePaths.selectFieldset, "POST", { fieldsetId: "camera" }),
+      ),
     );
-    const response = yield* json(yield* Effect.promise(() =>
-      server.fetch(request(controlPanelRoutePaths.state, "GET"))
-    ));
+    const response = yield* json(
+      yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.state, "GET"))),
+    );
 
     assert.deepStrictEqual(response, {
       state: {
         activeFieldsetId: "camera",
         activeBaseByFieldset: {
           scene: { type: "defaults" },
-          camera: { type: "defaults" }
+          camera: { type: "defaults" },
         },
         currentValuesByFieldset: {
           scene: { title: "" },
-          camera: { zoom: 0 }
-        }
-      }
+          camera: { zoom: 0 },
+        },
+      },
     });
     assert.deepStrictEqual(persisted, {
       version: 1,
       activeFieldsetId: "camera",
       activeBaseByFieldset: {
         scene: { type: "defaults" },
-        camera: { type: "defaults" }
+        camera: { type: "defaults" },
       },
-      snapshots: []
+      snapshots: [],
     });
     yield* Effect.promise(() => server.dispose());
   });
@@ -160,33 +164,40 @@ it.effect("persists active fieldset selection across route reads", () => {
 it.effect("branches, saves, reads, and deletes snapshots through tool routes", () => {
   let persisted: unknown = {
     version: 1,
-    snapshots: []
+    snapshots: [],
   };
   const registration = controlPanelTool({
     fieldsets: {
       scene: {
         fields: {
-          title: controlField.text({ default: "Default" })
-        }
-      }
-    }
+          title: controlField.text({ default: "Default" }),
+        },
+      },
+    },
   });
 
-  return Effect.gen(function*() {
+  return Effect.gen(function* () {
     const server = controlPanelServer(registration, {
       load: () => Effect.succeed(persisted),
-      save: (data) => Effect.sync(() => {
-        persisted = data;
-      })
+      save: (data) =>
+        Effect.sync(() => {
+          persisted = data;
+        }),
     });
 
-    const branched = yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.branchSnapshot, "POST", {
-      fieldsetId: "scene",
-      name: "Draft",
-      values: {
-        title: "Draft title"
-      }
-    }))));
+    const branched = yield* json(
+      yield* Effect.promise(() =>
+        server.fetch(
+          request(controlPanelRoutePaths.branchSnapshot, "POST", {
+            fieldsetId: "scene",
+            name: "Draft",
+            values: {
+              title: "Draft title",
+            },
+          }),
+        ),
+      ),
+    );
 
     assert.deepStrictEqual(branched, {
       snapshot: {
@@ -194,77 +205,105 @@ it.effect("branches, saves, reads, and deletes snapshots through tool routes", (
         name: "Draft",
         fieldsetId: "scene",
         values: {
-          title: "Draft title"
-        }
+          title: "Draft title",
+        },
       },
       state: {
         activeFieldsetId: "scene",
         activeBaseByFieldset: {
           scene: {
             type: "snapshot",
-            snapshotId: "snapshot_test-id-1"
-          }
+            snapshotId: "snapshot_test-id-1",
+          },
         },
         currentValuesByFieldset: {
           scene: {
-            title: "Draft title"
-          }
-        }
-      }
-    });
-
-    yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.saveSnapshot, "POST", {
-      fieldsetId: "scene",
-      values: {
-        title: "Saved title"
-      }
-    })));
-
-    assert.deepStrictEqual(yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.readSnapshot, "POST", {
-      fieldsetId: "scene",
-      snapshotId: "snapshot_test-id-1"
-    })))), {
-      snapshot: {
-        id: "snapshot_test-id-1",
-        name: "Draft",
-        fieldsetId: "scene",
-        values: {
-          title: "Saved title"
-        }
-      }
-    });
-
-    assert.deepStrictEqual(yield* json(yield* Effect.promise(() => server.fetch(request(controlPanelRoutePaths.deleteSnapshot, "POST", {
-      fieldsetId: "scene",
-      snapshotId: "snapshot_test-id-1"
-    })))), {
-      state: {
-        activeFieldsetId: "scene",
-        activeBaseByFieldset: {
-          scene: {
-            type: "defaults"
-          }
+            title: "Draft title",
+          },
         },
-        currentValuesByFieldset: {
-          scene: {
-            title: "Default"
-          }
-        }
       },
-      snapshots: []
     });
+
+    yield* Effect.promise(() =>
+      server.fetch(
+        request(controlPanelRoutePaths.saveSnapshot, "POST", {
+          fieldsetId: "scene",
+          values: {
+            title: "Saved title",
+          },
+        }),
+      ),
+    );
+
+    assert.deepStrictEqual(
+      yield* json(
+        yield* Effect.promise(() =>
+          server.fetch(
+            request(controlPanelRoutePaths.readSnapshot, "POST", {
+              fieldsetId: "scene",
+              snapshotId: "snapshot_test-id-1",
+            }),
+          ),
+        ),
+      ),
+      {
+        snapshot: {
+          id: "snapshot_test-id-1",
+          name: "Draft",
+          fieldsetId: "scene",
+          values: {
+            title: "Saved title",
+          },
+        },
+      },
+    );
+
+    assert.deepStrictEqual(
+      yield* json(
+        yield* Effect.promise(() =>
+          server.fetch(
+            request(controlPanelRoutePaths.deleteSnapshot, "POST", {
+              fieldsetId: "scene",
+              snapshotId: "snapshot_test-id-1",
+            }),
+          ),
+        ),
+      ),
+      {
+        state: {
+          activeFieldsetId: "scene",
+          activeBaseByFieldset: {
+            scene: {
+              type: "defaults",
+            },
+          },
+          currentValuesByFieldset: {
+            scene: {
+              title: "Default",
+            },
+          },
+        },
+        snapshots: [],
+      },
+    );
     yield* Effect.promise(() => server.dispose());
   });
 });
 
 function request(routePath: string, method: string, body?: unknown): Request {
-  return new Request(new URL(toolApiRoutePath(controlPanelToolId, routePath), "http://belt.local"), {
-    method,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    headers: body === undefined ? undefined : {
-      "content-type": "application/json"
-    }
-  });
+  return new Request(
+    new URL(toolApiRoutePath(controlPanelToolId, routePath), "http://belt.local"),
+    {
+      method,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      headers:
+        body === undefined
+          ? undefined
+          : {
+              "content-type": "application/json",
+            },
+    },
+  );
 }
 
 function json(response: Response) {
@@ -276,7 +315,7 @@ function controlPanelServer(
   persistence: {
     readonly load: () => Effect.Effect<unknown>;
     readonly save: (data: ControlSnapshotStoreData) => Effect.Effect<void>;
-  }
+  },
 ) {
   const api = registration.tool.api;
   const apiLayer = registration.tool.apiLayer;
@@ -288,14 +327,15 @@ function controlPanelServer(
   const app = HttpApiBuilder.layer(api).pipe(
     Layer.provide(apiLayer),
     Layer.provide(testStoreLayer(persistence)),
-    Layer.provide(HttpServer.layerServices)
+    Layer.provide(HttpServer.layerServices),
   );
 
   const { handler, dispose } = HttpRouter.toWebHandler(app);
 
   return {
-    fetch: (request: Request) => handler(rewriteControlPanelRequest(request), Context.empty() as Context.Context<unknown>),
-    dispose
+    fetch: (request: Request) =>
+      handler(rewriteControlPanelRequest(request), Context.empty() as Context.Context<unknown>),
+    dispose,
   };
 }
 
@@ -318,14 +358,14 @@ function testStoreLayer(persistence: {
     Layer.mergeAll(
       Layer.succeed(ControlSnapshotPersistence)({
         load: persistence.load,
-        save: (data) => persistence.save(data)
+        save: (data) => persistence.save(data),
       }),
       Layer.succeed(IdGenerator)({
         next: (prefix) => {
           idIndex += 1;
           return Effect.succeed(prefix ? `${prefix}_test-id-${idIndex}` : `test-id-${idIndex}`);
-        }
-      })
-    )
+        },
+      }),
+    ),
   );
 }

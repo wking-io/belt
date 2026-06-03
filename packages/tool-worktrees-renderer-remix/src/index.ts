@@ -11,6 +11,6 @@ export async function createWorktreesRendererModel(): Promise<WorktreesRendererM
 
   return {
     current: worktrees.find((worktree) => worktree.current),
-    worktrees
+    worktrees,
   };
 }

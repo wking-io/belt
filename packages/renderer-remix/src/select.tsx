@@ -154,13 +154,13 @@ function SelectContext(handle: Handle<SelectRootProps, SelectContextValue>) {
     popoverContextRef.hideFocusTarget = triggerRef ?? null;
     popoverContextRef.anchor = triggerRef
       ? {
-        node: triggerRef,
-        options: {
-          inset: true,
-          placement: "left",
-          relativeTo: selectedId ? `#${selectedId}` : '[role="option"]',
-        },
-      }
+          node: triggerRef,
+          options: {
+            inset: true,
+            placement: "left",
+            relativeTo: selectedId ? `#${selectedId}` : '[role="option"]',
+          },
+        }
       : null;
   };
 

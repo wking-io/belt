@@ -1,6 +1,10 @@
 {
   "name": "@riff-refine/belt",
   "version": "0.0.0",
+  "files": [
+    "dist",
+    "src"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -69,10 +73,6 @@
       "default": "./src/worktrees-remix.ts"
     }
   },
-  "files": [
-    "dist",
-    "src"
-  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.react.build.json && tsc -p tsconfig.remix.build.json",
     "check": "tsc -p tsconfig.json && tsc -p tsconfig.react.json && tsc -p tsconfig.remix.json",
@@ -84,8 +84,8 @@
     "@repo/config": "workspace:*",
     "@repo/control-panel-core": "workspace:*",
     "@repo/core": "workspace:*",
-    "@repo/renderer-remix": "workspace:*",
     "@repo/renderer-react": "workspace:*",
+    "@repo/renderer-remix": "workspace:*",
     "@repo/server": "workspace:*",
     "@repo/theme-css": "workspace:*",
     "@repo/tool-iterations": "workspace:*",

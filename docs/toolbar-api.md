@@ -122,21 +122,17 @@ JavaScript tools should keep route definitions close to the tool package:
 import { normalizeRoute } from "@riff-refine/belt";
 import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/unstable/httpapi";
 
-export class MyToolApiGroup extends HttpApiGroup.make("my-tool")
-  .add(
-    HttpApiEndpoint.get("index", normalizeRoute("index"), {
-      success: MyToolIndexResponseSchema
-    }),
-    HttpApiEndpoint.post("save", normalizeRoute("snapshots/save"), {
-      payload: MyToolSaveRequestSchema,
-      success: MyToolSaveResponseSchema
-    })
-  )
-{}
+export class MyToolApiGroup extends HttpApiGroup.make("my-tool").add(
+  HttpApiEndpoint.get("index", normalizeRoute("index"), {
+    success: MyToolIndexResponseSchema,
+  }),
+  HttpApiEndpoint.post("save", normalizeRoute("snapshots/save"), {
+    payload: MyToolSaveRequestSchema,
+    success: MyToolSaveResponseSchema,
+  }),
+) {}
 
-export class MyToolApi extends HttpApi.make("my-tool-api")
-  .add(MyToolApiGroup)
-{}
+export class MyToolApi extends HttpApi.make("my-tool-api").add(MyToolApiGroup) {}
 ```
 
 `normalizeRoute(routePath)` is intentionally thin: it only normalizes a tool-relative route key into the `/${string}` path shape required by Effect HTTP. It does not wrap `HttpApiEndpoint.get`, `HttpApiEndpoint.post`, or any other Effect APIs.
@@ -144,8 +140,8 @@ export class MyToolApi extends HttpApi.make("my-tool-api")
 Clients can compose the core Toolbar API client with a tool-owned API:
 
 ```ts
-const toolbar = yield* makeToolbarClient({ baseUrl: "/__toolbar" });
-const myTool = yield* toolbar.tool(MyToolApi, "my-tool");
+const toolbar = yield * makeToolbarClient({ baseUrl: "/__toolbar" });
+const myTool = yield * toolbar.tool(MyToolApi, "my-tool");
 ```
 
 ## Effect Schemas

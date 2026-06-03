@@ -7,7 +7,7 @@ import {
   type ControlFieldValue,
   type ControlPanelDefaultsValue,
   type ControlSelectOption,
-  normalizeControlField
+  normalizeControlField,
 } from "./fields.js";
 import {
   DuplicateControlSelectOptionValueError,
@@ -15,7 +15,7 @@ import {
   InvalidControlFieldIdError,
   InvalidControlFieldsetIdError,
   InvalidControlRangeError,
-  InvalidControlSelectDefaultError
+  InvalidControlSelectDefaultError,
 } from "../errors.js";
 
 export const controlPanelToolId = "control-panel";
@@ -40,7 +40,7 @@ export type ControlPanelDefinition<Fieldsets extends ControlFieldsetMap = Contro
 
 export type ControlPanelRegistration<
   Fieldsets extends ControlFieldsetMap = ControlFieldsetMap,
-  Tool extends ToolDefinition = ToolDefinition
+  Tool extends ToolDefinition = ToolDefinition,
 > = ToolRegistration<ControlPanelDefinition<Fieldsets>, Tool> & {
   readonly config: ControlPanelDefinition<Fieldsets>;
 };
@@ -50,7 +50,9 @@ export type ControlFieldsetValues<Fieldset extends ControlFieldset> = {
 };
 
 export type ControlPanelValues<Config extends ControlPanelConfig> = {
-  readonly [FieldsetId in keyof Config["fieldsets"]]: ControlFieldsetValues<Config["fieldsets"][FieldsetId]>;
+  readonly [FieldsetId in keyof Config["fieldsets"]]: ControlFieldsetValues<
+    Config["fieldsets"][FieldsetId]
+  >;
 };
 
 export type ControlPanelDefaults<Config extends ControlPanelConfig> = ControlPanelValues<Config>;
@@ -58,19 +60,21 @@ export type ControlPanelDefaults<Config extends ControlPanelConfig> = ControlPan
 export const ControlFieldsetSchema = Schema.Struct({
   label: Schema.optionalKey(NonEmptyStringSchema),
   description: Schema.optionalKey(NonEmptyStringSchema),
-  fields: Schema.Record(NonEmptyStringSchema, ControlFieldSchema)
+  fields: Schema.Record(NonEmptyStringSchema, ControlFieldSchema),
 });
 
 export const ControlPanelConfigSchema = Schema.Struct({
-  fieldsets: Schema.Record(NonEmptyStringSchema, ControlFieldsetSchema)
+  fieldsets: Schema.Record(NonEmptyStringSchema, ControlFieldsetSchema),
 });
 
 export const ControlPanelDefinitionSchema = Schema.Struct({
   ...ControlPanelConfigSchema.fields,
-  configHash: NonEmptyStringSchema
+  configHash: NonEmptyStringSchema,
 });
 
-export const validateControlPanel = Effect.fn("validateControlPanel")(function*(config: ControlPanelConfig) {
+export const validateControlPanel = Effect.fn("validateControlPanel")(function* (
+  config: ControlPanelConfig,
+) {
   const decoded = yield* Schema.decodeUnknownEffect(ControlPanelConfigSchema)(config);
   const normalized = normalizeControlPanelConfig(decoded);
 
@@ -78,12 +82,12 @@ export const validateControlPanel = Effect.fn("validateControlPanel")(function*(
 
   return {
     ...valid,
-    configHash: getControlConfigHash(valid)
+    configHash: getControlConfigHash(valid),
   };
 });
 
 export function defineControlPanel<const Config extends ControlPanelConfig>(
-  config: Config
+  config: Config,
 ): ControlPanelDefinition<Config["fieldsets"]>;
 export function defineControlPanel(config: ControlPanelConfig): ControlPanelDefinition {
   Schema.decodeUnknownSync(ControlPanelConfigSchema)(config);
@@ -92,12 +96,12 @@ export function defineControlPanel(config: ControlPanelConfig): ControlPanelDefi
 
   return {
     ...normalized,
-    configHash: getControlConfigHash(normalized)
+    configHash: getControlConfigHash(normalized),
   };
 }
 
 export function normalizeControlPanelConfig<const Config extends ControlPanelConfig>(
-  config: Config
+  config: Config,
 ): ControlPanelConfig<Config["fieldsets"]>;
 export function normalizeControlPanelConfig(config: ControlPanelConfig): ControlPanelConfig {
   const fieldsets = Object.fromEntries(
@@ -106,10 +110,13 @@ export function normalizeControlPanelConfig(config: ControlPanelConfig): Control
       {
         ...fieldset,
         fields: Object.fromEntries(
-          Object.entries(fieldset.fields).map(([fieldId, field]) => [fieldId, normalizeControlField(field)])
-        )
-      }
-    ])
+          Object.entries(fieldset.fields).map(([fieldId, field]) => [
+            fieldId,
+            normalizeControlField(field),
+          ]),
+        ),
+      },
+    ]),
   );
 
   return { fieldsets };
@@ -122,23 +129,26 @@ export function getControlConfigHash(config: ControlPanelConfig): string {
       fieldsetId,
       Object.entries(fieldset.fields)
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([fieldId, field]) => [fieldId, field.type])
+        .map(([fieldId, field]) => [fieldId, field.type]),
     ]);
 
   return hashString(stableJson(shape));
 }
 
 export function getControlPanelDefaults<const Config extends ControlPanelConfig>(
-  config: Config
+  config: Config,
 ): ControlPanelDefaults<Config>;
 export function getControlPanelDefaults(config: ControlPanelConfig): ControlPanelDefaultsValue {
   const fieldsets = Object.fromEntries(
     Object.entries(config.fieldsets).map(([fieldsetId, fieldset]) => [
       fieldsetId,
       Object.fromEntries(
-        Object.entries(fieldset.fields).map(([fieldId, field]) => [fieldId, getControlFieldDefault(field)])
-      )
-    ])
+        Object.entries(fieldset.fields).map(([fieldId, field]) => [
+          fieldId,
+          getControlFieldDefault(field),
+        ]),
+      ),
+    ]),
   );
 
   return fieldsets;
@@ -165,8 +175,10 @@ export function getControlFieldDefault(field: ControlField): ControlFieldValue<C
   }
 }
 
-export function validateControlPanelSemantics<const Config extends ControlPanelConfig>(config: Config) {
-  return Effect.gen(function*() {
+export function validateControlPanelSemantics<const Config extends ControlPanelConfig>(
+  config: Config,
+) {
+  return Effect.gen(function* () {
     for (const [fieldsetId, fieldset] of Object.entries(config.fieldsets)) {
       if (!isControlId(fieldsetId)) {
         return yield* new InvalidControlFieldsetIdError({ id: fieldsetId });
@@ -188,15 +200,18 @@ export function validateControlPanelSemantics<const Config extends ControlPanelC
             return yield* new DuplicateControlSelectOptionValueError({
               fieldsetId,
               fieldId,
-              value: duplicateOptionValue
+              value: duplicateOptionValue,
             });
           }
 
-          if (field.default !== undefined && !field.options.some((option) => option.value === field.default)) {
+          if (
+            field.default !== undefined &&
+            !field.options.some((option) => option.value === field.default)
+          ) {
             return yield* new InvalidControlSelectDefaultError({
               fieldsetId,
               fieldId,
-              value: field.default
+              value: field.default,
             });
           }
         }
@@ -210,7 +225,7 @@ export function validateControlPanelSemantics<const Config extends ControlPanelC
             return yield* new InvalidControlRangeError({
               fieldsetId,
               fieldId,
-              message: "range min must be less than max"
+              message: "range min must be less than max",
             });
           }
 
@@ -218,7 +233,7 @@ export function validateControlPanelSemantics<const Config extends ControlPanelC
             return yield* new InvalidControlRangeError({
               fieldsetId,
               fieldId,
-              message: "range step must be greater than zero"
+              message: "range step must be greater than zero",
             });
           }
 
@@ -226,7 +241,7 @@ export function validateControlPanelSemantics<const Config extends ControlPanelC
             return yield* new InvalidControlRangeError({
               fieldsetId,
               fieldId,
-              message: "range default must be between min and max"
+              message: "range default must be between min and max",
             });
           }
         }
@@ -241,7 +256,9 @@ function isControlId(value: string): boolean {
   return /^[a-zA-Z][a-zA-Z0-9_-]*$/.test(value);
 }
 
-function findDuplicateSelectOptionValue(options: readonly ControlSelectOption[]): string | undefined {
+function findDuplicateSelectOptionValue(
+  options: readonly ControlSelectOption[],
+): string | undefined {
   const values = new Set<string>();
 
   for (const option of options) {

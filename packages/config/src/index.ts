@@ -5,7 +5,7 @@ export const toolbarConfigFilenames = [
   "toolbar.config.ts",
   "toolbar.config.mts",
   "toolbar.config.js",
-  "toolbar.config.mjs"
+  "toolbar.config.mjs",
 ] as const;
 
 export type ToolbarConfigFilename = (typeof toolbarConfigFilenames)[number];
@@ -23,31 +23,31 @@ export class MissingToolbarConfigError extends Schema.TaggedErrorClass<MissingTo
   "MissingToolbarConfigError",
   {
     cwd: Schema.String,
-    filenames: Schema.Array(Schema.String)
-  }
+    filenames: Schema.Array(Schema.String),
+  },
 ) {}
 
 export class UnsupportedToolbarConfigFormatError extends Schema.TaggedErrorClass<UnsupportedToolbarConfigFormatError>()(
   "UnsupportedToolbarConfigFormatError",
   {
     path: Schema.String,
-    filenames: Schema.Array(Schema.String)
-  }
+    filenames: Schema.Array(Schema.String),
+  },
 ) {}
 
 export class ToolbarConfigModuleLoadError extends Schema.TaggedErrorClass<ToolbarConfigModuleLoadError>()(
   "ToolbarConfigModuleLoadError",
   {
     path: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export class InvalidToolbarConfigExportError extends Schema.TaggedErrorClass<InvalidToolbarConfigExportError>()(
   "InvalidToolbarConfigExportError",
   {
-    path: Schema.String
-  }
+    path: Schema.String,
+  },
 ) {}
 
 export type ToolbarConfigError =
@@ -58,25 +58,32 @@ export type ToolbarConfigError =
 
 export type ToolbarConfigServiceShape = {
   readonly find: (options?: FindToolbarConfigOptions) => Effect.Effect<string | undefined, never>;
-  readonly load: (options?: LoadToolbarConfigOptions) => Effect.Effect<ToolbarConfigData, ToolbarConfigError>;
+  readonly load: (
+    options?: LoadToolbarConfigOptions,
+  ) => Effect.Effect<ToolbarConfigData, ToolbarConfigError>;
 };
 
-export class ToolbarConfig extends Context.Service<ToolbarConfig, ToolbarConfigData>()("belt/ToolbarConfig") {
+export class ToolbarConfig extends Context.Service<ToolbarConfig, ToolbarConfigData>()(
+  "belt/ToolbarConfig",
+) {
   static layer(config: ToolbarConfigData) {
     return Layer.succeed(ToolbarConfig, config);
   }
 }
 
-export class ToolbarConfigService extends Context.Service<ToolbarConfigService, ToolbarConfigServiceShape>()(
-  "belt/ToolbarConfigService"
-) {
+export class ToolbarConfigService extends Context.Service<
+  ToolbarConfigService,
+  ToolbarConfigServiceShape
+>()("belt/ToolbarConfigService") {
   static readonly layer = Layer.effect(
     ToolbarConfigService,
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
-      const find = Effect.fn("ToolbarConfigService.find")(function*(options: FindToolbarConfigOptions = {}) {
+      const find = Effect.fn("ToolbarConfigService.find")(function* (
+        options: FindToolbarConfigOptions = {},
+      ) {
         const cwd = options.cwd ?? process.cwd();
         const filenames = options.filenames ?? toolbarConfigFilenames;
 
@@ -92,10 +99,14 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
         return undefined;
       });
 
-      const load = Effect.fn("ToolbarConfigService.load")(function*(options: LoadToolbarConfigOptions = {}) {
+      const load = Effect.fn("ToolbarConfigService.load")(function* (
+        options: LoadToolbarConfigOptions = {},
+      ) {
         const cwd = options.cwd ?? process.cwd();
         const filenames = options.filenames ?? toolbarConfigFilenames;
-        const discoveredPath = options.path ? path.resolve(cwd, options.path) : yield* find(options);
+        const discoveredPath = options.path
+          ? path.resolve(cwd, options.path)
+          : yield* find(options);
 
         if (!discoveredPath) {
           return yield* new MissingToolbarConfigError({ cwd, filenames: [...filenames] });
@@ -104,7 +115,10 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
         const configPath = discoveredPath;
 
         if (!isSupportedConfigPath(path, configPath, filenames)) {
-          return yield* new UnsupportedToolbarConfigFormatError({ path: configPath, filenames: [...filenames] });
+          return yield* new UnsupportedToolbarConfigFormatError({
+            path: configPath,
+            filenames: [...filenames],
+          });
         }
 
         const found = yield* fs.exists(configPath).pipe(Effect.catch(() => Effect.succeed(false)));
@@ -112,29 +126,37 @@ export class ToolbarConfigService extends Context.Service<ToolbarConfigService, 
         if (!found) {
           return yield* new MissingToolbarConfigError({
             cwd: path.dirname(configPath),
-            filenames: [path.basename(configPath)]
+            filenames: [path.basename(configPath)],
           });
         }
 
-        const configUrl = yield* path.toFileUrl(configPath).pipe(
-          Effect.catch((cause) => Effect.fail(new ToolbarConfigModuleLoadError({ path: configPath, cause })))
-        );
+        const configUrl = yield* path
+          .toFileUrl(configPath)
+          .pipe(
+            Effect.catch((cause) =>
+              Effect.fail(new ToolbarConfigModuleLoadError({ path: configPath, cause })),
+            ),
+          );
 
         const loaded = yield* Effect.tryPromise({
           try: () => import(configUrl.href),
-          catch: (cause) => new ToolbarConfigModuleLoadError({ path: configPath, cause })
+          catch: (cause) => new ToolbarConfigModuleLoadError({ path: configPath, cause }),
         });
 
         return yield* validateToolbarConfigExport(loaded.default).pipe(
-          Effect.mapError(() => new InvalidToolbarConfigExportError({ path: configPath }))
+          Effect.mapError(() => new InvalidToolbarConfigExportError({ path: configPath })),
         );
       });
 
       return ToolbarConfigService.of({ find, load });
-    })
+    }),
   );
 }
 
-function isSupportedConfigPath(path: Path.Path, filePath: string, filenames: readonly string[]): boolean {
+function isSupportedConfigPath(
+  path: Path.Path,
+  filePath: string,
+  filenames: readonly string[],
+): boolean {
   return filenames.includes(path.basename(filePath));
 }

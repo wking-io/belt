@@ -5,6 +5,6 @@ export default {
   actions: {
     home() {
       return renderPage(HomePage());
-    }
-  }
+    },
+  },
 };

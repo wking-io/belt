@@ -7,7 +7,7 @@ describe("prototype Vite adapter modules", () => {
   it("attaches and reads prototype identity from module specifiers", () => {
     const identity = createPrototypeGraphIdentity({
       queryParam: "prototype",
-      routePrefix: "/__prototype/"
+      routePrefix: "/__prototype/",
     });
 
     const attached = identity.attach("/src/main.tsx", "pricing-test");
@@ -20,14 +20,14 @@ describe("prototype Vite adapter modules", () => {
   it("rewrites app-local imports to carry prototype identity", async () => {
     const identity = createPrototypeGraphIdentity({
       queryParam: "prototype",
-      routePrefix: "/__prototype/"
+      routePrefix: "/__prototype/",
     });
     const result = await appendPrototypeToImports({
       code: `import Button from "@/components/Button";\nexport { Dashboard } from "/src/routes/Dashboard";\n`,
       id: "/src/App.tsx?prototype=pricing-test",
       prototypeName: "pricing-test",
       aliases: ["@/"],
-      identity
+      identity,
     });
 
     assert.match(result?.code ?? "", /@\/components\/Button\?prototype=pricing-test/);
@@ -38,7 +38,7 @@ describe("prototype Vite adapter modules", () => {
     const moduleSource = createPrototypeRuntimeModule({
       current: "default",
       prototypes: ["default", "pricing-test"],
-      routePrefix: "/__prototype/"
+      routePrefix: "/__prototype/",
     });
 
     assert.match(moduleSource, /export const prototypes = \["default","pricing-test"\];/);

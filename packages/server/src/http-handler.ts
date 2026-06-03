@@ -25,7 +25,7 @@ export function toToolbarServer(router: Layer.Layer<never, unknown, unknown>): T
 
   return {
     fetch: (request) => handle(request, context),
-    dispose
+    dispose,
   };
 }
 
@@ -33,13 +33,15 @@ export function toToolbarWebHandler(app: Layer.Layer<never, unknown, unknown>): 
   // Effect HTTP tracks router and request requirements in internal phantom types that
   // are not preserved once Tools are loaded from runtime Toolbar Config. Keep that
   // type erasure at this assembly seam, immediately before creating the Fetch handler.
-  const webHandlerLayer = app.pipe(
-    Layer.provide(HttpServer.layerServices)
-  ) as Layer.Layer<never, unknown, Exclude<ToolbarWebHandlerRequirements, Layer.Success<typeof HttpServer.layerServices>>>;
+  const webHandlerLayer = app.pipe(Layer.provide(HttpServer.layerServices)) as Layer.Layer<
+    never,
+    unknown,
+    Exclude<ToolbarWebHandlerRequirements, Layer.Success<typeof HttpServer.layerServices>>
+  >;
   const { handler, dispose } = HttpRouter.toWebHandler(webHandlerLayer);
 
   return {
     handle: handler,
-    dispose
+    dispose,
   };
 }

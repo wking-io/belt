@@ -41,16 +41,16 @@ type ToolbarApiIndex = {
 
 type ToolbarApiEnvelope =
   | {
-    readonly ok: true;
-    readonly data: ToolbarApiIndex;
-  }
+      readonly ok: true;
+      readonly data: ToolbarApiIndex;
+    }
   | {
-    readonly ok: false;
-    readonly error: {
-      readonly code: string;
-      readonly message: string;
+      readonly ok: false;
+      readonly error: {
+        readonly code: string;
+        readonly message: string;
+      };
     };
-  };
 
 type WorktreeDestination = {
   readonly id: string;
@@ -74,37 +74,37 @@ type WorktreesIndex = {
 
 type ControlField =
   | {
-    readonly default?: string;
-    readonly description?: string;
-    readonly label?: string;
-    readonly type: "text" | "color";
-    readonly unit?: string;
-  }
+      readonly default?: string;
+      readonly description?: string;
+      readonly label?: string;
+      readonly type: "text" | "color";
+      readonly unit?: string;
+    }
   | {
-    readonly default?: number;
-    readonly description?: string;
-    readonly label?: string;
-    readonly type: "number" | "range";
-    readonly min?: number;
-    readonly max?: number;
-    readonly step?: number;
-    readonly unit?: string;
-  }
+      readonly default?: number;
+      readonly description?: string;
+      readonly label?: string;
+      readonly type: "number" | "range";
+      readonly min?: number;
+      readonly max?: number;
+      readonly step?: number;
+      readonly unit?: string;
+    }
   | {
-    readonly default?: boolean;
-    readonly description?: string;
-    readonly label?: string;
-    readonly type: "boolean";
-    readonly unit?: string;
-  }
+      readonly default?: boolean;
+      readonly description?: string;
+      readonly label?: string;
+      readonly type: "boolean";
+      readonly unit?: string;
+    }
   | {
-    readonly default?: string;
-    readonly description?: string;
-    readonly label?: string;
-    readonly options: readonly { readonly label: string; readonly value: string }[];
-    readonly type: "select";
-    readonly unit?: string;
-  };
+      readonly default?: string;
+      readonly description?: string;
+      readonly label?: string;
+      readonly options: readonly { readonly label: string; readonly value: string }[];
+      readonly type: "select";
+      readonly unit?: string;
+    };
 
 type ControlPanelIndex = {
   readonly config: {
@@ -645,11 +645,11 @@ function LiveBeltToolbar() {
     normalizedWorktreeSearch.length === 0
       ? worktrees
       : worktrees.filter((worktree) =>
-        [worktree.branch, worktree.path]
-          .join(" ")
-          .toLocaleLowerCase()
-          .includes(normalizedWorktreeSearch),
-      );
+          [worktree.branch, worktree.path]
+            .join(" ")
+            .toLocaleLowerCase()
+            .includes(normalizedWorktreeSearch),
+        );
   useEffect(() => {
     if (worktrees.length === 0) {
       if (selectedWorktreeId !== null) setSelectedWorktreeId(null);
@@ -713,11 +713,7 @@ function LiveBeltToolbar() {
         </Toolbar.Left>
         <Toolbar.Right>
           <RenderPerformanceInpToolbarItem historySize={20} radius="none" size="compact" />
-          <RenderPerformanceLayoutShiftToolbarItem
-            historySize={20}
-            radius="none"
-            size="compact"
-          />
+          <RenderPerformanceLayoutShiftToolbarItem historySize={20} radius="none" size="compact" />
           <RenderPerformanceToolbarItem historySize={20} radius="none" size="compact" />
         </Toolbar.Right>
       </Toolbar.Body>

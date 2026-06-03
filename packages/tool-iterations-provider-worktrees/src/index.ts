@@ -7,7 +7,7 @@ import {
   defineIterationProvider,
   type Iteration,
   type IterationDestination,
-  type IterationProvider
+  type IterationProvider,
 } from "@repo/tool-iterations";
 
 export type DiscoveredWorktree = {
@@ -17,11 +17,12 @@ export type DiscoveredWorktree = {
 };
 
 export type WorktreeDestinationResolver = {
-  resolve:
-    (worktree: DiscoveredWorktree) =>
-      | Effect.Effect<readonly IterationDestination[], unknown>
-      | Promise<readonly IterationDestination[]>
-      | readonly IterationDestination[];
+  resolve: (
+    worktree: DiscoveredWorktree,
+  ) =>
+    | Effect.Effect<readonly IterationDestination[], unknown>
+    | Promise<readonly IterationDestination[]>
+    | readonly IterationDestination[];
 };
 
 export type WorktreeIterationsOptions = {
@@ -34,24 +35,24 @@ export class GitWorktreeCommandError extends Schema.TaggedErrorClass<GitWorktree
   {
     cwd: Schema.String,
     command: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export class NoGitRepositoryError extends Schema.TaggedErrorClass<NoGitRepositoryError>()(
   "NoGitRepositoryError",
   {
     cwd: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export class GitWorktreeParseError extends Schema.TaggedErrorClass<GitWorktreeParseError>()(
   "GitWorktreeParseError",
   {
     message: Schema.String,
-    block: Schema.String
-  }
+    block: Schema.String,
+  },
 ) {}
 
 export class WorktreeResolverError extends Schema.TaggedErrorClass<WorktreeResolverError>()(
@@ -59,8 +60,8 @@ export class WorktreeResolverError extends Schema.TaggedErrorClass<WorktreeResol
   {
     branch: Schema.String,
     path: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export type WorktreeDiscoveryError =
@@ -71,55 +72,65 @@ export type WorktreeDiscoveryError =
 
 export type WorktreeDiscoveryShape = {
   readonly discover: (
-    cwd?: string
+    cwd?: string,
   ) => Effect.Effect<readonly DiscoveredWorktree[], WorktreeDiscoveryError, ChildProcessSpawner>;
   readonly list: (
-    options: WorktreeIterationsOptions
+    options: WorktreeIterationsOptions,
   ) => Effect.Effect<readonly Iteration[], WorktreeDiscoveryError, ChildProcessSpawner | Path.Path>;
 };
 
 export class WorktreeDiscovery extends Context.Service<WorktreeDiscovery, WorktreeDiscoveryShape>()(
-  "@repo/tool-iterations-provider-worktrees/WorktreeDiscovery"
+  "@repo/tool-iterations-provider-worktrees/WorktreeDiscovery",
 ) {
   static readonly layer = Layer.succeed(
     WorktreeDiscovery,
     WorktreeDiscovery.of({
-      discover: Effect.fn("WorktreeDiscovery.discover")(function*(cwd: string = process.cwd()) {
+      discover: Effect.fn("WorktreeDiscovery.discover")(function* (cwd: string = process.cwd()) {
         const childProcess = yield* ChildProcessSpawner;
         const args = ["worktree", "list", "--porcelain"] as const;
-        const output = yield* childProcess.string(
-          ChildProcess.make("git", args, {
-            cwd,
-            stderr: "pipe"
-          })
-        ).pipe(
-          Effect.mapError((cause) => mapGitCommandError(cwd, `git ${args.join(" ")}`, cause))
-        );
+        const output = yield* childProcess
+          .string(
+            ChildProcess.make("git", args, {
+              cwd,
+              stderr: "pipe",
+            }),
+          )
+          .pipe(
+            Effect.mapError((cause) => mapGitCommandError(cwd, `git ${args.join(" ")}`, cause)),
+          );
 
         return yield* parseGitWorktreeList(output);
       }),
-      list: Effect.fn("WorktreeDiscovery.list")(function*(options: WorktreeIterationsOptions) {
+      list: Effect.fn("WorktreeDiscovery.list")(function* (options: WorktreeIterationsOptions) {
         const childProcess = yield* ChildProcessSpawner;
         const path = yield* Path.Path;
         const cwd = options.cwd ?? process.cwd();
         const currentPathArgs = ["rev-parse", "--show-toplevel"] as const;
-        const currentPathOutput = yield* childProcess.string(
-          ChildProcess.make("git", currentPathArgs, {
-            cwd,
-            stderr: "pipe"
-          })
-        ).pipe(
-          Effect.mapError((cause) => mapGitCommandError(cwd, `git ${currentPathArgs.join(" ")}`, cause))
-        );
+        const currentPathOutput = yield* childProcess
+          .string(
+            ChildProcess.make("git", currentPathArgs, {
+              cwd,
+              stderr: "pipe",
+            }),
+          )
+          .pipe(
+            Effect.mapError((cause) =>
+              mapGitCommandError(cwd, `git ${currentPathArgs.join(" ")}`, cause),
+            ),
+          );
         const worktreeListArgs = ["worktree", "list", "--porcelain"] as const;
-        const worktreeListOutput = yield* childProcess.string(
-          ChildProcess.make("git", worktreeListArgs, {
-            cwd,
-            stderr: "pipe"
-          })
-        ).pipe(
-          Effect.mapError((cause) => mapGitCommandError(cwd, `git ${worktreeListArgs.join(" ")}`, cause))
-        );
+        const worktreeListOutput = yield* childProcess
+          .string(
+            ChildProcess.make("git", worktreeListArgs, {
+              cwd,
+              stderr: "pipe",
+            }),
+          )
+          .pipe(
+            Effect.mapError((cause) =>
+              mapGitCommandError(cwd, `git ${worktreeListArgs.join(" ")}`, cause),
+            ),
+          );
         const currentPath = path.resolve(cwd, currentPathOutput.trim());
         const worktrees = yield* parseGitWorktreeList(worktreeListOutput);
 
@@ -127,10 +138,10 @@ export class WorktreeDiscovery extends Context.Service<WorktreeDiscovery, Worktr
           currentPath,
           resolvePath: path.resolve,
           resolver: options.resolver,
-          worktrees
+          worktrees,
         });
-      })
-    })
+      }),
+    }),
   );
 }
 
@@ -141,21 +152,24 @@ export function worktreeIterations(options: WorktreeIterationsOptions): Iteratio
     id: "worktrees",
     label: "Git worktrees",
     list: () =>
-      Effect.gen(function*() {
+      Effect.gen(function* () {
         const discovery = yield* WorktreeDiscovery;
 
         return yield* discovery.list(options).pipe(
           Effect.catchTag("NoGitRepositoryError", () => Effect.succeed([])),
-          Effect.mapError((cause) => new IterationProviderError({
-            providerId: "worktrees",
-            cause
-          }))
+          Effect.mapError(
+            (cause) =>
+              new IterationProviderError({
+                providerId: "worktrees",
+                cause,
+              }),
+          ),
         );
-      }).pipe(Effect.provide(WorktreeDiscoveryLive))
+      }).pipe(Effect.provide(WorktreeDiscoveryLive)),
   });
 }
 
-export const parseGitWorktreeList = Effect.fn("parseGitWorktreeList")(function*(output: string) {
+export const parseGitWorktreeList = Effect.fn("parseGitWorktreeList")(function* (output: string) {
   const blocks = output.trim().split("\n\n").filter(Boolean);
   const worktrees: DiscoveredWorktree[] = [];
 
@@ -166,7 +180,7 @@ export const parseGitWorktreeList = Effect.fn("parseGitWorktreeList")(function*(
     if (!worktreePath) {
       return yield* new GitWorktreeParseError({
         message: "Git worktree porcelain block is missing a worktree path",
-        block
+        block,
       });
     }
 
@@ -176,14 +190,14 @@ export const parseGitWorktreeList = Effect.fn("parseGitWorktreeList")(function*(
     worktrees.push({
       branch: branch ? branch.replace(/^refs\/heads\//, "") : "detached",
       detached,
-      path: worktreePath
+      path: worktreePath,
     });
   }
 
   return worktrees;
 });
 
-export const toWorktreeIterations = Effect.fn("toWorktreeIterations")(function*(options: {
+export const toWorktreeIterations = Effect.fn("toWorktreeIterations")(function* (options: {
   readonly currentPath: string;
   readonly resolvePath: (...segments: readonly string[]) => string;
   readonly resolver: WorktreeDestinationResolver;
@@ -193,7 +207,7 @@ export const toWorktreeIterations = Effect.fn("toWorktreeIterations")(function*(
 
   return yield* Effect.forEach(
     options.worktrees,
-    Effect.fn("toWorktreeIterations.entry")(function*(worktree) {
+    Effect.fn("toWorktreeIterations.entry")(function* (worktree) {
       const destinations = yield* resolveDestinations(options.resolver, worktree);
 
       return {
@@ -205,37 +219,41 @@ export const toWorktreeIterations = Effect.fn("toWorktreeIterations")(function*(
         metadata: {
           branch: worktree.branch,
           detached: worktree.detached,
-          path: worktree.path
-        }
+          path: worktree.path,
+        },
       } satisfies Iteration;
-    })
+    }),
   );
 });
 
-const resolveDestinations = Effect.fn("resolveWorktreeDestinations")(function*(
+const resolveDestinations = Effect.fn("resolveWorktreeDestinations")(function* (
   resolver: WorktreeDestinationResolver,
-  worktree: DiscoveredWorktree
+  worktree: DiscoveredWorktree,
 ) {
   const result = resolver.resolve(worktree);
 
   if (Effect.isEffect(result)) {
     return yield* result.pipe(
-      Effect.mapError((cause) => new WorktreeResolverError({
-        branch: worktree.branch,
-        path: worktree.path,
-        cause
-      }))
+      Effect.mapError(
+        (cause) =>
+          new WorktreeResolverError({
+            branch: worktree.branch,
+            path: worktree.path,
+            cause,
+          }),
+      ),
     );
   }
 
   if (isPromiseLike(result)) {
     return yield* Effect.tryPromise({
       try: () => result,
-      catch: (cause) => new WorktreeResolverError({
-        branch: worktree.branch,
-        path: worktree.path,
-        cause
-      })
+      catch: (cause) =>
+        new WorktreeResolverError({
+          branch: worktree.branch,
+          path: worktree.path,
+          cause,
+        }),
     });
   }
 
@@ -246,7 +264,11 @@ function getPorcelainValue(lines: readonly string[], key: string): string | unde
   return lines.find((line) => line.startsWith(`${key} `))?.slice(key.length + 1);
 }
 
-function mapGitCommandError(cwd: string, command: string, cause: unknown): GitWorktreeCommandError | NoGitRepositoryError {
+function mapGitCommandError(
+  cwd: string,
+  command: string,
+  cause: unknown,
+): GitWorktreeCommandError | NoGitRepositoryError {
   const message = String(cause);
 
   if (message.includes("not a git repository")) {
@@ -257,7 +279,9 @@ function mapGitCommandError(cwd: string, command: string, cause: unknown): GitWo
 }
 
 function isPromiseLike(value: unknown): value is Promise<readonly IterationDestination[]> {
-  return !!value && typeof value === "object" && "then" in value && typeof value.then === "function";
+  return (
+    !!value && typeof value === "object" && "then" in value && typeof value.then === "function"
+  );
 }
 
 function slugify(value: string): string {

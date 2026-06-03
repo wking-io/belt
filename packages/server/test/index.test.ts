@@ -6,7 +6,7 @@ import {
   toolbarApiRoutes,
   toolbarApiToolPath,
   toolbarApiToolRoutePath,
-  type ToolbarErrorCode
+  type ToolbarErrorCode,
 } from "@repo/core";
 import { iterationsTool } from "@repo/tool-iterations";
 import { Effect, Schema } from "effect";
@@ -16,7 +16,7 @@ import { createToolbarServer } from "../src/index.ts";
 
 describe("Effect HTTP Toolbar Server", () => {
   it.effect("serves root metadata through the protocol envelope", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const server = createToolbarServer(testConfig);
       const response = yield* Effect.promise(() => server.fetch(request(toolbarApiRoutes.root)));
       const body = yield* json(response);
@@ -30,19 +30,22 @@ describe("Effect HTTP Toolbar Server", () => {
             {
               id: "worktrees",
               label: "Worktrees",
-              routes: ["index"]
-            }
-          ]
-        }
+              routes: ["index"],
+            },
+          ],
+        },
       });
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 
   it.effect("serves registered tool metadata", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const server = createToolbarServer(testConfig);
-      const response = yield* Effect.promise(() => server.fetch(request(toolbarApiToolPath("worktrees"))));
+      const response = yield* Effect.promise(() =>
+        server.fetch(request(toolbarApiToolPath("worktrees"))),
+      );
       const body = yield* json(response);
 
       assert.strictEqual(response.status, 200);
@@ -52,16 +55,17 @@ describe("Effect HTTP Toolbar Server", () => {
           tool: {
             id: "worktrees",
             label: "Worktrees",
-            routes: ["index"]
-          }
-        }
+            routes: ["index"],
+          },
+        },
       });
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 
   it.effect("accepts Toolbar Definitions at the server entry point", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const server = createToolbarServer(defineToolbarDefinition({ toolbarConfig: testConfig }));
       const response = yield* Effect.promise(() => server.fetch(request(toolbarApiRoutes.root)));
       const body = yield* json(response);
@@ -75,59 +79,68 @@ describe("Effect HTTP Toolbar Server", () => {
             {
               id: "worktrees",
               label: "Worktrees",
-              routes: ["index"]
-            }
-          ]
-        }
+              routes: ["index"],
+            },
+          ],
+        },
       });
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 
   it.effect("dispatches tool-owned routes", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const server = createToolbarServer(testConfig);
-      const indexResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("worktrees", "/"))));
+      const indexResponse = yield* Effect.promise(() =>
+        server.fetch(request(toolbarApiToolRoutePath("worktrees", "/"))),
+      );
 
       assert.strictEqual(indexResponse.status, 200);
       assert.deepStrictEqual(yield* json(indexResponse), {
-        worktrees: []
+        worktrees: [],
       });
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 
   it.effect("dispatches the canonical Iterations tool route", () =>
-    Effect.gen(function*() {
-      const server = createToolbarServer(defineToolbar({
-        tools: [
-          iterationsTool({
-            providers: [
-              {
-                id: "test",
-                label: "Test",
-                list: () => Effect.succeed([
-                  {
-                    id: "prototype:pricing-test",
-                    label: "pricing-test",
-                    kind: "prototype",
-                    current: false,
-                    destinations: [
+    Effect.gen(function* () {
+      const server = createToolbarServer(
+        defineToolbar({
+          tools: [
+            iterationsTool({
+              providers: [
+                {
+                  id: "test",
+                  label: "Test",
+                  list: () =>
+                    Effect.succeed([
                       {
-                        id: "preview",
-                        label: "Preview",
-                        primary: true,
-                        url: "/__prototype/pricing-test"
-                      }
-                    ]
-                  }
-                ])
-              }
-            ]
-          })
-        ]
-      }));
-      const indexResponse = yield* Effect.promise(() => server.fetch(request(toolbarApiToolRoutePath("iterations", "/"))));
+                        id: "prototype:pricing-test",
+                        label: "pricing-test",
+                        kind: "prototype",
+                        current: false,
+                        destinations: [
+                          {
+                            id: "preview",
+                            label: "Preview",
+                            primary: true,
+                            url: "/__prototype/pricing-test",
+                          },
+                        ],
+                      },
+                    ]),
+                },
+              ],
+            }),
+          ],
+        }),
+      );
+      const indexResponse = yield* Effect.promise(() =>
+        server.fetch(request(toolbarApiToolRoutePath("iterations", "/"))),
+      );
 
       assert.strictEqual(indexResponse.status, 200);
       assert.deepStrictEqual(yield* json(indexResponse), {
@@ -142,48 +155,45 @@ describe("Effect HTTP Toolbar Server", () => {
                 id: "preview",
                 label: "Preview",
                 primary: true,
-                url: "/__prototype/pricing-test"
-              }
-            ]
-          }
-        ]
+                url: "/__prototype/pricing-test",
+              },
+            ],
+          },
+        ],
       });
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 
   it.effect("returns protocol errors for unknown resources", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const server = createToolbarServer(testConfig);
 
       yield* assertError(server, "/elsewhere", 404, "NOT_FOUND");
       yield* assertError(server, toolbarApiToolPath("missing"), 404, "UNKNOWN_TOOL");
 
       yield* Effect.promise(() => server.dispose());
-    }));
+    }),
+  );
 });
 
 const WorktreesIndexResponseSchema = Schema.Struct({
-  worktrees: Schema.Array(Schema.Unknown)
+  worktrees: Schema.Array(Schema.Unknown),
 });
 
-class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
-  .add(
-    HttpApiEndpoint.get("index", normalizeRoute("index"), {
-      success: WorktreesIndexResponseSchema
-    })
-  )
-{}
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test").add(
+  HttpApiEndpoint.get("index", normalizeRoute("index"), {
+    success: WorktreesIndexResponseSchema,
+  }),
+) {}
 
-class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
-  .add(WorktreesTestApiGroup)
-{}
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api").add(WorktreesTestApiGroup) {}
 
 const WorktreesTestApiHandlers = HttpApiBuilder.group(
   WorktreesTestApi,
   "worktrees-test",
-  (handlers) =>
-    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+  (handlers) => handlers.handle("index", () => Effect.succeed({ worktrees: [] })),
 );
 
 const testConfig = defineToolbar({
@@ -193,10 +203,10 @@ const testConfig = defineToolbar({
         api: WorktreesTestApi,
         apiLayer: WorktreesTestApiHandlers,
         id: "worktrees",
-        label: "Worktrees"
-      }
-    }
-  ]
+        label: "Worktrees",
+      },
+    },
+  ],
 });
 
 function request(pathname: string): Request {
@@ -207,11 +217,11 @@ function json(response: Response) {
   return Effect.promise(async (): Promise<unknown> => response.json());
 }
 
-const assertError = Effect.fn("assertError")(function*(
+const assertError = Effect.fn("assertError")(function* (
   server: ReturnType<typeof createToolbarServer>,
   pathname: string,
   status: number,
-  code: ToolbarErrorCode
+  code: ToolbarErrorCode,
 ) {
   const response = yield* Effect.promise(() => server.fetch(request(pathname)));
   const body = yield* json(response);
@@ -221,8 +231,8 @@ const assertError = Effect.fn("assertError")(function*(
     ok: false,
     error: {
       code,
-      message: errorMessageFor(code)
-    }
+      message: errorMessageFor(code),
+    },
   });
 });
 

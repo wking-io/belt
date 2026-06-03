@@ -20,13 +20,13 @@ export function toolbarVite(config: ToolbarConfigSource, options: ToolbarViteOpt
       });
 
       viteServer.middlewares.use(mountPath, createToolbarViteMiddleware(server, { mountPath }));
-    }
+    },
   };
 }
 
 export function createToolbarViteMiddleware(
   server: ToolbarServer,
-  options: Required<ToolbarViteOptions>
+  options: Required<ToolbarViteOptions>,
 ): Connect.NextHandleFunction {
   const mountPath = normalizeToolbarMountPath(options.mountPath);
 
@@ -42,7 +42,10 @@ export function createToolbarViteMiddleware(
   };
 }
 
-async function toFetchRequest(req: IncomingMessage, options: Required<ToolbarViteOptions>): Promise<Request> {
+async function toFetchRequest(
+  req: IncomingMessage,
+  options: Required<ToolbarViteOptions>,
+): Promise<Request> {
   const host = req.headers.host ?? "localhost";
   const url = new URL(withMountPath(req.url ?? "/", options.mountPath), `http://${host}`);
   const headers = new Headers();
@@ -58,7 +61,7 @@ async function toFetchRequest(req: IncomingMessage, options: Required<ToolbarVit
 
   const init: RequestInit & { duplex?: "half" } = {
     headers,
-    method
+    method,
   };
 
   if (method !== "GET" && method !== "HEAD") {

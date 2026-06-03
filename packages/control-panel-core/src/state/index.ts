@@ -1,7 +1,4 @@
-import {
-  getControlFieldDefault,
-  type ControlPanelConfig
-} from "../config/index.js";
+import { getControlFieldDefault, type ControlPanelConfig } from "../config/index.js";
 import {
   type ControlField,
   type ControlFieldValue,
@@ -9,7 +6,7 @@ import {
   type ControlSnapshotValueMap,
   isOklchColor,
   isVector2Value,
-  isVector3Value
+  isVector3Value,
 } from "../config/fields.js";
 import {
   CannotSaveDefaultsBaseError,
@@ -17,7 +14,7 @@ import {
   DuplicateControlSnapshotIdError,
   DuplicateControlSnapshotNameError,
   UnknownControlFieldsetError,
-  UnknownControlSnapshotError
+  UnknownControlSnapshotError,
 } from "../errors.js";
 
 export type DefaultsBase = {
@@ -32,7 +29,7 @@ export type SnapshotBase = {
 export type ControlBase = DefaultsBase | SnapshotBase;
 
 export const defaultsBase: DefaultsBase = {
-  type: "defaults"
+  type: "defaults",
 };
 
 export type ControlSnapshot = {
@@ -60,13 +57,18 @@ export type SnapshotWriteOptions = {
   readonly values: ControlFieldsetValueMap;
 };
 
-export const controlSnapshotActions = ["saveChanges", "branchSnapshot", "discardChanges", "deleteSnapshot"] as const;
+export const controlSnapshotActions = [
+  "saveChanges",
+  "branchSnapshot",
+  "discardChanges",
+  "deleteSnapshot",
+] as const;
 
 export type ControlSnapshotAction = (typeof controlSnapshotActions)[number];
 
 export function createControlPanelState(
   config: ControlPanelConfig,
-  options: CreateControlPanelStateOptions = {}
+  options: CreateControlPanelStateOptions = {},
 ): ControlPanelState {
   const fieldsetIds = Object.keys(config.fieldsets);
   const activeFieldsetId = options.activeFieldsetId ?? fieldsetIds[0];
@@ -80,23 +82,32 @@ export function createControlPanelState(
 
   for (const fieldsetId of fieldsetIds) {
     const activeBase = options.activeBaseByFieldset?.[fieldsetId] ?? defaultsBase;
-    activeBaseByFieldset[fieldsetId] = sanitizeControlBase(config, options.snapshots ?? [], fieldsetId, activeBase);
+    activeBaseByFieldset[fieldsetId] = sanitizeControlBase(
+      config,
+      options.snapshots ?? [],
+      fieldsetId,
+      activeBase,
+    );
   }
 
   const state = {
     activeBaseByFieldset,
-    snapshots: options.snapshots ?? []
+    snapshots: options.snapshots ?? [],
   };
 
   return activeFieldsetId === undefined ? state : { ...state, activeFieldsetId };
 }
 
-export function selectActiveFieldset(state: ControlPanelState, config: ControlPanelConfig, fieldsetId: string): ControlPanelState {
+export function selectActiveFieldset(
+  state: ControlPanelState,
+  config: ControlPanelConfig,
+  fieldsetId: string,
+): ControlPanelState {
   assertKnownFieldset(config, fieldsetId);
 
   return {
     ...state,
-    activeFieldsetId: fieldsetId
+    activeFieldsetId: fieldsetId,
   };
 }
 
@@ -104,7 +115,7 @@ export function selectControlBase(
   state: ControlPanelState,
   config: ControlPanelConfig,
   fieldsetId: string,
-  base: ControlBase
+  base: ControlBase,
 ): ControlPanelState {
   assertKnownFieldset(config, fieldsetId);
 
@@ -112,8 +123,8 @@ export function selectControlBase(
     ...state,
     activeBaseByFieldset: {
       ...state.activeBaseByFieldset,
-      [fieldsetId]: sanitizeControlBase(config, state.snapshots, fieldsetId, base)
-    }
+      [fieldsetId]: sanitizeControlBase(config, state.snapshots, fieldsetId, base),
+    },
   };
 }
 
@@ -124,18 +135,23 @@ export function getActiveControlBase(state: ControlPanelState, fieldsetId: strin
 export function getCurrentFieldsetValues(
   state: ControlPanelState,
   config: ControlPanelConfig,
-  fieldsetId: string = state.activeFieldsetId ?? ""
+  fieldsetId: string = state.activeFieldsetId ?? "",
 ): ControlFieldsetValueMap {
   assertKnownFieldset(config, fieldsetId);
 
-  return getFieldsetValuesForBase(state, config, fieldsetId, getActiveControlBase(state, fieldsetId));
+  return getFieldsetValuesForBase(
+    state,
+    config,
+    fieldsetId,
+    getActiveControlBase(state, fieldsetId),
+  );
 }
 
 export function getFieldsetValuesForBase(
   state: ControlPanelState,
   config: ControlPanelConfig,
   fieldsetId: string,
-  base: ControlBase
+  base: ControlBase,
 ): ControlFieldsetValueMap {
   assertKnownFieldset(config, fieldsetId);
 
@@ -154,7 +170,10 @@ export function getFieldsetValuesForBase(
   return restoreControlSnapshot(config, snapshot);
 }
 
-export function restoreControlSnapshot(config: ControlPanelConfig, snapshot: ControlSnapshot): ControlFieldsetValueMap {
+export function restoreControlSnapshot(
+  config: ControlPanelConfig,
+  snapshot: ControlSnapshot,
+): ControlFieldsetValueMap {
   assertKnownFieldset(config, snapshot.fieldsetId);
   const defaults = getFieldsetDefaults(config, snapshot.fieldsetId);
   const fields = config.fieldsets[snapshot.fieldsetId]?.fields ?? {};
@@ -163,7 +182,8 @@ export function restoreControlSnapshot(config: ControlPanelConfig, snapshot: Con
   for (const [fieldId, field] of Object.entries(fields)) {
     const savedValue = snapshot.values[fieldId];
     const fallback = defaults[fieldId] ?? getControlFieldDefault(field);
-    values[fieldId] = savedValue === undefined ? fallback : restoreControlFieldValue(field, savedValue, fallback);
+    values[fieldId] =
+      savedValue === undefined ? fallback : restoreControlFieldValue(field, savedValue, fallback);
   }
 
   return values;
@@ -173,7 +193,7 @@ export function saveControlSnapshot(
   state: ControlPanelState,
   config: ControlPanelConfig,
   fieldsetId: string,
-  values: ControlFieldsetValueMap
+  values: ControlFieldsetValueMap,
 ): ControlPanelState {
   assertKnownFieldset(config, fieldsetId);
   const activeBase = getActiveControlBase(state, fieldsetId);
@@ -195,11 +215,11 @@ export function saveControlSnapshot(
     snapshots: state.snapshots.map((snapshot) =>
       snapshot.id === existingSnapshot.id
         ? {
-          ...snapshot,
-          values: pickKnownFieldValues(config, fieldsetId, values)
-        }
-        : snapshot
-    )
+            ...snapshot,
+            values: pickKnownFieldValues(config, fieldsetId, values),
+          }
+        : snapshot,
+    ),
   };
 }
 
@@ -207,7 +227,7 @@ export function branchControlSnapshot(
   state: ControlPanelState,
   config: ControlPanelConfig,
   fieldsetId: string,
-  options: SnapshotWriteOptions
+  options: SnapshotWriteOptions,
 ): ControlPanelState {
   assertKnownFieldset(config, fieldsetId);
   assertUniqueSnapshotId(state.snapshots, options.id);
@@ -217,7 +237,7 @@ export function branchControlSnapshot(
     id: options.id,
     name: options.name,
     fieldsetId,
-    values: pickKnownFieldValues(config, fieldsetId, options.values)
+    values: pickKnownFieldValues(config, fieldsetId, options.values),
   };
 
   return {
@@ -226,22 +246,25 @@ export function branchControlSnapshot(
       ...state.activeBaseByFieldset,
       [fieldsetId]: {
         type: "snapshot",
-        snapshotId: snapshot.id
-      }
+        snapshotId: snapshot.id,
+      },
     },
-    snapshots: [...state.snapshots, snapshot]
+    snapshots: [...state.snapshots, snapshot],
   };
 }
 
 export function discardControlChanges(
   state: ControlPanelState,
   config: ControlPanelConfig,
-  fieldsetId: string
+  fieldsetId: string,
 ): ControlFieldsetValueMap {
   return getCurrentFieldsetValues(state, config, fieldsetId);
 }
 
-export function deleteControlSnapshot(state: ControlPanelState, snapshotId: string): ControlPanelState {
+export function deleteControlSnapshot(
+  state: ControlPanelState,
+  snapshotId: string,
+): ControlPanelState {
   const snapshot = findSnapshot(state.snapshots, snapshotId);
 
   if (!snapshot) {
@@ -251,19 +274,23 @@ export function deleteControlSnapshot(state: ControlPanelState, snapshotId: stri
   const activeBaseByFieldset: Record<string, ControlBase> = {};
 
   for (const [fieldsetId, activeBase] of Object.entries(state.activeBaseByFieldset)) {
-    activeBaseByFieldset[fieldsetId] = activeBase.type === "snapshot" && activeBase.snapshotId === snapshotId
-      ? defaultsBase
-      : activeBase;
+    activeBaseByFieldset[fieldsetId] =
+      activeBase.type === "snapshot" && activeBase.snapshotId === snapshotId
+        ? defaultsBase
+        : activeBase;
   }
 
   return {
     ...state,
     activeBaseByFieldset,
-    snapshots: state.snapshots.filter((candidate) => candidate.id !== snapshotId)
+    snapshots: state.snapshots.filter((candidate) => candidate.id !== snapshotId),
   };
 }
 
-export function getFieldsetDefaults(config: ControlPanelConfig, fieldsetId: string): ControlFieldsetValueMap {
+export function getFieldsetDefaults(
+  config: ControlPanelConfig,
+  fieldsetId: string,
+): ControlFieldsetValueMap {
   const fieldset = config.fieldsets[fieldsetId];
 
   if (!fieldset) {
@@ -282,7 +309,7 @@ export function getFieldsetDefaults(config: ControlPanelConfig, fieldsetId: stri
 export function pickKnownFieldValues(
   config: ControlPanelConfig,
   fieldsetId: string,
-  values: ControlFieldsetValueMap
+  values: ControlFieldsetValueMap,
 ): ControlSnapshotValueMap {
   const fieldset = config.fieldsets[fieldsetId];
 
@@ -304,7 +331,7 @@ export function pickKnownFieldValues(
 function restoreControlFieldValue(
   field: ControlField,
   value: unknown,
-  fallback: ControlFieldValue<ControlField>
+  fallback: ControlFieldValue<ControlField>,
 ): ControlFieldValue<ControlField> {
   switch (field.type) {
     case "text":
@@ -315,7 +342,9 @@ function restoreControlFieldValue(
     case "boolean":
       return typeof value === "boolean" ? value : fallback;
     case "select":
-      return typeof value === "string" && field.options.some((option) => option.value === value) ? value : fallback;
+      return typeof value === "string" && field.options.some((option) => option.value === value)
+        ? value
+        : fallback;
     case "color":
       return typeof value === "string" && isOklchColor(value) ? value : fallback;
     case "vector2":
@@ -329,7 +358,7 @@ function sanitizeControlBase(
   config: ControlPanelConfig,
   snapshots: readonly ControlSnapshot[],
   fieldsetId: string,
-  base: ControlBase
+  base: ControlBase,
 ): ControlBase {
   if (base.type === "defaults") {
     return defaultsBase;
@@ -365,7 +394,7 @@ function assertSnapshots(config: ControlPanelConfig, snapshots: readonly Control
     if (names.has(snapshot.name)) {
       throw new DuplicateControlSnapshotNameError({
         fieldsetId: snapshot.fieldsetId,
-        name: snapshot.name
+        name: snapshot.name,
       });
     }
 
@@ -385,7 +414,7 @@ function assertSnapshotFieldset(fieldsetId: string, snapshot: ControlSnapshot): 
     throw new ControlSnapshotFieldsetMismatchError({
       fieldsetId,
       snapshotId: snapshot.id,
-      snapshotFieldsetId: snapshot.fieldsetId
+      snapshotFieldsetId: snapshot.fieldsetId,
     });
   }
 }
@@ -396,12 +425,19 @@ function assertUniqueSnapshotId(snapshots: readonly ControlSnapshot[], snapshotI
   }
 }
 
-function assertUniqueSnapshotName(snapshots: readonly ControlSnapshot[], fieldsetId: string, name: string): void {
+function assertUniqueSnapshotName(
+  snapshots: readonly ControlSnapshot[],
+  fieldsetId: string,
+  name: string,
+): void {
   if (snapshots.some((snapshot) => snapshot.fieldsetId === fieldsetId && snapshot.name === name)) {
     throw new DuplicateControlSnapshotNameError({ fieldsetId, name });
   }
 }
 
-function findSnapshot(snapshots: readonly ControlSnapshot[], snapshotId: string): ControlSnapshot | undefined {
+function findSnapshot(
+  snapshots: readonly ControlSnapshot[],
+  snapshotId: string,
+): ControlSnapshot | undefined {
   return snapshots.find((snapshot) => snapshot.id === snapshotId);
 }

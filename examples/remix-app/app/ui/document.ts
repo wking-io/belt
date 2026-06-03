@@ -17,7 +17,7 @@ export function document(options: {
       createElement("meta", { content: "light dark", name: "color-scheme" }),
       createElement("title", undefined, options.title),
       createElement("link", { href: themeCssPath, rel: "stylesheet" }),
-      createElement("script", { src: clientScriptPath, type: "module" })
+      createElement("script", { src: clientScriptPath, type: "module" }),
     ),
     createElement("body", { mix: options.bodyMix }, options.children),
   );

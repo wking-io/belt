@@ -8,7 +8,7 @@ export const PrimitivesEntry: EntryComponent = clientEntry(
   `${clientScriptPath}#PrimitivesEntry`,
   function PrimitivesEntry(_handle: Handle) {
     return () => createElement(PrimitivesContent);
-  }
+  },
 );
 
 if (typeof document !== "undefined") {
@@ -20,7 +20,7 @@ if (typeof document !== "undefined") {
     async resolveFrame(src, signal) {
       const response = await fetch(src, signal ? { signal } : undefined);
       return response.text();
-    }
+    },
   });
 
   runtime.addEventListener("error", (event) => {

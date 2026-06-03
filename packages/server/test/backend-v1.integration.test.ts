@@ -15,78 +15,85 @@ import { createToolbarRouteHandler } from "../../adapter-remix/src/index.ts";
 import { toolbarVite } from "../../adapter-vite/src/index.ts";
 
 describe("backend v1 integration", () => {
-  it.effect("loads config and serves the same Toolbar protocol through server, Remix, and Vite", () =>
-    withFixture(Effect.fn(function*(fixture) {
-      const configService = yield* ToolbarConfigService;
-      const config = yield* configService.load({ cwd: fixture.appRoot });
+  it.effect(
+    "loads config and serves the same Toolbar protocol through server, Remix, and Vite",
+    () =>
+      withFixture(
+        Effect.fn(function* (fixture) {
+          const configService = yield* ToolbarConfigService;
+          const config = yield* configService.load({ cwd: fixture.appRoot });
 
-      assert.strictEqual(config.tools[0]?.tool.id, "worktrees");
+          assert.strictEqual(config.tools[0]?.tool.id, "worktrees");
 
-      const server = createToolbarServer(config);
-      const remix = createToolbarRouteHandler(config);
-      const vite = mountToolbarVite(config);
+          const server = createToolbarServer(config);
+          const remix = createToolbarRouteHandler(config);
+          const vite = mountToolbarVite(config);
 
-      try {
-        yield* assertRootResponse(() => server.fetch(request(toolbarApiRoutes.root)));
-        yield* assertRootResponse(() => remix({ request: request(toolbarApiRoutes.root) }));
-        yield* assertRootResponse(() => vite.fetch("/"));
+          try {
+            yield* assertRootResponse(() => server.fetch(request(toolbarApiRoutes.root)));
+            yield* assertRootResponse(() => remix({ request: request(toolbarApiRoutes.root) }));
+            yield* assertRootResponse(() => vite.fetch("/"));
 
-        const worktreesResponse = yield* Effect.promise(() =>
-          server.fetch(request(toolbarApiToolRoutePath("worktrees", "/")))
-        );
-        const worktreesBody = yield* json(worktreesResponse);
+            const worktreesResponse = yield* Effect.promise(() =>
+              server.fetch(request(toolbarApiToolRoutePath("worktrees", "/"))),
+            );
+            const worktreesBody = yield* json(worktreesResponse);
 
-        assert.strictEqual(worktreesResponse.status, 200);
-        assert.deepStrictEqual(worktreesBody, {
-          worktrees: [
-            {
-              id: "main",
-              branch: "main",
-              path: fixture.repoRoot,
-              current: true,
-              destinations: [
+            assert.strictEqual(worktreesResponse.status, 200);
+            assert.deepStrictEqual(worktreesBody, {
+              worktrees: [
                 {
-                  id: "web",
-                  label: "Web",
-                  primary: true,
-                  url: "https://example.localhost"
-                }
-              ]
-            },
-            {
-              id: "fix-ui",
-              branch: "fix-ui",
-              path: fixture.worktreeRoot,
-              current: false,
-              destinations: [
+                  id: "main",
+                  branch: "main",
+                  path: fixture.repoRoot,
+                  current: true,
+                  destinations: [
+                    {
+                      id: "web",
+                      label: "Web",
+                      primary: true,
+                      url: "https://example.localhost",
+                    },
+                  ],
+                },
                 {
-                  id: "web",
-                  label: "Web",
-                  primary: true,
-                  url: "https://fix-ui.example.localhost"
-                }
-              ]
-            }
-          ]
-        });
+                  id: "fix-ui",
+                  branch: "fix-ui",
+                  path: fixture.worktreeRoot,
+                  current: false,
+                  destinations: [
+                    {
+                      id: "web",
+                      label: "Web",
+                      primary: true,
+                      url: "https://fix-ui.example.localhost",
+                    },
+                  ],
+                },
+              ],
+            });
 
-        const missingResponse = yield* Effect.promise(() => remix({ request: request(toolbarApiToolPath("missing")) }));
-        const missingBody = yield* json(missingResponse);
+            const missingResponse = yield* Effect.promise(() =>
+              remix({ request: request(toolbarApiToolPath("missing")) }),
+            );
+            const missingBody = yield* json(missingResponse);
 
-        assert.strictEqual(missingResponse.status, 404);
-        assert.deepStrictEqual(missingBody, {
-          ok: false,
-          error: {
-            code: "UNKNOWN_TOOL",
-            message: "Unknown tool"
+            assert.strictEqual(missingResponse.status, 404);
+            assert.deepStrictEqual(missingBody, {
+              ok: false,
+              error: {
+                code: "UNKNOWN_TOOL",
+                message: "Unknown tool",
+              },
+            });
+          } finally {
+            yield* Effect.promise(() => server.dispose());
+            yield* Effect.promise(() => remix.dispose());
+            vite.close();
           }
-        });
-      } finally {
-        yield* Effect.promise(() => server.dispose());
-        yield* Effect.promise(() => remix.dispose());
-        vite.close();
-      }
-    })).pipe(Effect.provide(configServiceLayer)));
+        }),
+      ).pipe(Effect.provide(configServiceLayer)),
+  );
 });
 
 type Fixture = {
@@ -114,15 +121,19 @@ function withFixture<A, E, R>(run: (fixture: Fixture) => Effect.Effect<A, E, R>)
       return { appRoot, repoRoot, worktreeRoot };
     }),
     run,
-    (fixture) => Effect.promise(() => rm(fixture.appRoot, { force: true, recursive: true }))
+    (fixture) => Effect.promise(() => rm(fixture.appRoot, { force: true, recursive: true })),
   );
 }
 
 async function writeToolbarConfig(appRoot: string, repoRoot: string) {
   const workspaceRoot = process.cwd();
   const coreUrl = pathToFileURL(join(workspaceRoot, "packages/core/src/index.ts")).href;
-  const worktreesUrl = pathToFileURL(join(workspaceRoot, "packages/tool-worktrees/src/index.ts")).href;
-  const portlessUrl = pathToFileURL(join(workspaceRoot, "packages/tool-worktrees-extension-portless/src/index.ts")).href;
+  const worktreesUrl = pathToFileURL(
+    join(workspaceRoot, "packages/tool-worktrees/src/index.ts"),
+  ).href;
+  const portlessUrl = pathToFileURL(
+    join(workspaceRoot, "packages/tool-worktrees-extension-portless/src/index.ts"),
+  ).href;
 
   await writeFile(
     join(appRoot, "toolbar.config.mjs"),
@@ -147,20 +158,20 @@ async function writeToolbarConfig(appRoot: string, repoRoot: string) {
           })
         ]
       });
-    `
+    `,
   );
 }
 
 async function git(cwd: string, args: readonly string[]) {
   const child = spawn("git", [...args], {
     cwd,
-    stdio: ["ignore", "ignore", "pipe"]
+    stdio: ["ignore", "ignore", "pipe"],
   });
   const [exitCode, stderr] = await Promise.all([
     new Promise<number>((resolve) => {
       child.once("close", (code) => resolve(code ?? 1));
     }),
-    new Response(child.stderr).text()
+    new Response(child.stderr).text(),
   ]);
 
   if (exitCode !== 0) {
@@ -180,7 +191,9 @@ function testViteServer(middlewares: ViteDevServer["middlewares"]): ViteDevServe
   return Object.assign(Object.create(null), { middlewares });
 }
 
-const assertRootResponse = Effect.fn("assertRootResponse")(function*(fetchResponse: () => Promise<Response>) {
+const assertRootResponse = Effect.fn("assertRootResponse")(function* (
+  fetchResponse: () => Promise<Response>,
+) {
   const response = yield* Effect.promise(fetchResponse);
   const body = yield* json(response);
 
@@ -193,10 +206,10 @@ const assertRootResponse = Effect.fn("assertRootResponse")(function*(fetchRespon
         {
           id: "worktrees",
           label: "Worktrees",
-          routes: ["index"]
-        }
-      ]
-    }
+          routes: ["index"],
+        },
+      ],
+    },
   });
 });
 
@@ -208,11 +221,13 @@ function mountToolbarVite(config: Parameters<typeof toolbarVite>[0]) {
     throw new Error("Vite plugin did not expose configureServer");
   }
 
-  plugin.configureServer(testViteServer({
-    use: (_mountPath: string, nextHandler: Connect.NextHandleFunction) => {
-      handler = nextHandler;
-    }
-  }));
+  plugin.configureServer(
+    testViteServer({
+      use: (_mountPath: string, nextHandler: Connect.NextHandleFunction) => {
+        handler = nextHandler;
+      },
+    }),
+  );
 
   if (!handler) {
     throw new Error("Vite plugin did not register middleware");
@@ -241,7 +256,7 @@ function mountToolbarVite(config: Parameters<typeof toolbarVite>[0]) {
     },
     close() {
       server.close();
-    }
+    },
   };
 }
 
@@ -253,5 +268,5 @@ async function waitForListening(server: ReturnType<typeof createServer>) {
 
 const configServiceLayer = Layer.provide(
   ToolbarConfigService.layer,
-  Layer.mergeAll(NodeFileSystem.layer, NodePath.layer)
+  Layer.mergeAll(NodeFileSystem.layer, NodePath.layer),
 );

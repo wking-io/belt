@@ -8,10 +8,12 @@ import { layout } from "../../ui/layout.ts";
 export default {
   actions: {
     index() {
-      return renderPage(layout({
-        title: "Belt Remix Primitives",
-        children: createElement(PrimitivesEntry)
-      }));
-    }
-  }
+      return renderPage(
+        layout({
+          title: "Belt Remix Primitives",
+          children: createElement(PrimitivesEntry),
+        }),
+      );
+    },
+  },
 } satisfies Controller<typeof routes.primitives>;

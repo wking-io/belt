@@ -30,17 +30,19 @@ import { createToolbarServer } from "@repo/server";
 const registration = controlPanelTool(controlPanelConfig);
 const { runtimeLayer: _defaultRuntimeLayer, ...tool } = registration.tool;
 
-const toolbarServer = createToolbarServer(defineToolbar({
-  tools: [
-    {
-      config: registration.config,
-      tool: {
-        ...tool,
-        apiLayer: Layer.provide(tool.apiLayer, customSnapshotStoreLayer)
-      }
-    }
-  ]
-}));
+const toolbarServer = createToolbarServer(
+  defineToolbar({
+    tools: [
+      {
+        config: registration.config,
+        tool: {
+          ...tool,
+          apiLayer: Layer.provide(tool.apiLayer, customSnapshotStoreLayer),
+        },
+      },
+    ],
+  }),
+);
 ```
 
 Runtime-loaded configs still erase the exact TypeScript type of each concrete Tool requirement, but the runtime path remains safe for standard tools because those Tools carry their own default runtime layers. Advanced callers only need to think about Effect layer assembly when they intentionally replace a Tool's default runtime wiring.

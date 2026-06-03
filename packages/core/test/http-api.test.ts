@@ -10,19 +10,19 @@ it("defines the Effect HTTP API from the core protocol model", () => {
     onEndpoint: ({ endpoint }) => {
       endpoints.push({
         method: endpoint.method,
-        path: endpoint.path
+        path: endpoint.path,
       });
-    }
+    },
   });
 
   assert.deepStrictEqual(endpoints, [
     {
       method: "GET",
-      path: toolbarApiRoutes.root
+      path: toolbarApiRoutes.root,
     },
     {
       method: "GET",
-      path: toolbarApiRoutes.tools
-    }
+      path: toolbarApiRoutes.tools,
+    },
   ]);
 });

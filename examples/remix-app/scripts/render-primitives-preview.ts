@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 Object.defineProperty(globalThis.crypto, "randomUUID", {
   configurable: true,
-  value: () => "00000000-0000-4000-8000-000000000000"
+  value: () => "00000000-0000-4000-8000-000000000000",
 });
 
 const { router } = await import("../app/router.ts");

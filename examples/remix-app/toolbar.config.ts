@@ -14,13 +14,13 @@ export default defineToolbar({
               {
                 id: "web",
                 label: "Web",
-                appName: "toolbar-example"
-              }
-            ]
-          })
+                appName: "toolbar-example",
+              },
+            ],
+          }),
         }),
-        prototypeIterations()
-      ]
-    })
-  ]
+        prototypeIterations(),
+      ],
+    }),
+  ],
 });

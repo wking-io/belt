@@ -19,6 +19,6 @@ export function createPrototypeRuntimeModule(runtime: PrototypeOverlayRuntime): 
     `  return prototypeName || ${JSON.stringify(runtime.current)};`,
     "}",
     "export const current = getCurrentPrototype();",
-    "export const runtime = { current, prototypes, routePrefix };"
+    "export const runtime = { current, prototypes, routePrefix };",
   ].join("\n");
 }

@@ -22,6 +22,6 @@ export function createToolbarRouteHandler(config: ToolbarConfigSource): RemixToo
 
   return Object.assign(route, {
     server,
-    dispose: () => server.dispose()
+    dispose: () => server.dispose(),
   });
 }

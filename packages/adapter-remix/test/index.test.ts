@@ -7,12 +7,12 @@ import { createToolbarRouteHandler } from "../src/index.ts";
 
 describe("Remix Toolbar adapter", () => {
   it.effect("exposes a Remix route-shaped handler for explicit route mounting", () =>
-    Effect.gen(function*() {
+    Effect.gen(function* () {
       const handler = createToolbarRouteHandler(testConfig);
       const response = yield* Effect.promise(() =>
         handler({
-          request: request("/__toolbar")
-        })
+          request: request("/__toolbar"),
+        }),
       );
       const body = yield* json(response);
 
@@ -25,51 +25,50 @@ describe("Remix Toolbar adapter", () => {
             {
               id: "worktrees",
               label: "Worktrees",
-              routes: ["index"]
-            }
-          ]
-        }
+              routes: ["index"],
+            },
+          ],
+        },
       });
 
       yield* Effect.promise(() => handler.dispose());
-    }));
+    }),
+  );
 
   it.effect("accepts Toolbar Definitions at the adapter entry point", () =>
-    Effect.gen(function*() {
-      const handler = createToolbarRouteHandler(defineToolbarDefinition({ toolbarConfig: testConfig }));
+    Effect.gen(function* () {
+      const handler = createToolbarRouteHandler(
+        defineToolbarDefinition({ toolbarConfig: testConfig }),
+      );
       const response = yield* Effect.promise(() =>
         handler({
-          request: request("/__toolbar")
-        })
+          request: request("/__toolbar"),
+        }),
       );
 
       assert.strictEqual(response.status, 200);
 
       yield* Effect.promise(() => handler.dispose());
-    }));
+    }),
+  );
 });
 
 const WorktreesIndexResponseSchema = Schema.Struct({
-  worktrees: Schema.Array(Schema.Unknown)
+  worktrees: Schema.Array(Schema.Unknown),
 });
 
-class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test")
-  .add(
-    HttpApiEndpoint.get("index", normalizeRoute("index"), {
-      success: WorktreesIndexResponseSchema
-    })
-  )
-{}
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test").add(
+  HttpApiEndpoint.get("index", normalizeRoute("index"), {
+    success: WorktreesIndexResponseSchema,
+  }),
+) {}
 
-class WorktreesTestApi extends HttpApi.make("worktrees-test-api")
-  .add(WorktreesTestApiGroup)
-{}
+class WorktreesTestApi extends HttpApi.make("worktrees-test-api").add(WorktreesTestApiGroup) {}
 
 const WorktreesTestApiHandlers = HttpApiBuilder.group(
   WorktreesTestApi,
   "worktrees-test",
-  (handlers) =>
-    handlers.handle("index", () => Effect.succeed({ worktrees: [] }))
+  (handlers) => handlers.handle("index", () => Effect.succeed({ worktrees: [] })),
 );
 
 const testConfig = defineToolbar({
@@ -79,10 +78,10 @@ const testConfig = defineToolbar({
         api: WorktreesTestApi,
         apiLayer: WorktreesTestApiHandlers,
         id: "worktrees",
-        label: "Worktrees"
-      }
-    }
-  ]
+        label: "Worktrees",
+      },
+    },
+  ],
 });
 
 function request(pathname: string): Request {

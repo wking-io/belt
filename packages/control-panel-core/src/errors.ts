@@ -4,16 +4,16 @@ import type { SchemaError } from "effect/Schema";
 export class InvalidControlFieldsetIdError extends Schema.TaggedErrorClass<InvalidControlFieldsetIdError>()(
   "InvalidControlFieldsetIdError",
   {
-    id: Schema.String
-  }
+    id: Schema.String,
+  },
 ) {}
 
 export class InvalidControlFieldIdError extends Schema.TaggedErrorClass<InvalidControlFieldIdError>()(
   "InvalidControlFieldIdError",
   {
     fieldsetId: Schema.String,
-    id: Schema.String
-  }
+    id: Schema.String,
+  },
 ) {}
 
 export class InvalidControlSelectDefaultError extends Schema.TaggedErrorClass<InvalidControlSelectDefaultError>()(
@@ -21,16 +21,16 @@ export class InvalidControlSelectDefaultError extends Schema.TaggedErrorClass<In
   {
     fieldsetId: Schema.String,
     fieldId: Schema.String,
-    value: Schema.String
-  }
+    value: Schema.String,
+  },
 ) {}
 
 export class EmptyControlSelectOptionsError extends Schema.TaggedErrorClass<EmptyControlSelectOptionsError>()(
   "EmptyControlSelectOptionsError",
   {
     fieldsetId: Schema.String,
-    fieldId: Schema.String
-  }
+    fieldId: Schema.String,
+  },
 ) {}
 
 export class DuplicateControlSelectOptionValueError extends Schema.TaggedErrorClass<DuplicateControlSelectOptionValueError>()(
@@ -38,8 +38,8 @@ export class DuplicateControlSelectOptionValueError extends Schema.TaggedErrorCl
   {
     fieldsetId: Schema.String,
     fieldId: Schema.String,
-    value: Schema.String
-  }
+    value: Schema.String,
+  },
 ) {}
 
 export class InvalidControlRangeError extends Schema.TaggedErrorClass<InvalidControlRangeError>()(
@@ -47,22 +47,22 @@ export class InvalidControlRangeError extends Schema.TaggedErrorClass<InvalidCon
   {
     fieldsetId: Schema.String,
     fieldId: Schema.String,
-    message: Schema.String
-  }
+    message: Schema.String,
+  },
 ) {}
 
 export class UnknownControlFieldsetError extends Schema.TaggedErrorClass<UnknownControlFieldsetError>()(
   "UnknownControlFieldsetError",
   {
-    fieldsetId: Schema.String
-  }
+    fieldsetId: Schema.String,
+  },
 ) {}
 
 export class UnknownControlSnapshotError extends Schema.TaggedErrorClass<UnknownControlSnapshotError>()(
   "UnknownControlSnapshotError",
   {
-    snapshotId: Schema.String
-  }
+    snapshotId: Schema.String,
+  },
 ) {}
 
 export class ControlSnapshotFieldsetMismatchError extends Schema.TaggedErrorClass<ControlSnapshotFieldsetMismatchError>()(
@@ -70,54 +70,54 @@ export class ControlSnapshotFieldsetMismatchError extends Schema.TaggedErrorClas
   {
     fieldsetId: Schema.String,
     snapshotId: Schema.String,
-    snapshotFieldsetId: Schema.String
-  }
+    snapshotFieldsetId: Schema.String,
+  },
 ) {}
 
 export class DuplicateControlSnapshotIdError extends Schema.TaggedErrorClass<DuplicateControlSnapshotIdError>()(
   "DuplicateControlSnapshotIdError",
   {
-    snapshotId: Schema.String
-  }
+    snapshotId: Schema.String,
+  },
 ) {}
 
 export class DuplicateControlSnapshotNameError extends Schema.TaggedErrorClass<DuplicateControlSnapshotNameError>()(
   "DuplicateControlSnapshotNameError",
   {
     fieldsetId: Schema.String,
-    name: Schema.String
-  }
+    name: Schema.String,
+  },
 ) {}
 
 export class CannotSaveDefaultsBaseError extends Schema.TaggedErrorClass<CannotSaveDefaultsBaseError>()(
   "CannotSaveDefaultsBaseError",
   {
-    fieldsetId: Schema.String
-  }
+    fieldsetId: Schema.String,
+  },
 ) {}
 
 export class ControlSnapshotStoreParseError extends Schema.TaggedErrorClass<ControlSnapshotStoreParseError>()(
   "ControlSnapshotStoreParseError",
   {
     path: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export class ControlSnapshotStoreReadError extends Schema.TaggedErrorClass<ControlSnapshotStoreReadError>()(
   "ControlSnapshotStoreReadError",
   {
     path: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export class ControlSnapshotStoreWriteError extends Schema.TaggedErrorClass<ControlSnapshotStoreWriteError>()(
   "ControlSnapshotStoreWriteError",
   {
     path: Schema.String,
-    cause: Schema.Unknown
-  }
+    cause: Schema.Unknown,
+  },
 ) {}
 
 export type ControlPanelConfigError =

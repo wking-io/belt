@@ -13,11 +13,11 @@ import {
   toolApiRoutePath,
   normalizeRoute,
   toolbarError,
-  toolbarSuccess
+  toolbarSuccess,
 } from "../src/index.ts";
 
 it.effect("validates the root success envelope schema", () =>
-  Effect.gen(function*() {
+  Effect.gen(function* () {
     const RootResponseSchema = ToolbarSuccessEnvelopeSchema(ToolbarRootDataSchema);
     const decoded = yield* Schema.decodeUnknownEffect(RootResponseSchema)(
       toolbarSuccess({
@@ -26,26 +26,28 @@ it.effect("validates the root success envelope schema", () =>
           {
             id: "worktrees",
             label: "Worktrees",
-            routes: ["index"]
-          }
-        ]
-      })
+            routes: ["index"],
+          },
+        ],
+      }),
     );
 
     assert.strictEqual(decoded.data.tools[0]?.id, "worktrees");
-  }));
+  }),
+);
 
 it.effect("validates the error envelope schema", () =>
-  Effect.gen(function*() {
+  Effect.gen(function* () {
     const decoded = yield* Schema.decodeUnknownEffect(ToolbarErrorEnvelopeSchema)(
       toolbarError({
         code: "UNKNOWN_TOOL",
-        message: "Unknown tool"
-      })
+        message: "Unknown tool",
+      }),
     );
 
     assert.strictEqual(decoded.error.code, "UNKNOWN_TOOL");
-  }));
+  }),
+);
 
 it("documents the initial API route constants", () => {
   assert.strictEqual(toolbarApiRoutes.root, "/__toolbar");
@@ -57,8 +59,14 @@ it("documents the initial API route constants", () => {
 it("builds concrete API paths from the protocol model", () => {
   assert.strictEqual(toolbarApiToolRelativePath("worktrees"), "/tools/worktrees");
   assert.strictEqual(toolbarApiToolPath("worktrees"), "/__toolbar/tools/worktrees");
-  assert.strictEqual(toolbarApiToolRoutePath("worktrees", "branches/list"), "/__toolbar/tools/worktrees/branches/list");
-  assert.strictEqual(toolbarApiToolRoutePath("worktrees", "/branches/list"), "/__toolbar/tools/worktrees/branches/list");
+  assert.strictEqual(
+    toolbarApiToolRoutePath("worktrees", "branches/list"),
+    "/__toolbar/tools/worktrees/branches/list",
+  );
+  assert.strictEqual(
+    toolbarApiToolRoutePath("worktrees", "/branches/list"),
+    "/__toolbar/tools/worktrees/branches/list",
+  );
 });
 
 it("normalizes tool-owned route paths separately from Toolbar API mount paths", () => {
@@ -67,7 +75,10 @@ it("normalizes tool-owned route paths separately from Toolbar API mount paths", 
   assert.strictEqual(normalizeRoute("index"), "/");
   assert.strictEqual(normalizeRoute("branches/list"), "/branches/list");
   assert.strictEqual(toolApiRoutePath("worktrees", "index"), "/__toolbar/tools/worktrees/");
-  assert.strictEqual(toolApiRoutePath("worktrees", "branches/list"), "/__toolbar/tools/worktrees/branches/list");
+  assert.strictEqual(
+    toolApiRoutePath("worktrees", "branches/list"),
+    "/__toolbar/tools/worktrees/branches/list",
+  );
   assert.throws(() => normalizeToolRoutePath("/__toolbar/tools/worktrees"));
   assert.throws(() => normalizeToolRoutePath("tools/worktrees"));
 });
