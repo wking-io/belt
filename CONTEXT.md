@@ -224,6 +224,10 @@ _Avoid_: frontend-only theme registry, automatic theme package scanning
 The **Theme** shipped by toolbar packages for apps that do not provide custom styling.
 _Avoid_: required design system
 
+**Typography Contract**:
+The font family and OpenType feature settings shared by **Theme CSS** and **Renderers**.
+_Avoid_: renderer-local font rules
+
 **Internal Component Library**:
 The shared component set used by the **Toolbar Wrapper** and Tool **Renderers**.
 _Avoid_: third-party component dependency, app design system
@@ -487,9 +491,18 @@ _Avoid_: Fetch adapter package
 - Custom Themes may be partial and inherit from built-in or registered Themes.
 - Theme color variables should use OKLCH values or OKLCH color mixing.
 - Theme color variables use elevation, foreground, border, focus, and intent/control families instead of background/surface tokens.
+- The default **Typography Contract** uses package-managed Geist Pixel Square from `geist`.
 - The **Default Theme** is optional and can be customized or replaced by the host app.
 - The **Internal Component Library** provides the preferred building blocks for **Renderers** and downstream Tools.
 - Each supported frontend rendering target should have a **Target Component Library**.
+- The Remix **Target Component Library** uses the Remix 3 UI component model from `@remix-run/ui`, not React.
+- The Remix **Target Component Library** should prefer thin wrappers over Remix UI behavior primitives.
+- Style-only primitives in the Remix **Target Component Library** should be mixins, not components.
+- Text, badge, icon, gap, and radius styling should be expressed as Remix UI mixins.
+- The Remix **Target Component Library** should not include a `Stack` component; layout should use ordinary host elements and mixins.
+- The Remix `Panel` primitive always renders outer and inner elements.
+- Remix button primitives have one compact control size for toolbar usage.
+- Full combobox behavior belongs in the Remix **Target Component Library**.
 - Downstream Tools should prefer the **Internal Component Library** when it has a component for the UI need.
 - Custom components may still participate in the **Theme** by using the same CSS custom properties.
 - The **Worktree Iteration Provider** uses a **URL Resolver** to determine each worktree's **Destinations**.
@@ -562,6 +575,18 @@ _Avoid_: Fetch adapter package
 
 > **Dev:** "Should there be one universal component package for every frontend target?"
 > **Domain expert:** "No — each supported frontend rendering target should have a **Target Component Library**."
+
+> **Dev:** "Is the first **Target Component Library** a React package?"
+> **Domain expert:** "No — the Remix renderer should use Remix 3 UI components from `@remix-run/ui`, not React."
+
+> **Dev:** "Should style-only primitives like text and badge be components?"
+> **Domain expert:** "No — use Remix UI mixins when behavior and styling are independent of the underlying host element."
+
+> **Dev:** "Should layout use a shared `Stack` component?"
+> **Domain expert:** "No — use ordinary host elements, CSS, and mixins for layout."
+
+> **Dev:** "Should the Remix renderer wrap all of Remix UI heavily?"
+> **Domain expert:** "No — prefer thin wrappers over Remix UI behavior primitives and export shared mixins for custom composition."
 
 > **Dev:** "Does installing a package make a **Tool** appear automatically?"
 > **Domain expert:** "No — the app must add it through **Tool Registration**."

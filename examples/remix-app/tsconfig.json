@@ -1,4 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["app", "toolbar.config.ts"]
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "createElement",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "include": ["app", "scripts", "server.ts", "toolbar.config.ts"]
 }

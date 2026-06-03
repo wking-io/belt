@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "files": [
+    "src/react.ts",
+    "src/render-performance.ts"
+  ]
+}

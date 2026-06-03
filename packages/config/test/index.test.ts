@@ -49,13 +49,13 @@ it.effect("loads a valid module config through the Effect service", () =>
 it.effect("loads a Toolbar Definition module export through the Effect service", () =>
   withLive(withTempDir((cwd) =>
     Effect.gen(function*() {
-      const rendererUrl = pathToFileURL(path.join(process.cwd(), "packages/renderer-react/src/index.ts")).href;
+      const coreUrl = pathToFileURL(path.join(process.cwd(), "packages/core/src/index.ts")).href;
       yield* writeTempFile(
         cwd,
         "toolbar.config.mjs",
         [
-          `import { createToolbar } from ${JSON.stringify(rendererUrl)};`,
-          "export default createToolbar({ tools: [{ id: 'worktrees', label: 'Worktrees' }] });"
+          `import { defineToolbar } from ${JSON.stringify(coreUrl)};`,
+          "export default defineToolbar({ tools: [{ id: 'worktrees', label: 'Worktrees' }] });"
         ].join("\n")
       );
       const configService = yield* ToolbarConfigService;

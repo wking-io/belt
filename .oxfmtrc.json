@@ -1,0 +1,7 @@
+{
+  "ignorePatterns": [
+    "dist/**",
+    "packages/*/dist/**",
+    "examples/remix-app/primitive-preview.html"
+  ]
+}
