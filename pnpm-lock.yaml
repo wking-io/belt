@@ -33,12 +33,21 @@ importers:
 
   examples/react-preview:
     dependencies:
+      '@repo/control-panel-core':
+        specifier: workspace:*
+        version: link:../../packages/control-panel-core
       '@repo/renderer-react':
         specifier: workspace:*
         version: link:../../packages/renderer-react
+      '@repo/tool-control-panel':
+        specifier: workspace:*
+        version: link:../../packages/tool-control-panel
       '@repo/tool-iterations-renderer-react':
         specifier: workspace:*
         version: link:../../packages/tool-iterations-renderer-react
+      '@repo/tool-render-performance':
+        specifier: workspace:*
+        version: link:../../packages/tool-render-performance
       '@riff-refine/belt':
         specifier: workspace:*
         version: link:../../packages/belt

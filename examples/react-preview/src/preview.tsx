@@ -1,11 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import {
-  RenderPerformanceInpToolbarItem,
-  RenderPerformanceJankPanel,
-  RenderPerformanceLayoutShiftToolbarItem,
-  RenderPerformanceToolbarItem,
-} from "@riff-refine/belt/render-performance";
+import { RenderPerformanceJankPanel, RenderPerformance } from "@repo/tool-render-performance";
 import type { Iteration } from "@riff-refine/belt/iterations";
+import { ControlPanel } from "@repo/tool-control-panel";
 import { Iterations } from "@repo/tool-iterations-renderer-react";
 import {
   Button,
@@ -27,6 +23,7 @@ import {
   Menu,
   type Elevation,
 } from "@repo/renderer-react";
+import type { ControlPanelDefinition } from "@repo/control-panel-core/browser";
 
 type ThemeMode = "system" | "belt-light" | "belt-dark";
 type PreviewPage = "primitives" | "live" | "performance";
@@ -59,66 +56,6 @@ type IterationsIndex = {
   readonly iterations: readonly Iteration[];
 };
 
-type ControlField =
-  | {
-      readonly default?: string;
-      readonly description?: string;
-      readonly label?: string;
-      readonly type: "text" | "color";
-      readonly unit?: string;
-    }
-  | {
-      readonly default?: number;
-      readonly description?: string;
-      readonly label?: string;
-      readonly type: "number" | "range";
-      readonly min?: number;
-      readonly max?: number;
-      readonly step?: number;
-      readonly unit?: string;
-    }
-  | {
-      readonly default?: boolean;
-      readonly description?: string;
-      readonly label?: string;
-      readonly type: "boolean";
-      readonly unit?: string;
-    }
-  | {
-      readonly default?: string;
-      readonly description?: string;
-      readonly label?: string;
-      readonly options: readonly { readonly label: string; readonly value: string }[];
-      readonly type: "select";
-      readonly unit?: string;
-    };
-
-type ControlPanelIndex = {
-  readonly config: {
-    readonly fieldsets: Readonly<
-      Record<
-        string,
-        {
-          readonly description?: string;
-          readonly fields: Readonly<Record<string, ControlField>>;
-          readonly label?: string;
-        }
-      >
-    >;
-  };
-  readonly state: ControlPanelRouteState;
-};
-
-type ControlPanelRouteState = {
-  readonly activeBaseByFieldset: Readonly<
-    Record<string, { readonly snapshotId?: string; readonly type: string }>
-  >;
-  readonly activeFieldsetId?: string;
-  readonly currentValuesByFieldset: Readonly<
-    Record<string, Readonly<Record<string, string | number | boolean>>>
-  >;
-};
-
 const tones = ["neutral", "primary", "info", "success", "warning", "danger"] as const;
 const elevations = [1, 2, 3] as const;
 const radii = ["inner", "default", "outer"] as const;
@@ -147,6 +84,58 @@ const paletteGroups = [
   "oatmeal",
 ] as const;
 const paletteSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
+const previewControlPanelConfig = {
+  configHash: "react-preview",
+  fieldsets: {
+    toolbar: {
+      label: "Toolbar",
+      fields: {
+        enabled: {
+          default: true,
+          label: "Enabled",
+          type: "boolean",
+        },
+        density: {
+          default: "compact",
+          label: "Density",
+          options: [
+            { label: "Compact", value: "compact" },
+            { label: "Comfortable", value: "comfortable" },
+          ],
+          type: "select",
+        },
+        intensity: {
+          default: 0.48,
+          label: "Intensity",
+          max: 1,
+          min: 0,
+          step: 0.01,
+          type: "range",
+          unit: "%",
+        },
+      },
+    },
+    iteration: {
+      label: "Iteration",
+      fields: {
+        branchName: {
+          default: "feature/react-preview",
+          label: "Branch name",
+          type: "text",
+        },
+        destination: {
+          default: "web",
+          label: "Destination",
+          options: [
+            { label: "Web", value: "web" },
+            { label: "Docs", value: "docs" },
+          ],
+          type: "select",
+        },
+      },
+    },
+  },
+} satisfies ControlPanelDefinition;
 const PreviewToolbar = createToolbar({
   tools: [
     {
@@ -156,6 +145,7 @@ const PreviewToolbar = createToolbar({
       },
     },
     {
+      config: previewControlPanelConfig,
       tool: {
         id: "control-panel",
         label: "Control Panel",
@@ -482,7 +472,11 @@ function PerformancePreview() {
                 toolbar.
               </span>
               <div className="preview-row">
-                <RenderPerformanceToolbarItem historySize={20} size="compact" />
+                <PreviewToolbar.Provider>
+                  <RenderPerformance>
+                    <RenderPerformance.Jank />
+                  </RenderPerformance>
+                </PreviewToolbar.Provider>
               </div>
             </div>
           </div>
@@ -630,12 +624,6 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
           </div>
         </Panel>
       </PreviewSection>
-
-      <PreviewSection title="Control Panel">
-        <Panel>
-          <ControlPanelEditor controlPanel={live.controlPanel} onRefresh={live.refresh} />
-        </Panel>
-      </PreviewSection>
     </>
   );
 }
@@ -649,16 +637,14 @@ function LiveBeltToolbar() {
         <Toolbar.Body>
           <Toolbar.Left>
             <Iterations initialIterations={live.iterations?.iterations ?? []} />
-            <GhostButton size="compact" icon="dial" radius="none" />
+            <ControlPanel />
           </Toolbar.Left>
           <Toolbar.Right>
-            <RenderPerformanceInpToolbarItem historySize={20} radius="none" size="compact" />
-            <RenderPerformanceLayoutShiftToolbarItem
-              historySize={20}
-              radius="none"
-              size="compact"
-            />
-            <RenderPerformanceToolbarItem historySize={20} radius="none" size="compact" />
+            <RenderPerformance>
+              <RenderPerformance.Inp />
+              <RenderPerformance.LayoutShift />
+              <RenderPerformance.Jank />
+            </RenderPerformance>
           </Toolbar.Right>
         </Toolbar.Body>
       </Toolbar>
@@ -721,181 +707,17 @@ function getIterationMetadataString(iteration: Iteration, key: string): string |
   return typeof value === "string" ? value : undefined;
 }
 
-function ControlPanelEditor(props: {
-  readonly controlPanel: ControlPanelIndex | undefined;
-  readonly onRefresh: () => Promise<void>;
-}) {
-  const controlPanel = props.controlPanel;
-  const activeFieldsetId = controlPanel?.state.activeFieldsetId;
-  const activeFieldset =
-    activeFieldsetId === undefined ? undefined : controlPanel?.config.fieldsets[activeFieldsetId];
-  const [draftValues, setDraftValues] = useState<
-    Readonly<Record<string, string | number | boolean>>
-  >({});
-
-  useEffect(() => {
-    if (!controlPanel || activeFieldsetId === undefined) return;
-    setDraftValues(controlPanel.state.currentValuesByFieldset[activeFieldsetId] ?? {});
-  }, [activeFieldsetId, controlPanel]);
-
-  if (!controlPanel || activeFieldsetId === undefined || !activeFieldset) {
-    return (
-      <div className="preview-card-body">
-        <PreviewLabel>Control Panel</PreviewLabel>
-        <span className="belt-text" data-emphasis="subtle" data-size="sm">
-          Loading control panel state...
-        </span>
-      </div>
-    );
-  }
-
-  const updateValue = (fieldId: string, value: string | number | boolean) => {
-    setDraftValues((current) => ({ ...current, [fieldId]: value }));
-  };
-
-  const branchSnapshot = async () => {
-    await postJson("/__toolbar/tools/control-panel/snapshots/branch", {
-      fieldsetId: activeFieldsetId,
-      name: `Preview ${new Date().toLocaleTimeString()}`,
-      values: draftValues,
-    });
-    await props.onRefresh();
-  };
-
-  return (
-    <div className="preview-card-body">
-      <div className="preview-control-header">
-        <PreviewLabel>{activeFieldset.label ?? activeFieldsetId}</PreviewLabel>
-        <Select.Root
-          onValueChange={(value) => {
-            void postJson("/__toolbar/tools/control-panel/state/select-fieldset", {
-              fieldsetId: String(value),
-            }).then(props.onRefresh);
-          }}
-          value={activeFieldsetId}
-        >
-          <Select.Trigger defaultLabel="Fieldset" />
-          <Select.List>
-            {Object.entries(controlPanel.config.fieldsets).map(([fieldsetId, fieldset]) => (
-              <Select.Option key={fieldsetId} value={fieldsetId}>
-                {fieldset.label ?? fieldsetId}
-              </Select.Option>
-            ))}
-          </Select.List>
-        </Select.Root>
-      </div>
-      <div className="preview-control-fields">
-        {Object.entries(activeFieldset.fields).map(([fieldId, field]) => (
-          <ControlFieldEditor
-            field={field}
-            fieldId={fieldId}
-            key={fieldId}
-            onChange={(value) => updateValue(fieldId, value)}
-            value={draftValues[fieldId]}
-          />
-        ))}
-      </div>
-      <div className="preview-row">
-        <Button onClick={() => void branchSnapshot()} startIcon="add">
-          Branch snapshot
-        </Button>
-        <GhostButton onClick={() => void props.onRefresh()} startIcon="spinner">
-          Refresh
-        </GhostButton>
-      </div>
-    </div>
-  );
-}
-
-function ControlFieldEditor(props: {
-  readonly field: ControlField;
-  readonly fieldId: string;
-  readonly onChange: (value: string | number | boolean) => void;
-  readonly value: string | number | boolean | undefined;
-}) {
-  const label = props.field.label ?? props.fieldId;
-
-  if (props.field.type === "boolean") {
-    return (
-      <label className="preview-switch-label">
-        <Switch checked={props.value === true} onCheckedChange={(value) => props.onChange(value)} />
-        <span className="belt-text" data-size="sm">
-          {label}
-        </span>
-      </label>
-    );
-  }
-
-  if (props.field.type === "select") {
-    return (
-      <Field>
-        <Label>{label}</Label>
-        <Select.Root
-          onValueChange={(value) => props.onChange(String(value))}
-          value={String(props.value ?? props.field.default ?? "")}
-        >
-          <Select.Trigger defaultLabel={label} />
-          <Select.List>
-            {props.field.options.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
-              </Select.Option>
-            ))}
-          </Select.List>
-        </Select.Root>
-      </Field>
-    );
-  }
-
-  if (props.field.type === "range") {
-    const value =
-      typeof props.value === "number" ? props.value : (props.field.default ?? props.field.min ?? 0);
-    return (
-      <Slider
-        label={label}
-        max={props.field.max ?? 1}
-        min={props.field.min ?? 0}
-        onValueChange={(nextValue) =>
-          props.onChange(Array.isArray(nextValue) ? (nextValue[0] ?? value) : nextValue)
-        }
-        step={props.field.step ?? 0.01}
-        unit={props.field.unit}
-        value={[value]}
-      />
-    );
-  }
-
-  return (
-    <Field>
-      <Label>{label}</Label>
-      <Input
-        onChange={(event) =>
-          props.onChange(
-            props.field.type === "number"
-              ? Number(event.currentTarget.value)
-              : event.currentTarget.value,
-          )
-        }
-        type={props.field.type === "number" ? "number" : "text"}
-        value={String(props.value ?? props.field.default ?? "")}
-      />
-    </Field>
-  );
-}
-
 function useLiveToolbarData() {
   const [toolbar, setToolbar] = useState<ToolbarApiIndex>();
   const [iterations, setIterations] = useState<IterationsIndex>();
-  const [controlPanel, setControlPanel] = useState<ControlPanelIndex>();
   const [error, setError] = useState<string>();
 
   const refresh = async () => {
     try {
       setError(undefined);
-      const [toolbarResponse, iterationsResponse, controlPanelResponse] = await Promise.all([
+      const [toolbarResponse, iterationsResponse] = await Promise.all([
         getJson<ToolbarApiEnvelope>("/__toolbar"),
         getJson<IterationsIndex>("/__toolbar/tools/iterations/"),
-        getJson<ControlPanelIndex>("/__toolbar/tools/control-panel/index"),
       ]);
 
       if (!toolbarResponse.ok) {
@@ -904,7 +726,6 @@ function useLiveToolbarData() {
 
       setToolbar(toolbarResponse.data);
       setIterations(iterationsResponse);
-      setControlPanel(controlPanelResponse);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to load live toolbar data");
     }
@@ -914,27 +735,11 @@ function useLiveToolbarData() {
     void refresh();
   }, []);
 
-  return { controlPanel, error, iterations, refresh, toolbar };
+  return { error, iterations, refresh, toolbar };
 }
 
 async function getJson<Data>(url: string): Promise<Data> {
   const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-
-  return (await response.json()) as Data;
-}
-
-async function postJson<Data = unknown>(url: string, body: unknown): Promise<Data> {
-  const response = await fetch(url, {
-    body: JSON.stringify(body),
-    headers: {
-      "content-type": "application/json",
-    },
-    method: "POST",
-  });
 
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
