@@ -1,5 +1,6 @@
 import { toolApiRoutePath } from "@repo/core";
 import {
+  Button,
   Field,
   GhostButton,
   Input,
@@ -16,13 +17,18 @@ import {
   controlPanelRoutePaths,
   controlPanelToolId,
   getControlFieldDefault,
+  type ControlBase,
   type ControlField,
   type ControlFieldValue,
   type ControlFieldsetValueMap,
+  type ControlPanelDeleteSnapshotResponse,
   type ControlPanelDefinition,
   type ControlPanelIndexResponse,
   type ControlPanelRouteState,
+  type ControlPanelSnapshotsResponse,
   type ControlPanelStateResponse,
+  type ControlPanelSnapshotStateResponse,
+  type ControlSnapshot,
 } from "@repo/control-panel-core";
 import { useEffect, useMemo, useState, type ReactElement } from "react";
 
@@ -37,8 +43,26 @@ export type ControlPanelProps = {
 };
 
 export type ControlPanelClient = {
+  readonly branchSnapshot: (
+    fieldsetId: string,
+    name: string,
+    values: ControlFieldsetValueMap,
+  ) => Promise<ControlPanelSnapshotStateResponse>;
+  readonly deleteSnapshot: (
+    fieldsetId: string,
+    snapshotId: string,
+  ) => Promise<ControlPanelDeleteSnapshotResponse>;
   readonly index: () => Promise<ControlPanelIndexResponse>;
+  readonly saveSnapshot: (
+    fieldsetId: string,
+    values: ControlFieldsetValueMap,
+  ) => Promise<ControlPanelStateResponse>;
+  readonly selectBase: (
+    fieldsetId: string,
+    base: ControlBase,
+  ) => Promise<ControlPanelStateResponse>;
   readonly selectFieldset: (fieldsetId: string) => Promise<ControlPanelStateResponse>;
+  readonly snapshots: () => Promise<ControlPanelSnapshotsResponse>;
 };
 
 type ControlPanelViewState = {
@@ -46,10 +70,29 @@ type ControlPanelViewState = {
   readonly draftValuesByFieldset: Readonly<Record<string, ControlFieldsetValueMap>>;
   readonly error?: string;
   readonly loading: boolean;
+  readonly pendingAction?: ControlPanelAction;
   readonly routeState: ControlPanelRouteState;
+  readonly snapshots: readonly ControlSnapshot[];
+};
+
+type ControlPanelAction =
+  | "branchSnapshot"
+  | "deleteSnapshot"
+  | "discardChanges"
+  | "saveSnapshot"
+  | "selectBase";
+
+type ControlPanelActionCompleteOptions = {
+  readonly fieldsetId: string;
+  readonly snapshots?: readonly ControlSnapshot[];
+  readonly type: "discardDraft";
 };
 
 type SupportedControlValue = ControlFieldValue<ControlField>;
+
+type StoredDraftValues = Readonly<
+  Record<string, Readonly<Record<string, ControlFieldsetValueMap>>>
+>;
 
 export function createControlPanelClient(
   options: ControlPanelClientOptions = {},
@@ -57,11 +100,40 @@ export function createControlPanelClient(
   const fetchImpl = options.fetch ?? fetch;
 
   return {
+    branchSnapshot: (fieldsetId: string, name: string, values: ControlFieldsetValueMap) =>
+      postControlPanelJson<ControlPanelSnapshotStateResponse>(
+        controlPanelRoutePaths.branchSnapshot,
+        {
+          fieldsetId,
+          name,
+          values,
+        },
+      ),
+    deleteSnapshot: (fieldsetId: string, snapshotId: string) =>
+      postControlPanelJson<ControlPanelDeleteSnapshotResponse>(
+        controlPanelRoutePaths.deleteSnapshot,
+        {
+          fieldsetId,
+          snapshotId,
+        },
+      ),
     index: () => getControlPanelJson<ControlPanelIndexResponse>(controlPanelRoutePaths.index),
+    saveSnapshot: (fieldsetId: string, values: ControlFieldsetValueMap) =>
+      postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.saveSnapshot, {
+        fieldsetId,
+        values,
+      }),
+    selectBase: (fieldsetId: string, base: ControlBase) =>
+      postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.selectBase, {
+        base,
+        fieldsetId,
+      }),
     selectFieldset: (fieldsetId: string) =>
       postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.selectFieldset, {
         fieldsetId,
       }),
+    snapshots: () =>
+      getControlPanelJson<ControlPanelSnapshotsResponse>(controlPanelRoutePaths.snapshots),
   };
 
   function getControlPanelJson<Response>(routePath: string): Promise<Response> {
@@ -94,10 +166,14 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
           draftValuesByFieldset:
             storageKey === undefined
               ? createDraftValuesByFieldset(config)
-              : (readControlPanelDraftValues(config, storageKey) ??
-                createDraftValuesByFieldset(config)),
+              : (readControlPanelDraftValues(
+                  config,
+                  storageKey,
+                  createFallbackRouteState(config),
+                ) ?? createDraftValuesByFieldset(config)),
           loading: true,
           routeState: createFallbackRouteState(config),
+          snapshots: [],
         },
   );
 
@@ -109,20 +185,22 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
       config,
       draftValuesByFieldset:
         current?.draftValuesByFieldset ??
-        (storageKey === undefined ? undefined : readControlPanelDraftValues(config, storageKey)) ??
+        (storageKey === undefined
+          ? undefined
+          : readControlPanelDraftValues(config, storageKey, createFallbackRouteState(config))) ??
         createDraftValuesByFieldset(config),
       loading: true,
       routeState: current?.routeState ?? createFallbackRouteState(config),
+      snapshots: current?.snapshots ?? [],
     }));
 
-    void client
-      .index()
-      .then((response) => {
+    void Promise.all([client.index(), client.snapshots()])
+      .then(([response, snapshotsResponse]) => {
         if (cancelled) return;
         const draftValuesByFieldset =
           (storageKey === undefined
             ? undefined
-            : readControlPanelDraftValues(response.config, storageKey)) ??
+            : readControlPanelDraftValues(response.config, storageKey, response.state)) ??
           response.state.currentValuesByFieldset;
 
         setViewState({
@@ -130,6 +208,7 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
           draftValuesByFieldset,
           loading: false,
           routeState: response.state,
+          snapshots: snapshotsResponse.snapshots,
         });
       })
       .catch((cause) => {
@@ -140,11 +219,16 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
             current?.draftValuesByFieldset ??
             (storageKey === undefined
               ? undefined
-              : readControlPanelDraftValues(config, storageKey)) ??
+              : readControlPanelDraftValues(
+                  config,
+                  storageKey,
+                  createFallbackRouteState(config),
+                )) ??
             createDraftValuesByFieldset(config),
           error: cause instanceof Error ? cause.message : "Unable to load Control Panel state.",
           loading: false,
           routeState: current?.routeState ?? createFallbackRouteState(config),
+          snapshots: current?.snapshots ?? [],
         }));
       });
 
@@ -203,7 +287,9 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
             setViewState((current) =>
               current === undefined
                 ? current
-                : updateDraftValues(current, fieldsetId, values, storageKey),
+                : updateDraftValues(current, fieldsetId, values, storageKey, {
+                    type: "write",
+                  }),
             );
           }}
           onRouteStateChange={(routeState) => {
@@ -221,6 +307,28 @@ export function ControlPanel(props: ControlPanelProps): ReactElement | null {
                   },
             );
           }}
+          onSnapshotActionComplete={(routeState, options) => {
+            setViewState((current) =>
+              current === undefined
+                ? current
+                : completeSnapshotAction(current, routeState, storageKey, options),
+            );
+          }}
+          onSnapshotActionError={(cause) => {
+            setViewState((current) =>
+              current === undefined
+                ? current
+                : toFailedActionState(
+                    current,
+                    cause instanceof Error ? cause.message : "Control Panel action failed.",
+                  ),
+            );
+          }}
+          onSnapshotActionStart={(action) => {
+            setViewState((current) =>
+              current === undefined ? current : toPendingActionState(current, action),
+            );
+          }}
           viewState={viewState}
         />
       </ToolDrawer>
@@ -233,12 +341,35 @@ function ControlPanelDrawerContent(props: {
   readonly client: ControlPanelClient;
   readonly onDraftValuesChange: (fieldsetId: string, values: ControlFieldsetValueMap) => void;
   readonly onRouteStateChange: (routeState: ControlPanelRouteState) => void;
+  readonly onSnapshotActionComplete: (
+    routeState: ControlPanelRouteState,
+    options: ControlPanelActionCompleteOptions,
+  ) => void;
+  readonly onSnapshotActionError: (cause: unknown) => void;
+  readonly onSnapshotActionStart: (action: ControlPanelAction) => void;
   readonly viewState: ControlPanelViewState;
 }): ReactElement {
-  const { config, draftValuesByFieldset, error, loading } = props.viewState;
+  const { config, draftValuesByFieldset, error, loading, pendingAction, routeState, snapshots } =
+    props.viewState;
   const activeFieldsetId = props.activeFieldsetId;
   const activeFieldset =
     activeFieldsetId === undefined ? undefined : config.fieldsets[activeFieldsetId];
+  const activeBase =
+    activeFieldsetId === undefined ? undefined : routeState.activeBaseByFieldset[activeFieldsetId];
+  const activeSnapshot =
+    activeBase?.type === "snapshot"
+      ? snapshots.find((snapshot) => snapshot.id === activeBase.snapshotId)
+      : undefined;
+  const activeValues =
+    activeFieldsetId === undefined ? undefined : draftValuesByFieldset[activeFieldsetId];
+  const snapshotOptions =
+    activeFieldsetId === undefined
+      ? []
+      : snapshots.filter((snapshot) => snapshot.fieldsetId === activeFieldsetId);
+  const activeBaseValue =
+    activeBase?.type === "snapshot" ? `snapshot:${activeBase.snapshotId}` : "defaults";
+  const actionDisabled =
+    activeFieldsetId === undefined || activeValues === undefined || pendingAction !== undefined;
 
   return (
     <div className="belt-control-panel-drawer">
@@ -286,30 +417,151 @@ function ControlPanelDrawerContent(props: {
           No fieldset selected.
         </span>
       ) : (
-        <div className="belt-control-panel-drawer__fields">
-          {activeFieldset.description === undefined ? null : (
-            <span className="belt-text" data-emphasis="subtle" data-size="sm">
-              {activeFieldset.description}
-            </span>
-          )}
-          {Object.entries(activeFieldset.fields).map(([fieldId, field]) => (
-            <ControlPanelField
-              field={field}
-              fieldId={fieldId}
-              key={fieldId}
-              onChange={(value) => {
-                const currentValues = draftValuesByFieldset[activeFieldsetId] ?? {};
-                props.onDraftValuesChange(activeFieldsetId, {
-                  ...currentValues,
-                  [fieldId]: value,
-                });
+        <>
+          <div className="belt-control-panel-drawer__snapshot-actions">
+            <Select.Root
+              onValueChange={(value) => {
+                const base = parseControlBaseValue(String(value));
+                props.onSnapshotActionStart("selectBase");
+                props.client
+                  .selectBase(activeFieldsetId, base)
+                  .then((response) =>
+                    props.onSnapshotActionComplete(response.state, {
+                      fieldsetId: activeFieldsetId,
+                      type: "discardDraft",
+                    }),
+                  )
+                  .catch(props.onSnapshotActionError);
               }}
-              value={
-                draftValuesByFieldset[activeFieldsetId]?.[fieldId] ?? getControlFieldDefault(field)
-              }
-            />
-          ))}
-        </div>
+              value={activeBaseValue}
+            >
+              <Select.Trigger defaultLabel="Base" />
+              <Select.List>
+                <Select.Option value="defaults">Defaults</Select.Option>
+                {snapshotOptions.map((snapshot) => (
+                  <Select.Option key={snapshot.id} value={`snapshot:${snapshot.id}`}>
+                    {snapshot.name}
+                  </Select.Option>
+                ))}
+              </Select.List>
+            </Select.Root>
+            <div className="belt-control-panel-drawer__action-row">
+              <Button
+                disabled={actionDisabled}
+                onClick={() => {
+                  if (activeValues === undefined) return;
+
+                  props.onSnapshotActionStart("branchSnapshot");
+                  props.client
+                    .branchSnapshot(
+                      activeFieldsetId,
+                      `Snapshot ${new Date().toLocaleTimeString()}`,
+                      activeValues,
+                    )
+                    .then((response) =>
+                      props.onSnapshotActionComplete(response.state, {
+                        fieldsetId: activeFieldsetId,
+                        snapshots: [...snapshots, response.snapshot],
+                        type: "discardDraft",
+                      }),
+                    )
+                    .catch(props.onSnapshotActionError);
+                }}
+                startIcon="branch"
+              >
+                Branch
+              </Button>
+              <Button
+                disabled={actionDisabled || activeBase?.type !== "snapshot"}
+                onClick={() => {
+                  if (activeValues === undefined) return;
+
+                  props.onSnapshotActionStart("saveSnapshot");
+                  props.client
+                    .saveSnapshot(activeFieldsetId, activeValues)
+                    .then((response) =>
+                      props.onSnapshotActionComplete(response.state, {
+                        fieldsetId: activeFieldsetId,
+                        type: "discardDraft",
+                      }),
+                    )
+                    .catch(props.onSnapshotActionError);
+                }}
+                startIcon="check"
+              >
+                Save
+              </Button>
+              <GhostButton
+                disabled={actionDisabled}
+                onClick={() => {
+                  props.onSnapshotActionStart("discardChanges");
+                  props.onSnapshotActionComplete(routeState, {
+                    fieldsetId: activeFieldsetId,
+                    type: "discardDraft",
+                  });
+                }}
+                startIcon="close"
+              >
+                Discard
+              </GhostButton>
+              <GhostButton
+                disabled={actionDisabled || activeBase?.type !== "snapshot"}
+                onClick={() => {
+                  if (activeBase?.type !== "snapshot") return;
+
+                  props.onSnapshotActionStart("deleteSnapshot");
+                  props.client
+                    .deleteSnapshot(activeFieldsetId, activeBase.snapshotId)
+                    .then((response) =>
+                      props.onSnapshotActionComplete(response.state, {
+                        fieldsetId: activeFieldsetId,
+                        type: "discardDraft",
+                      }),
+                    )
+                    .catch(props.onSnapshotActionError);
+                }}
+                startIcon="trash"
+                tone="danger"
+              >
+                Delete
+              </GhostButton>
+            </div>
+            {activeBase?.type === "snapshot" && activeSnapshot !== undefined ? (
+              <span className="belt-text" data-emphasis="subtle" data-size="xs">
+                Editing {activeSnapshot.name}
+              </span>
+            ) : (
+              <span className="belt-text" data-emphasis="subtle" data-size="xs">
+                Save is available after selecting or branching a snapshot.
+              </span>
+            )}
+          </div>
+          <div className="belt-control-panel-drawer__fields">
+            {activeFieldset.description === undefined ? null : (
+              <span className="belt-text" data-emphasis="subtle" data-size="sm">
+                {activeFieldset.description}
+              </span>
+            )}
+            {Object.entries(activeFieldset.fields).map(([fieldId, field]) => (
+              <ControlPanelField
+                field={field}
+                fieldId={fieldId}
+                key={fieldId}
+                onChange={(value) => {
+                  const currentValues = draftValuesByFieldset[activeFieldsetId] ?? {};
+                  props.onDraftValuesChange(activeFieldsetId, {
+                    ...currentValues,
+                    [fieldId]: value,
+                  });
+                }}
+                value={
+                  draftValuesByFieldset[activeFieldsetId]?.[fieldId] ??
+                  getControlFieldDefault(field)
+                }
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -508,6 +760,9 @@ function updateDraftValues(
   fieldsetId: string,
   values: ControlFieldsetValueMap,
   storageKey: string | undefined,
+  options: {
+    readonly type: "discard" | "write";
+  },
 ): ControlPanelViewState {
   const draftValuesByFieldset = {
     ...current.draftValuesByFieldset,
@@ -515,12 +770,70 @@ function updateDraftValues(
   };
 
   if (storageKey !== undefined) {
-    writeControlPanelDraftValues(current.config, storageKey, draftValuesByFieldset);
+    if (options.type === "discard") {
+      deleteControlPanelDraftValues(current.config, storageKey, current.routeState, fieldsetId);
+    } else {
+      writeControlPanelDraftValues(
+        current.config,
+        storageKey,
+        current.routeState,
+        fieldsetId,
+        values,
+      );
+    }
   }
 
   return {
     ...current,
     draftValuesByFieldset,
+  };
+}
+
+function completeSnapshotAction(
+  current: ControlPanelViewState,
+  routeState: ControlPanelRouteState,
+  storageKey: string | undefined,
+  options: ControlPanelActionCompleteOptions,
+): ControlPanelViewState {
+  const baseValues =
+    routeState.currentValuesByFieldset[options.fieldsetId] ??
+    current.routeState.currentValuesByFieldset[options.fieldsetId] ??
+    createDraftValuesByFieldset(current.config)[options.fieldsetId] ??
+    {};
+  const next = updateDraftValues(current, options.fieldsetId, baseValues, storageKey, {
+    type: "discard",
+  });
+
+  const { error: _error, pendingAction: _pendingAction, ...rest } = next;
+
+  return {
+    ...rest,
+    routeState,
+    snapshots: options.snapshots ?? current.snapshots,
+  };
+}
+
+function toFailedActionState(
+  current: ControlPanelViewState,
+  message: string,
+): ControlPanelViewState {
+  const { pendingAction: _pendingAction, ...rest } = current;
+
+  return {
+    ...rest,
+    error: message,
+  };
+}
+
+function toPendingActionState(
+  current: ControlPanelViewState,
+  action: ControlPanelAction,
+): ControlPanelViewState {
+  const { error: _error, ...rest } = current;
+
+  return {
+    ...rest,
+    pendingAction: action,
   };
 }
 
@@ -554,6 +867,7 @@ function controlPanelDraftStorageKey(config: ControlPanelDefinition): string {
 function readControlPanelDraftValues(
   config: ControlPanelDefinition,
   storageKey: string,
+  routeState: ControlPanelRouteState,
 ): Readonly<Record<string, ControlFieldsetValueMap>> | undefined {
   const storage = getBrowserStorage();
   if (storage === undefined) return undefined;
@@ -562,7 +876,11 @@ function readControlPanelDraftValues(
     const stored = storage.getItem(storageKey);
     if (stored === null) return undefined;
 
-    return sanitizeDraftValuesByFieldset(config, JSON.parse(stored));
+    return readActiveDraftValuesByFieldset(
+      config,
+      routeState,
+      sanitizeStoredDraftValues(config, JSON.parse(stored)),
+    );
   } catch {
     return undefined;
   }
@@ -571,30 +889,107 @@ function readControlPanelDraftValues(
 function writeControlPanelDraftValues(
   config: ControlPanelDefinition,
   storageKey: string,
-  valuesByFieldset: Readonly<Record<string, ControlFieldsetValueMap>>,
+  routeState: ControlPanelRouteState,
+  fieldsetId: string,
+  values: ControlFieldsetValueMap,
 ): void {
   const storage = getBrowserStorage();
   if (storage === undefined) return;
 
   try {
-    storage.setItem(
-      storageKey,
-      JSON.stringify(sanitizeDraftValuesByFieldset(config, valuesByFieldset)),
-    );
+    const stored = readStoredDraftValues(config, storageKey);
+    const baseKey = controlBaseStorageKey(routeState.activeBaseByFieldset[fieldsetId]);
+    const next: StoredDraftValues = {
+      ...stored,
+      [fieldsetId]: {
+        ...stored[fieldsetId],
+        [baseKey]: sanitizeDraftFieldsetValues(config, fieldsetId, values),
+      },
+    };
+
+    storage.setItem(storageKey, JSON.stringify(next));
   } catch {
     // Browsers can reject localStorage writes because of quota or privacy settings.
   }
 }
 
-function sanitizeDraftValuesByFieldset(
+function deleteControlPanelDraftValues(
+  config: ControlPanelDefinition,
+  storageKey: string,
+  routeState: ControlPanelRouteState,
+  fieldsetId: string,
+): void {
+  const storage = getBrowserStorage();
+  if (storage === undefined) return;
+
+  try {
+    const stored = readStoredDraftValues(config, storageKey);
+    const baseKey = controlBaseStorageKey(routeState.activeBaseByFieldset[fieldsetId]);
+    const fieldsetDrafts = stored[fieldsetId] ?? {};
+    const nextFieldsetDrafts = Object.fromEntries(
+      Object.entries(fieldsetDrafts).filter(([key]) => key !== baseKey),
+    );
+    const next: StoredDraftValues = {
+      ...stored,
+      ...(Object.keys(nextFieldsetDrafts).length === 0 ? {} : { [fieldsetId]: nextFieldsetDrafts }),
+    };
+
+    if (Object.keys(nextFieldsetDrafts).length === 0) {
+      delete (next as Record<string, unknown>)[fieldsetId];
+    }
+
+    if (Object.keys(next).length === 0) {
+      storage.removeItem(storageKey);
+    } else {
+      storage.setItem(storageKey, JSON.stringify(next));
+    }
+  } catch {
+    // Browsers can reject localStorage writes because of quota or privacy settings.
+  }
+}
+
+function readStoredDraftValues(
+  config: ControlPanelDefinition,
+  storageKey: string,
+): StoredDraftValues {
+  const storage = getBrowserStorage();
+  if (storage === undefined) return {};
+
+  try {
+    const stored = storage.getItem(storageKey);
+    return stored === null ? {} : sanitizeStoredDraftValues(config, JSON.parse(stored));
+  } catch {
+    return {};
+  }
+}
+
+function readActiveDraftValuesByFieldset(
+  config: ControlPanelDefinition,
+  routeState: ControlPanelRouteState,
+  stored: StoredDraftValues,
+): Readonly<Record<string, ControlFieldsetValueMap>> {
+  return Object.fromEntries(
+    Object.entries(config.fieldsets).map(([fieldsetId]) => {
+      const baseKey = controlBaseStorageKey(routeState.activeBaseByFieldset[fieldsetId]);
+      const fallbackValues =
+        routeState.currentValuesByFieldset[fieldsetId] ??
+        createDraftValuesByFieldset(config)[fieldsetId] ??
+        {};
+
+      return [fieldsetId, stored[fieldsetId]?.[baseKey] ?? fallbackValues];
+    }),
+  );
+}
+
+function sanitizeStoredDraftValues(
   config: ControlPanelDefinition,
   value: unknown,
-): Readonly<Record<string, ControlFieldsetValueMap>> {
+): StoredDraftValues {
   const storedByFieldset =
     typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
 
   return Object.fromEntries(
-    Object.entries(config.fieldsets).map(([fieldsetId, fieldset]) => {
+    Object.keys(config.fieldsets).map((fieldsetId) => {
       const storedFieldset =
         typeof storedByFieldset[fieldsetId] === "object" && storedByFieldset[fieldsetId] !== null
           ? (storedByFieldset[fieldsetId] as Record<string, unknown>)
@@ -603,14 +998,47 @@ function sanitizeDraftValuesByFieldset(
       return [
         fieldsetId,
         Object.fromEntries(
-          Object.entries(fieldset.fields).map(([fieldId, field]) => [
-            fieldId,
-            sanitizeDraftValue(field, storedFieldset[fieldId]),
+          Object.entries(storedFieldset).map(([baseKey, values]) => [
+            baseKey,
+            sanitizeDraftFieldsetValues(config, fieldsetId, values),
           ]),
         ),
       ];
     }),
   );
+}
+
+function sanitizeDraftFieldsetValues(
+  config: ControlPanelDefinition,
+  fieldsetId: string,
+  value: unknown,
+): ControlFieldsetValueMap {
+  const fieldset = config.fieldsets[fieldsetId];
+  const storedValues = typeof value === "object" && value !== null ? value : {};
+
+  if (fieldset === undefined) return {};
+
+  return Object.fromEntries(
+    Object.entries(fieldset.fields).map(([fieldId, field]) => [
+      fieldId,
+      sanitizeDraftValue(field, (storedValues as Record<string, unknown>)[fieldId]),
+    ]),
+  );
+}
+
+function controlBaseStorageKey(base: ControlBase | undefined): string {
+  return base?.type === "snapshot" ? `snapshot:${base.snapshotId}` : "defaults";
+}
+
+function parseControlBaseValue(value: string): ControlBase {
+  if (value.startsWith("snapshot:")) {
+    return {
+      snapshotId: value.slice("snapshot:".length),
+      type: "snapshot",
+    };
+  }
+
+  return { type: "defaults" };
 }
 
 function sanitizeDraftValue(field: ControlField, value: unknown): SupportedControlValue {
