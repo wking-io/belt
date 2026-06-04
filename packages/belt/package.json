@@ -94,6 +94,7 @@
     "@repo/tool-iterations-provider-prototypes": "workspace:*",
     "@repo/tool-iterations-provider-worktrees": "workspace:*",
     "@repo/tool-iterations-provider-worktrees-extension-portless": "workspace:*",
+    "@repo/tool-iterations-renderer-react": "workspace:*",
     "@repo/tool-render-performance": "workspace:*",
     "@repo/tool-worktrees": "workspace:*",
     "@repo/tool-worktrees-extension-portless": "workspace:*",
