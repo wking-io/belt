@@ -165,7 +165,7 @@ export type ControlPanelToolApiError =
   | CannotSaveDefaultsBaseError
   | HttpApiError.InternalServerError;
 
-export class ControlPanelToolApiGroup extends HttpApiGroup.make("control-panel")
+export class ControlPanelToolApiGroup extends HttpApiGroup.make("controlPanel")
   .add(
     HttpApiEndpoint.get("index", normalizeRoute(controlPanelRoutePaths.index), {
       error: ControlPanelToolApiErrorSchemas,

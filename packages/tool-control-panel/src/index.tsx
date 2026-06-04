@@ -108,7 +108,7 @@ export function createControlPanelClient(
     branchSnapshot: (fieldsetId: string, name: string, values: ControlFieldsetValueMap) =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].branchSnapshot({
+          controlPanel.controlPanel.branchSnapshot({
             payload: {
               fieldsetId,
               name,
@@ -120,7 +120,7 @@ export function createControlPanelClient(
     deleteSnapshot: (fieldsetId: string, snapshotId: string) =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].deleteSnapshot({
+          controlPanel.controlPanel.deleteSnapshot({
             payload: {
               fieldsetId,
               snapshotId,
@@ -131,13 +131,13 @@ export function createControlPanelClient(
     index: () =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].index(),
+          controlPanel.controlPanel.index(),
         ),
       ),
     saveSnapshot: (fieldsetId: string, values: ControlFieldsetValueMap) =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].saveSnapshot({
+          controlPanel.controlPanel.saveSnapshot({
             payload: {
               fieldsetId,
               values,
@@ -148,7 +148,7 @@ export function createControlPanelClient(
     selectBase: (fieldsetId: string, base: ControlBase) =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].selectBase({
+          controlPanel.controlPanel.selectBase({
             payload: {
               base,
               fieldsetId,
@@ -159,7 +159,7 @@ export function createControlPanelClient(
     selectFieldset: (fieldsetId: string) =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].selectFieldset({
+          controlPanel.controlPanel.selectFieldset({
             payload: {
               fieldsetId,
             },
@@ -169,7 +169,7 @@ export function createControlPanelClient(
     snapshots: () =>
       toolbarClient.run((client) =>
         Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
-          controlPanel["control-panel"].snapshots(),
+          controlPanel.controlPanel.snapshots(),
         ),
       ),
   };

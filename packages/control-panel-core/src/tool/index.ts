@@ -62,7 +62,7 @@ export function controlPanelToolApiLayer(definition: ReturnType<typeof defineCon
   return Layer.provide(
     HttpApiBuilder.group(
       ControlPanelToolApi,
-      "control-panel",
+      "controlPanel",
       Effect.fn("ControlPanelToolApi.handlers")(function* (handlers) {
         const session = yield* ControlSession;
 
