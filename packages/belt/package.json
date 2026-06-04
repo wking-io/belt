@@ -88,6 +88,7 @@
     "@repo/renderer-remix": "workspace:*",
     "@repo/server": "workspace:*",
     "@repo/theme-css": "workspace:*",
+    "@repo/tool-control-panel": "workspace:*",
     "@repo/tool-iterations": "workspace:*",
     "@repo/tool-iterations-adapter-vite-prototypes": "workspace:*",
     "@repo/tool-iterations-provider-prototypes": "workspace:*",
