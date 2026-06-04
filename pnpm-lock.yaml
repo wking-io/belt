@@ -150,6 +150,9 @@ importers:
       '@repo/theme-css':
         specifier: workspace:*
         version: link:../theme-css
+      '@repo/tool-control-panel':
+        specifier: workspace:*
+        version: link:../tool-control-panel
       '@repo/tool-iterations':
         specifier: workspace:*
         version: link:../tool-iterations
@@ -292,6 +295,31 @@ importers:
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
+
+  packages/tool-control-panel:
+    dependencies:
+      '@repo/control-panel-core':
+        specifier: workspace:*
+        version: link:../control-panel-core
+      '@repo/core':
+        specifier: workspace:*
+        version: link:../core
+      '@repo/renderer-react':
+        specifier: workspace:*
+        version: link:../renderer-react
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
 
   packages/tool-iterations:
     dependencies:

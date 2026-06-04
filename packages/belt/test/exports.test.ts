@@ -12,6 +12,7 @@ import {
   textField,
 } from "@riff-refine/belt/remix";
 import {
+  ControlPanel,
   controlPanelTool as reactControlPanelTool,
   createToolbar,
   createToolbarRendererModel,
@@ -42,6 +43,7 @@ describe("@riff-refine/belt facade exports", () => {
     assert.deepStrictEqual(createToolbarRendererModel(config), { tools: [] });
     assert.deepStrictEqual(createToolbarRendererModel(toolbar), { tools: [] });
     assert.strictEqual(typeof controlPanelTool, "function");
+    assert.strictEqual(typeof ControlPanel, "function");
     assert.strictEqual(typeof defineControlPanel, "function");
     assert.strictEqual(typeof controlField.text, "function");
     assert.strictEqual(typeof createToolbarRouteHandler, "function");
