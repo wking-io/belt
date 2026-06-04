@@ -9,8 +9,11 @@
     "preview": "vite preview --host 127.0.0.1 --configLoader runner"
   },
   "dependencies": {
+    "@repo/control-panel-core": "workspace:*",
     "@repo/renderer-react": "workspace:*",
+    "@repo/tool-control-panel": "workspace:*",
     "@repo/tool-iterations-renderer-react": "workspace:*",
+    "@repo/tool-render-performance": "workspace:*",
     "@riff-refine/belt": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

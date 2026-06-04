@@ -29,7 +29,7 @@ import {
   type ControlPanelStateResponse,
   type ControlPanelSnapshotStateResponse,
   type ControlSnapshot,
-} from "@repo/control-panel-core";
+} from "@repo/control-panel-core/browser";
 import { useEffect, useMemo, useState, type ReactElement } from "react";
 
 export type ControlPanelClientOptions = {
