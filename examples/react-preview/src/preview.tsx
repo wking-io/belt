@@ -152,6 +152,10 @@ const PreviewToolbar = createToolbar({
       },
     },
     {
+      config: {
+        historySize: 60,
+        updateIntervalMs: 1000,
+      },
       tool: {
         id: "render-performance",
         label: "Render Performance",

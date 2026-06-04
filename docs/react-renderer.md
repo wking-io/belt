@@ -2,6 +2,91 @@
 
 `@repo/renderer-react` provides React components for the shared Belt CSS contract. It uses Base UI for available behavior primitives and `@repo/theme-css` for all styling.
 
+The public React entrypoint is `@riff-refine/belt/react`. It re-exports the React renderer primitives, ready-made React Tool components, Control Panel config helpers, and the typed `createToolbar(...)` factory.
+
+## Toolbar Provider
+
+Initialize the React toolbar with `createToolbar(...)` from the same Tool Registrations used by the backend:
+
+```tsx
+import {
+  ControlPanel,
+  Iterations,
+  RenderPerformance,
+  Toolbar,
+  booleanField,
+  controlPanelTool,
+  createToolbar,
+} from "@riff-refine/belt/react";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
+import { renderPerformanceTool } from "@riff-refine/belt/render-performance";
+
+const AppToolbar = createToolbar({
+  tools: [
+    iterationsTool({
+      providers: [
+        worktreeIterations({
+          resolver: portlessResolver({
+            destinations: [
+              {
+                id: "web",
+                label: "Web",
+                appName: "myapp",
+                primary: true,
+              },
+            ],
+          }),
+        }),
+      ],
+    }),
+    controlPanelTool({
+      fieldsets: {
+        preview: {
+          label: "Preview",
+          fields: {
+            enabled: booleanField({ default: true, label: "Enabled" }),
+          },
+        },
+      },
+    }),
+    renderPerformanceTool({
+      historySize: 60,
+      updateIntervalMs: 1000,
+    }),
+  ],
+});
+
+export function DevToolbar() {
+  return (
+    <AppToolbar.Provider>
+      <Toolbar aria-label="Belt toolbar">
+        <Toolbar.Body>
+          <Toolbar.Left>
+            <Iterations />
+            <ControlPanel />
+          </Toolbar.Left>
+          <Toolbar.Right>
+            <RenderPerformance>
+              <RenderPerformance.Inp />
+              <RenderPerformance.LayoutShift />
+              <RenderPerformance.Jank />
+            </RenderPerformance>
+          </Toolbar.Right>
+        </Toolbar.Body>
+      </Toolbar>
+    </AppToolbar.Provider>
+  );
+}
+```
+
+`createToolbar(...)` returns a typed Toolbar Definition. Its `Provider`, `useToolbarConfig`, `useToolbarDrawer`, and `useToolRegistration` members preserve the concrete Tool Registration types from the config passed to the factory. Ready-made Tool components use those hooks to read their own registration, so host apps should not duplicate Tool config through component props.
+
+Tool Registration config is local renderer config. The Toolbar API returns runtime data such as registered tool metadata, available iterations, and Control Panel snapshots; it is not the source of renderer config. For example, `renderPerformanceTool({ historySize: 60 })` controls measurement options through the local registration, while the metric buttons shown in the toolbar are enabled by rendering `RenderPerformance.Inp`, `RenderPerformance.LayoutShift`, and `RenderPerformance.Jank` as children.
+
+Ready-made Tool components render nothing when their Tool Registration is absent from the active provider. That keeps the public component API simple while still making Tool installation explicit in the Toolbar Config.
+
 ## Components
 
 The React renderer mirrors the Remix renderer's visual hooks:

@@ -84,6 +84,9 @@ export default defineToolbar({
       ],
     }),
     previewControlPanel,
-    renderPerformanceTool(),
+    renderPerformanceTool({
+      historySize: 60,
+      updateIntervalMs: 1000,
+    }),
   ],
 });
