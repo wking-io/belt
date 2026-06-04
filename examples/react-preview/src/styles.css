@@ -200,14 +200,14 @@ body {
 }
 
 .preview-toolbar-metadata,
-.preview-worktree-list,
+.preview-iteration-list,
 .preview-control-fields {
   display: grid;
   gap: 8px;
 }
 
 .preview-toolbar-tool,
-.preview-worktree-row {
+.preview-iteration-row {
   align-items: center;
   background: var(--belt-color-elevation-2);
   border: 0.5px solid var(--belt-color-border-subtle);
@@ -225,13 +225,13 @@ body {
   justify-content: stretch;
 }
 
-.preview-worktree-row > div:first-child {
+.preview-iteration-row > div:first-child {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-.preview-worktree-row .belt-text {
+.preview-iteration-row .belt-text {
   overflow-wrap: anywhere;
 }
 

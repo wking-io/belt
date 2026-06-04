@@ -36,6 +36,9 @@ importers:
       '@repo/renderer-react':
         specifier: workspace:*
         version: link:../../packages/renderer-react
+      '@repo/tool-iterations-renderer-react':
+        specifier: workspace:*
+        version: link:../../packages/tool-iterations-renderer-react
       '@riff-refine/belt':
         specifier: workspace:*
         version: link:../../packages/belt
@@ -168,6 +171,9 @@ importers:
       '@repo/tool-iterations-provider-worktrees-extension-portless':
         specifier: workspace:*
         version: link:../tool-iterations-provider-worktrees-extension-portless
+      '@repo/tool-iterations-renderer-react':
+        specifier: workspace:*
+        version: link:../tool-iterations-renderer-react
       '@repo/tool-render-performance':
         specifier: workspace:*
         version: link:../tool-render-performance
@@ -392,6 +398,28 @@ importers:
       effect:
         specifier: 4.0.0-beta.66
         version: 4.0.0-beta.66
+
+  packages/tool-iterations-renderer-react:
+    dependencies:
+      '@repo/renderer-react':
+        specifier: workspace:*
+        version: link:../renderer-react
+      '@repo/tool-iterations':
+        specifier: workspace:*
+        version: link:../tool-iterations
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
 
   packages/tool-render-performance:
     dependencies:

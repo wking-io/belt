@@ -7,9 +7,10 @@ import {
   selectField,
   textField,
 } from "@riff-refine/belt/react";
+import { iterationsTool } from "@riff-refine/belt/iterations";
+import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
+import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
 import { renderPerformanceTool } from "@riff-refine/belt/render-performance";
-import { worktreesTool } from "@riff-refine/belt/worktrees";
-import { portlessResolver } from "@riff-refine/belt/worktrees/portless";
 
 export const previewControlPanel = controlPanelTool({
   fieldsets: {
@@ -38,8 +39,8 @@ export const previewControlPanel = controlPanelTool({
         }),
       },
     },
-    worktree: {
-      label: "Worktree",
+    iteration: {
+      label: "Iteration",
       fields: {
         branchName: textField({
           default: "feature/react-preview",
@@ -60,23 +61,27 @@ export const previewControlPanel = controlPanelTool({
 
 export default defineToolbar({
   tools: [
-    worktreesTool({
-      cwd: new URL("../..", import.meta.url).pathname,
-      resolver: portlessResolver({
-        destinations: [
-          {
-            id: "web",
-            label: "Web",
-            appName: "toolbar-preview",
-            primary: true,
-          },
-          {
-            id: "docs",
-            label: "Docs",
-            appName: "docs.toolbar-preview",
-          },
-        ],
-      }),
+    iterationsTool({
+      providers: [
+        worktreeIterations({
+          cwd: new URL("../..", import.meta.url).pathname,
+          resolver: portlessResolver({
+            destinations: [
+              {
+                id: "web",
+                label: "Web",
+                appName: "toolbar-preview",
+                primary: true,
+              },
+              {
+                id: "docs",
+                label: "Docs",
+                appName: "docs.toolbar-preview",
+              },
+            ],
+          }),
+        }),
+      ],
     }),
     previewControlPanel,
     renderPerformanceTool(),

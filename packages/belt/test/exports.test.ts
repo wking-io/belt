@@ -17,6 +17,7 @@ import {
   createToolbar,
   createToolbarRendererModel,
   defineControlPanel as reactDefineControlPanel,
+  Iterations as ReactIterations,
   numberField,
   RenderPerformance,
   RenderPerformanceMeter,
@@ -44,6 +45,7 @@ describe("@riff-refine/belt facade exports", () => {
     assert.deepStrictEqual(createToolbarRendererModel(toolbar), { tools: [] });
     assert.strictEqual(typeof controlPanelTool, "function");
     assert.strictEqual(typeof ControlPanel, "function");
+    assert.strictEqual(typeof ReactIterations, "function");
     assert.strictEqual(typeof defineControlPanel, "function");
     assert.strictEqual(typeof controlField.text, "function");
     assert.strictEqual(typeof createToolbarRouteHandler, "function");

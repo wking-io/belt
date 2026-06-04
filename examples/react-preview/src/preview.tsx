@@ -5,9 +5,12 @@ import {
   RenderPerformanceLayoutShiftToolbarItem,
   RenderPerformanceToolbarItem,
 } from "@riff-refine/belt/render-performance";
+import type { Iteration } from "@riff-refine/belt/iterations";
+import { Iterations } from "@repo/tool-iterations-renderer-react";
 import {
   Button,
   Combobox,
+  createToolbar,
   Field,
   GhostButton,
   Glyph,
@@ -52,24 +55,8 @@ type ToolbarApiEnvelope =
       };
     };
 
-type WorktreeDestination = {
-  readonly id: string;
-  readonly label: string;
-  readonly primary?: boolean;
-  readonly reachable?: boolean;
-  readonly url: string;
-};
-
-type WorktreeEntry = {
-  readonly branch: string;
-  readonly current: boolean;
-  readonly destinations: readonly WorktreeDestination[];
-  readonly id: string;
-  readonly path: string;
-};
-
-type WorktreesIndex = {
-  readonly worktrees: readonly WorktreeEntry[];
+type IterationsIndex = {
+  readonly iterations: readonly Iteration[];
 };
 
 type ControlField =
@@ -160,6 +147,28 @@ const paletteGroups = [
   "oatmeal",
 ] as const;
 const paletteSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] as const;
+const PreviewToolbar = createToolbar({
+  tools: [
+    {
+      tool: {
+        id: "iterations",
+        label: "Iterations",
+      },
+    },
+    {
+      tool: {
+        id: "control-panel",
+        label: "Control Panel",
+      },
+    },
+    {
+      tool: {
+        id: "render-performance",
+        label: "Render Performance",
+      },
+    },
+  ],
+});
 
 export function ReactPreviewApp() {
   const [theme, setTheme] = useState<ThemeMode>("system");
@@ -340,7 +349,7 @@ export function ReactPreviewApp() {
                     <Menu.Root>
                       <Menu.Trigger render={<Button endIcon="chevronDown">Actions</Button>} />
                       <Menu.List>
-                        <Menu.Item>Open worktree</Menu.Item>
+                        <Menu.Item>Open iteration</Menu.Item>
                         <Menu.Item>Copy URL</Menu.Item>
                         <Menu.Item>Archive</Menu.Item>
                         <Menu.Item>Delete</Menu.Item>
@@ -613,11 +622,11 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
         </div>
       </PreviewSection>
 
-      <PreviewSection title="Worktrees">
+      <PreviewSection title="Iterations">
         <Panel>
           <div className="preview-card-body">
-            <PreviewLabel>Discovered Git Worktrees</PreviewLabel>
-            <WorktreeList worktrees={live.worktrees?.worktrees ?? []} />
+            <PreviewLabel>Discovered Iterations</PreviewLabel>
+            <IterationList iterations={live.iterations?.iterations ?? []} />
           </div>
         </Panel>
       </PreviewSection>
@@ -633,122 +642,60 @@ function LiveToolbarPreview(props: { readonly toolbarEnabled: boolean }) {
 
 function LiveBeltToolbar() {
   const live = useLiveToolbarData();
-  const worktrees = live.worktrees?.worktrees ?? [];
-  const [selectedWorktreeId, setSelectedWorktreeId] = useState<string | null>(null);
-  const [worktreeSearch, setWorktreeSearch] = useState("");
-  const selectedWorktree =
-    worktrees.find((worktree) => worktree.id === selectedWorktreeId) ??
-    worktrees.find((worktree) => worktree.current) ??
-    worktrees[0];
-  const normalizedWorktreeSearch = worktreeSearch.trim().toLocaleLowerCase();
-  const visibleWorktrees =
-    normalizedWorktreeSearch.length === 0
-      ? worktrees
-      : worktrees.filter((worktree) =>
-          [worktree.branch, worktree.path]
-            .join(" ")
-            .toLocaleLowerCase()
-            .includes(normalizedWorktreeSearch),
-        );
-  useEffect(() => {
-    if (worktrees.length === 0) {
-      if (selectedWorktreeId !== null) setSelectedWorktreeId(null);
-      if (worktreeSearch !== "") setWorktreeSearch("");
-      return;
-    }
-
-    if (
-      selectedWorktreeId === null ||
-      !worktrees.some((worktree) => worktree.id === selectedWorktreeId)
-    ) {
-      const nextWorktree = worktrees.find((worktree) => worktree.current) ?? worktrees[0];
-      setSelectedWorktreeId(nextWorktree?.id ?? null);
-      setWorktreeSearch("");
-    }
-  }, [selectedWorktreeId, worktreeSearch, worktrees]);
 
   return (
-    <Toolbar aria-label="Belt toolbar">
-      <Toolbar.Body>
-        <Toolbar.Left>
-          <Combobox.Root
-            inputValue={worktreeSearch}
-            items={worktrees.map((worktree) => worktree.branch)}
-            onInputValueChange={(inputValue) => setWorktreeSearch(inputValue)}
-            onValueChange={(branchValue) => {
-              const nextWorktree = worktrees.find((worktree) => worktree.branch === branchValue);
-              setSelectedWorktreeId(nextWorktree?.id ?? null);
-              setWorktreeSearch("");
-            }}
-            value={selectedWorktree?.branch ?? null}
-          >
-            <Combobox.Trigger
-              placeholder="Find worktree"
-              searchPlacement="popup"
-              render={
-                <GhostButton size="compact" startIcon="split" radius="none">
-                  {selectedWorktree?.branch ?? "No worktrees found"}
-                </GhostButton>
-              }
+    <PreviewToolbar.Provider>
+      <Toolbar aria-label="Belt toolbar">
+        <Toolbar.Body>
+          <Toolbar.Left>
+            <Iterations initialIterations={live.iterations?.iterations ?? []} />
+            <GhostButton size="compact" icon="dial" radius="none" />
+          </Toolbar.Left>
+          <Toolbar.Right>
+            <RenderPerformanceInpToolbarItem historySize={20} radius="none" size="compact" />
+            <RenderPerformanceLayoutShiftToolbarItem
+              historySize={20}
+              radius="none"
+              size="compact"
             />
-            <Combobox.List placeholder="Find worktree" searchPlacement="popup">
-              {visibleWorktrees.map((worktree) => (
-                <Combobox.Option key={worktree.id} value={worktree.branch}>
-                  {worktree.branch}
-                </Combobox.Option>
-              ))}
-              {worktrees.length > 0 && visibleWorktrees.length === 0 ? (
-                <Combobox.Option disabled value="no-matching-worktrees">
-                  No matching worktrees
-                </Combobox.Option>
-              ) : null}
-              {worktrees.length === 0 ? (
-                <Combobox.Option disabled value="no-worktrees">
-                  No worktrees found
-                </Combobox.Option>
-              ) : null}
-            </Combobox.List>
-          </Combobox.Root>
-          <GhostButton size="compact" icon="dial" radius="none" />
-        </Toolbar.Left>
-        <Toolbar.Right>
-          <RenderPerformanceInpToolbarItem historySize={20} radius="none" size="compact" />
-          <RenderPerformanceLayoutShiftToolbarItem historySize={20} radius="none" size="compact" />
-          <RenderPerformanceToolbarItem historySize={20} radius="none" size="compact" />
-        </Toolbar.Right>
-      </Toolbar.Body>
-    </Toolbar>
+            <RenderPerformanceToolbarItem historySize={20} radius="none" size="compact" />
+          </Toolbar.Right>
+        </Toolbar.Body>
+      </Toolbar>
+    </PreviewToolbar.Provider>
   );
 }
 
-function WorktreeList(props: { readonly worktrees: readonly WorktreeEntry[] }) {
-  if (props.worktrees.length === 0) {
+function IterationList(props: { readonly iterations: readonly Iteration[] }) {
+  if (props.iterations.length === 0) {
     return (
       <span className="belt-text" data-emphasis="subtle" data-size="sm">
-        No linked Git worktrees were discovered for this checkout.
+        No iterations were discovered for this checkout.
       </span>
     );
   }
 
   return (
-    <div className="preview-worktree-list">
-      {props.worktrees.map((worktree) => (
-        <div className="preview-worktree-row" key={worktree.id}>
+    <div className="preview-iteration-list">
+      {props.iterations.map((iteration) => (
+        <div className="preview-iteration-row" key={iteration.id}>
           <div>
             <span className="belt-text" data-emphasis="strong" data-size="sm">
-              {worktree.branch}
+              {getIterationDisplayName(iteration)}
             </span>
-            <span className="belt-text" data-emphasis="subtle" data-size="xs">
-              {worktree.path}
-            </span>
+            {getIterationDetail(iteration) === undefined ? null : (
+              <span className="belt-text" data-emphasis="subtle" data-size="xs">
+                {getIterationDetail(iteration)}
+              </span>
+            )}
           </div>
           <div className="preview-row">
-            {worktree.current ? (
+            {iteration.current ? (
               <span className="belt-badge" data-tone="success">
                 current
               </span>
             ) : null}
-            {worktree.destinations.map((destination) => (
+            {iteration.destinations.map((destination) => (
               <a className="preview-destination-link" href={destination.url} key={destination.id}>
                 {destination.label}
               </a>
@@ -758,6 +705,20 @@ function WorktreeList(props: { readonly worktrees: readonly WorktreeEntry[] }) {
       ))}
     </div>
   );
+}
+
+function getIterationDisplayName(iteration: Iteration): string {
+  return getIterationMetadataString(iteration, "branch") ?? iteration.label;
+}
+
+function getIterationDetail(iteration: Iteration): string | undefined {
+  return getIterationMetadataString(iteration, "path") ?? iteration.description;
+}
+
+function getIterationMetadataString(iteration: Iteration, key: string): string | undefined {
+  const value = iteration.metadata?.[key];
+
+  return typeof value === "string" ? value : undefined;
 }
 
 function ControlPanelEditor(props: {
@@ -924,16 +885,16 @@ function ControlFieldEditor(props: {
 
 function useLiveToolbarData() {
   const [toolbar, setToolbar] = useState<ToolbarApiIndex>();
-  const [worktrees, setWorktrees] = useState<WorktreesIndex>();
+  const [iterations, setIterations] = useState<IterationsIndex>();
   const [controlPanel, setControlPanel] = useState<ControlPanelIndex>();
   const [error, setError] = useState<string>();
 
   const refresh = async () => {
     try {
       setError(undefined);
-      const [toolbarResponse, worktreesResponse, controlPanelResponse] = await Promise.all([
+      const [toolbarResponse, iterationsResponse, controlPanelResponse] = await Promise.all([
         getJson<ToolbarApiEnvelope>("/__toolbar"),
-        getJson<WorktreesIndex>("/__toolbar/tools/worktrees/index"),
+        getJson<IterationsIndex>("/__toolbar/tools/iterations/"),
         getJson<ControlPanelIndex>("/__toolbar/tools/control-panel/index"),
       ]);
 
@@ -942,7 +903,7 @@ function useLiveToolbarData() {
       }
 
       setToolbar(toolbarResponse.data);
-      setWorktrees(worktreesResponse);
+      setIterations(iterationsResponse);
       setControlPanel(controlPanelResponse);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to load live toolbar data");
@@ -953,7 +914,7 @@ function useLiveToolbarData() {
     void refresh();
   }, []);
 
-  return { controlPanel, error, refresh, toolbar, worktrees };
+  return { controlPanel, error, iterations, refresh, toolbar };
 }
 
 async function getJson<Data>(url: string): Promise<Data> {

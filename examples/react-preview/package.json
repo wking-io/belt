@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@repo/renderer-react": "workspace:*",
+    "@repo/tool-iterations-renderer-react": "workspace:*",
     "@riff-refine/belt": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
