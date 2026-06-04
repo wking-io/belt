@@ -16,6 +16,22 @@ _Avoid_: tool renderer shell, worktree UI
 An installable capability that contributes behavior and optional UI to the **Toolbar Wrapper**.
 _Avoid_: Plugin, widget
 
+**Tool Registration**:
+The public **Toolbar Config** entry that installs one **Tool** for a host app. A **Tool Registration** wraps the backend **Tool Definition** and may include local renderer config for that Tool.
+_Avoid_: Tool definition, renderer registry item, component props
+
+**Tool Definition**:
+The backend implementation shape for one **Tool**, including its stable identity and optional Tool-owned API, API layer, and default runtime layer.
+_Avoid_: Tool registration, toolbar config entry, renderer config
+
+**Toolbar Config**:
+The app-authored configuration object passed to `defineToolbar(...)` or `createToolbar(...)`. It contains explicit **Tool Registrations** and optional theme registration.
+_Avoid_: Toolbar API response, renderer state, tool route data
+
+**Toolbar Definition**:
+The typed wrapper returned by renderer packages such as React `createToolbar(...)`, preserving the app's **Toolbar Config** while adding renderer-specific providers and hooks.
+_Avoid_: Tool definition, backend-only config
+
 **Iterations**:
 A **Tool** used to show available variants of the same application and open one.
 _Avoid_: Worktree switcher, branch picker
@@ -128,6 +144,10 @@ _Avoid_: Remix implementation, React implementation, adapter-specific control pa
 The frontend-safe **Control Panel**-specific declaration of available **Control Fieldsets**.
 _Avoid_: Toolbar Config, renderer config, app settings
 
+**Local Renderer Config**:
+Tool-specific config stored on a **Tool Registration** and read by ready-made frontend Tool components through the **Toolbar Definition** provider.
+_Avoid_: Toolbar API runtime data, duplicated component props, server metadata
+
 **Process Management**:
 Starting, stopping, installing for, or supervising development servers.
 _Avoid_: Switching
@@ -183,6 +203,10 @@ _Avoid_: toolbar shell, global launcher
 **Rendered Tool Composition**:
 The explicit frontend pattern where the host app builds the toolbar by rendering Tool UI as children of the **Toolbar Shell**.
 _Avoid_: renderer registry, automatic renderer discovery
+
+**Ready-Made Tool Rendering**:
+The frontend pattern where a Tool package ships public components such as `Iterations`, `ControlPanel`, and `RenderPerformance` that read their **Tool Registration** from the active **Toolbar Definition** provider.
+_Avoid_: prop-driven tool config, renderer-owned config lookup, API metadata lookup
 
 **Tool Registration Drift**:
 The development-time mismatch where frontend **Rendered Tool Composition** and backend **Tool Registration** do not include the same **Tools**.
@@ -251,6 +275,10 @@ _Avoid_: renderer-built URL, per-tool client instance
 **Toolbar Client Context**:
 The shell-scoped frontend context that owns the single instantiated **Tool Client** used by Tool renderers.
 _Avoid_: per-tool clients, per-component client construction, unrelated global singleton
+
+**Toolbar API Runtime Data**:
+Runtime data served from `/__toolbar` and Tool-owned routes, such as registered tool metadata, available iterations, Control Panel snapshots, and saved state.
+_Avoid_: local renderer config, Toolbar Config source, component props
 
 **URL Resolver**:
 An **Extension** for the **Worktree Iteration Provider** that computes navigable destinations for worktrees.

@@ -12,6 +12,7 @@ import { iterationsTool } from "@riff-refine/belt/iterations";
 import { prototypeIterations } from "@riff-refine/belt/iterations/prototypes";
 import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
 import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
+import { renderPerformanceTool } from "@riff-refine/belt/render-performance";
 
 export default defineToolbar({
   tools: [
@@ -31,11 +32,32 @@ export default defineToolbar({
         prototypeIterations(),
       ],
     }),
+    renderPerformanceTool({
+      historySize: 60,
+      updateIntervalMs: 1000,
+    }),
   ],
 });
 ```
 
 Tool Registration is explicit. Installing a Tool package does not make it available; the app must add a Tool Registration to `tools`. Built-in tool helpers return Tool Registrations.
+
+A Tool Registration is the public config entry. It wraps a backend Tool Definition and may include Tool-specific config:
+
+```ts
+{
+  config: {
+    historySize: 60,
+    updateIntervalMs: 1000,
+  },
+  tool: {
+    id: "render-performance",
+    label: "Render Performance",
+  },
+}
+```
+
+Most app code should use Tool helper functions instead of hand-writing that shape. Tool Definitions are still the backend implementation shape for Tool identity, Tool-owned APIs, API layers, and default runtime layers. Do not put raw Tool Definitions directly in `tools`; wrap them in Tool Registrations or use the built-in helper.
 
 Config discovery can also load a Toolbar Definition produced by a renderer package's `createToolbar`. The backend extracts the Tool Definitions from the registrations in that definition, so one export can be used by application rendering and backend setup:
 
@@ -44,6 +66,7 @@ import { createToolbar } from "@riff-refine/belt/react";
 import { iterationsTool } from "@riff-refine/belt/iterations";
 import { worktreeIterations } from "@riff-refine/belt/iterations/worktrees";
 import { portlessResolver } from "@riff-refine/belt/iterations/worktrees/portless";
+import { renderPerformanceTool } from "@riff-refine/belt/render-performance";
 
 export default createToolbar({
   tools: [
@@ -61,6 +84,10 @@ export default createToolbar({
           }),
         }),
       ],
+    }),
+    renderPerformanceTool({
+      historySize: 60,
+      updateIntervalMs: 1000,
     }),
   ],
 });
