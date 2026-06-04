@@ -242,9 +242,9 @@ it("derives tool metadata from Effect HTTP API endpoints", () => {
   });
 });
 
-class TestToolApiGroup extends HttpApiGroup.make("test-tool").add(
+class TestToolApiGroup extends HttpApiGroup.make("testTool").add(
   HttpApiEndpoint.get("index", normalizeRoute("index")),
   HttpApiEndpoint.get("destinations", normalizeRoute("destinations/check")),
 ) {}
 
-class TestToolApi extends HttpApi.make("test-tool-api").add(TestToolApiGroup) {}
+class TestToolApi extends HttpApi.make("testToolApi").add(TestToolApiGroup) {}

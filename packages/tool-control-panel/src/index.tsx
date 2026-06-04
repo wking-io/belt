@@ -1,4 +1,4 @@
-import { toolApiRoutePath } from "@repo/core";
+import { Effect } from "effect";
 import {
   Button,
   Field,
@@ -10,11 +10,14 @@ import {
   StatusBanner,
   Switch,
   ToolDrawer,
+  createToolbarClient,
+  useToolbarClient,
   useToolbarDrawer,
   useToolRegistration,
+  type ToolbarClient,
 } from "@repo/renderer-react";
 import {
-  controlPanelRoutePaths,
+  ControlPanelToolApi,
   controlPanelToolId,
   getControlFieldDefault,
   type ControlBase,
@@ -34,7 +37,7 @@ import { useEffect, useMemo, useState, type ReactElement } from "react";
 
 export type ControlPanelClientOptions = {
   readonly baseUrl?: string | URL;
-  readonly fetch?: typeof fetch;
+  readonly toolbarClient?: ToolbarClient;
 };
 
 export type ControlPanelProps = {
@@ -97,65 +100,90 @@ type StoredDraftValues = Readonly<
 export function createControlPanelClient(
   options: ControlPanelClientOptions = {},
 ): ControlPanelClient {
-  const fetchImpl = options.fetch ?? fetch;
+  const toolbarClient =
+    options.toolbarClient ??
+    createToolbarClient(options.baseUrl === undefined ? {} : { baseUrl: options.baseUrl });
 
   return {
     branchSnapshot: (fieldsetId: string, name: string, values: ControlFieldsetValueMap) =>
-      postControlPanelJson<ControlPanelSnapshotStateResponse>(
-        controlPanelRoutePaths.branchSnapshot,
-        {
-          fieldsetId,
-          name,
-          values,
-        },
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.branchSnapshot({
+            payload: {
+              fieldsetId,
+              name,
+              values,
+            },
+          }),
+        ),
       ),
     deleteSnapshot: (fieldsetId: string, snapshotId: string) =>
-      postControlPanelJson<ControlPanelDeleteSnapshotResponse>(
-        controlPanelRoutePaths.deleteSnapshot,
-        {
-          fieldsetId,
-          snapshotId,
-        },
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.deleteSnapshot({
+            payload: {
+              fieldsetId,
+              snapshotId,
+            },
+          }),
+        ),
       ),
-    index: () => getControlPanelJson<ControlPanelIndexResponse>(controlPanelRoutePaths.index),
+    index: () =>
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.index(),
+        ),
+      ),
     saveSnapshot: (fieldsetId: string, values: ControlFieldsetValueMap) =>
-      postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.saveSnapshot, {
-        fieldsetId,
-        values,
-      }),
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.saveSnapshot({
+            payload: {
+              fieldsetId,
+              values,
+            },
+          }),
+        ),
+      ),
     selectBase: (fieldsetId: string, base: ControlBase) =>
-      postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.selectBase, {
-        base,
-        fieldsetId,
-      }),
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.selectBase({
+            payload: {
+              base,
+              fieldsetId,
+            },
+          }),
+        ),
+      ),
     selectFieldset: (fieldsetId: string) =>
-      postControlPanelJson<ControlPanelStateResponse>(controlPanelRoutePaths.selectFieldset, {
-        fieldsetId,
-      }),
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.selectFieldset({
+            payload: {
+              fieldsetId,
+            },
+          }),
+        ),
+      ),
     snapshots: () =>
-      getControlPanelJson<ControlPanelSnapshotsResponse>(controlPanelRoutePaths.snapshots),
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(ControlPanelToolApi, controlPanelToolId), (controlPanel) =>
+          controlPanel.controlPanel.snapshots(),
+        ),
+      ),
   };
-
-  function getControlPanelJson<Response>(routePath: string): Promise<Response> {
-    return fetchControlPanelJson<Response>(fetchImpl, options.baseUrl, routePath);
-  }
-
-  function postControlPanelJson<Response>(routePath: string, body: unknown): Promise<Response> {
-    return fetchControlPanelJson<Response>(fetchImpl, options.baseUrl, routePath, {
-      body: JSON.stringify(body),
-      headers: {
-        "content-type": "application/json",
-      },
-      method: "POST",
-    });
-  }
 }
 
 export function ControlPanel(props: ControlPanelProps): ReactElement | null {
   const registration = useToolRegistration(controlPanelToolId);
   const config = registration?.config as ControlPanelDefinition | undefined;
   const drawer = useToolbarDrawer();
-  const client = useMemo(() => props.client ?? createControlPanelClient(), [props.client]);
+  const toolbarClient = useToolbarClient();
+  const client = useMemo(
+    () => props.client ?? createControlPanelClient({ toolbarClient }),
+    [props.client, toolbarClient],
+  );
   const storageKey =
     props.storageKey ?? (config === undefined ? undefined : controlPanelDraftStorageKey(config));
   const [viewState, setViewState] = useState<ControlPanelViewState | undefined>(() =>
@@ -700,31 +728,6 @@ function ControlPanelFieldLabel(props: {
       )}
     </span>
   );
-}
-
-async function fetchControlPanelJson<Response>(
-  fetchImpl: typeof fetch,
-  baseUrl: string | URL | undefined,
-  routePath: string,
-  init?: RequestInit,
-): Promise<Response> {
-  const response = await fetchImpl(resolveControlPanelUrl(baseUrl, routePath), init);
-
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-
-  return (await response.json()) as Response;
-}
-
-function resolveControlPanelUrl(baseUrl: string | URL | undefined, routePath: string): string {
-  const path = toolApiRoutePath(controlPanelToolId, routePath);
-
-  if (baseUrl === undefined) {
-    return path;
-  }
-
-  return new URL(path, baseUrl).href;
 }
 
 function createDraftValuesByFieldset(

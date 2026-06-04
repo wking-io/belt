@@ -43,48 +43,44 @@ it("does not render when the Control Panel tool is not registered", () => {
 
 it("uses the Control Panel API route paths", async () => {
   const requests: { readonly body?: string; readonly method: string; readonly url: string }[] = [];
-  const client = createControlPanelClient({
-    baseUrl: "http://belt.local",
-    fetch: async (input, init) => {
-      requests.push({
-        method: init?.method ?? "GET",
-        url: String(input),
-        ...(typeof init?.body === "string" ? { body: init.body } : {}),
-      });
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    const request = input instanceof Request ? input : new Request(input, init);
+    const body = request.method === "GET" ? undefined : await request.clone().text();
+    requests.push({
+      method: request.method,
+      url: request.url,
+      ...(body === undefined || body.length === 0 ? {} : { body }),
+    });
 
-      return new Response(
-        JSON.stringify({
-          config: {
-            configHash: "hash",
-            fieldsets: {},
-          },
-          state: {
-            activeBaseByFieldset: {},
-            currentValuesByFieldset: {},
-          },
-        }),
-        {
-          status: 200,
-        },
-      );
-    },
-  });
+    return new Response(JSON.stringify(getControlPanelTestResponse(request.url)), {
+      status: 200,
+    });
+  };
 
-  await client.index();
-  await client.selectFieldset("scene");
-  await client.selectBase("scene", {
-    snapshotId: "snapshot_1",
-    type: "snapshot",
-  });
-  await client.branchSnapshot("scene", "Draft", {
-    enabled: true,
-    title: "Preview",
-  });
-  await client.saveSnapshot("scene", {
-    title: "Saved",
-  });
-  await client.deleteSnapshot("scene", "snapshot_1");
-  await client.snapshots();
+  try {
+    const client = createControlPanelClient({
+      baseUrl: "http://belt.local",
+    });
+
+    await client.index();
+    await client.selectFieldset("scene");
+    await client.selectBase("scene", {
+      snapshotId: "snapshot_1",
+      type: "snapshot",
+    });
+    await client.branchSnapshot("scene", "Draft", {
+      enabled: true,
+      title: "Preview",
+    });
+    await client.saveSnapshot("scene", {
+      title: "Saved",
+    });
+    await client.deleteSnapshot("scene", "snapshot_1");
+    await client.snapshots();
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 
   assert.deepStrictEqual(requests, [
     {
@@ -98,11 +94,11 @@ it("uses the Control Panel API route paths", async () => {
     },
     {
       body: JSON.stringify({
-        base: {
-          snapshotId: "snapshot_1",
-          type: "snapshot",
-        },
         fieldsetId: "scene",
+        base: {
+          type: "snapshot",
+          snapshotId: "snapshot_1",
+        },
       }),
       method: "POST",
       url: "http://belt.local/__toolbar/tools/control-panel/state/select-base",
@@ -143,3 +139,41 @@ it("uses the Control Panel API route paths", async () => {
     },
   ]);
 });
+
+function getControlPanelTestResponse(url: string) {
+  const pathname = new URL(url).pathname;
+  const state = {
+    activeBaseByFieldset: {},
+    currentValuesByFieldset: {},
+  };
+  const snapshot = {
+    fieldsetId: "scene",
+    id: "snapshot_1",
+    name: "Snapshot",
+    values: {},
+  };
+
+  if (pathname.endsWith("/snapshots")) {
+    return { snapshots: [snapshot] };
+  }
+
+  if (pathname.endsWith("/snapshots/branch")) {
+    return { snapshot, state };
+  }
+
+  if (pathname.endsWith("/snapshots/delete")) {
+    return { snapshots: [], state };
+  }
+
+  if (pathname.endsWith("/control-panel") || pathname.endsWith("/control-panel/")) {
+    return {
+      config: {
+        configHash: "hash",
+        fieldsets: {},
+      },
+      state,
+    };
+  }
+
+  return { state };
+}

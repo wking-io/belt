@@ -26,6 +26,8 @@ import {
   type SVGProps,
 } from "react";
 import { createPortal } from "react-dom";
+import { Effect } from "effect";
+import { FetchHttpClient } from "effect/unstable/http";
 import {
   glyphDefinitions,
   glyphIds,
@@ -37,6 +39,7 @@ import {
 import {
   defineToolbarDefinition,
   extractToolbarConfig,
+  makeToolbarClient,
   type ToolDefinition,
   type ToolbarConfig,
   type ToolbarConfigSource,
@@ -57,6 +60,17 @@ export type ToolbarRendererModel = {
 
 export type ToolbarToolIdentity<Config extends ToolbarConfig = ToolbarConfig> =
   Config["tools"][number]["tool"]["id"] & string;
+export type ToolbarEffectClient = Effect.Success<ReturnType<typeof makeToolbarClient>>;
+export type ToolbarClientOptions = {
+  readonly baseUrl?: string | URL;
+};
+
+export type ToolbarClient = {
+  readonly effectClient: Promise<ToolbarEffectClient>;
+  readonly run: <A, E, R>(
+    effect: (client: ToolbarEffectClient) => Effect.Effect<A, E, R>,
+  ) => Promise<A>;
+};
 
 export type ToolRegistrationByIdentity<
   Config extends ToolbarConfig,
@@ -72,7 +86,9 @@ export type ToolRegistrationByIdentity<
   : never;
 
 export type ToolbarProviderProps<DrawerId extends string = string> = {
+  readonly baseUrl?: string | URL;
   readonly children?: ReactNode;
+  readonly client?: ToolbarClient;
   readonly initialDrawerId?: DrawerId;
 };
 
@@ -109,6 +125,7 @@ export type ToolDrawerProps<DrawerId extends string = string> = Omit<
   };
 
 type ToolbarContextValue<Config extends ToolbarConfig> = {
+  readonly client: ToolbarClient;
   readonly drawer: ToolbarDrawerController<ToolbarToolIdentity<Config>>;
   readonly toolbar: ToolbarDefinition<Config>;
 };
@@ -120,6 +137,7 @@ export type ReactToolbarDefinition<Config extends ToolbarConfig> = ToolbarDefini
     props: ToolDrawerProps<DrawerId>,
   ) => ReactElement | null;
   readonly Provider: (props: ToolbarProviderProps<ToolbarToolIdentity<Config>>) => ReactElement;
+  readonly useToolbarClient: () => ToolbarClient;
   readonly useToolbarDrawer: () => ToolbarDrawerController<ToolbarToolIdentity<Config>>;
   readonly useToolbarConfig: () => Config;
   readonly useToolbarDefinition: () => ToolbarDefinition<Config>;
@@ -141,6 +159,56 @@ export function createToolbarRendererModel(source: ToolbarConfigSource): Toolbar
       label: tool.label,
     })),
   };
+}
+
+export function createToolbarClient(options: ToolbarClientOptions = {}): ToolbarClient {
+  const clientOptions =
+    options.baseUrl === undefined ? {} : { baseUrl: resolveToolbarApiBaseUrl(options.baseUrl) };
+  const effectClient = makeToolbarClient(clientOptions).pipe(
+    Effect.provide(FetchHttpClient.layer),
+    Effect.runPromise,
+  );
+
+  return {
+    effectClient,
+    run<A, E, R>(effect: (client: ToolbarEffectClient) => Effect.Effect<A, E, R>): Promise<A> {
+      return Effect.runPromise(
+        Effect.promise(() => effectClient).pipe(
+          Effect.flatMap(effect),
+          Effect.provide(FetchHttpClient.layer),
+        ) as Effect.Effect<unknown, unknown, never>,
+      ) as Promise<A>;
+    },
+  };
+}
+
+function resolveToolbarApiBaseUrl(baseUrl: string | URL): string | URL {
+  const href = baseUrl instanceof URL ? baseUrl.href : baseUrl;
+  const pathname = baseUrl instanceof URL ? baseUrl.pathname : getAbsoluteUrlPathname(href);
+
+  if (pathname?.split("/").includes("__toolbar")) {
+    return baseUrl;
+  }
+
+  if (baseUrl instanceof URL) {
+    const next = new URL(baseUrl.href);
+    next.pathname = `${next.pathname.replace(/\/+$/, "")}/__toolbar`;
+    return next;
+  }
+
+  return `${href.replace(/\/+$/, "")}/__toolbar`;
+}
+
+function getAbsoluteUrlPathname(value: string): string | undefined {
+  try {
+    return new URL(value).pathname;
+  } catch {
+    return undefined;
+  }
+}
+
+export function useToolbarClient(): ToolbarClient {
+  return useToolbarContext().client;
 }
 
 export function useToolbarDefinition(): ToolbarDefinition<ToolbarConfig> {
@@ -180,6 +248,12 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
   );
 
   const Provider = (props: ToolbarProviderProps<ToolbarToolIdentity<Config>>): ReactElement => {
+    const client = useMemo(
+      () =>
+        props.client ??
+        createToolbarClient(props.baseUrl === undefined ? {} : { baseUrl: props.baseUrl }),
+      [props.baseUrl, props.client],
+    );
     const initialDrawerState: ToolbarDrawerState<ToolbarToolIdentity<Config>> =
       props.initialDrawerId === undefined ? {} : { activeDrawerId: props.initialDrawerId };
     const [drawerState, dispatchDrawer] = useReducer(
@@ -199,6 +273,7 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
 
     const value = useMemo<ToolbarContextValue<Config>>(
       () => ({
+        client,
         drawer: {
           closeDrawer,
           isDrawerOpen,
@@ -209,7 +284,7 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
         },
         toolbar,
       }),
-      [closeDrawer, drawerState.activeDrawerId, isDrawerOpen, openDrawer],
+      [client, closeDrawer, drawerState.activeDrawerId, isDrawerOpen, openDrawer],
     );
 
     return (
@@ -243,6 +318,16 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
 
   const useBoundToolbarConfig = (): Config => useBoundToolbarDefinition().toolbarConfig;
 
+  const useBoundToolbarClient = (): ToolbarClient => {
+    const current = useContext(ToolbarDefinitionContext);
+
+    if (current === undefined) {
+      throw new Error("Toolbar Provider is required before reading toolbar client.");
+    }
+
+    return current.client;
+  };
+
   const useBoundToolRegistration = <const ToolId extends ToolbarToolIdentity<Config>>(
     toolId: ToolId,
   ): ToolRegistrationByIdentity<Config, ToolId> | undefined => {
@@ -261,6 +346,7 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
   return Object.assign(toolbar, {
     Drawer,
     Provider,
+    useToolbarClient: useBoundToolbarClient,
     useToolbarDrawer: useBoundToolbarDrawer,
     useToolbarConfig: useBoundToolbarConfig,
     useToolbarDefinition: useBoundToolbarDefinition,

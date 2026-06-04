@@ -116,15 +116,49 @@ it("filters iterations by metadata and destination text", () => {
 
 it("uses the Iterations tool API route in the browser client", async () => {
   const requests: string[] = [];
-  const client = createIterationsClient({
-    baseUrl: "http://belt.local",
-    fetch: async (input) => {
-      requests.push(String(input));
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    requests.push(input instanceof Request ? input.url : String(input));
 
-      return new Response(JSON.stringify({ iterations: [worktreeIteration] }));
-    },
+    return new Response(JSON.stringify({ iterations: [worktreeIteration] }));
+  };
+
+  try {
+    const client = createIterationsClient({
+      baseUrl: "http://belt.local",
+    });
+
+    assert.deepStrictEqual(await client.list(), { iterations: [worktreeIteration] });
+    assert.deepStrictEqual(requests, ["http://belt.local/__toolbar/tools/iterations/"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+it("allows tests and hosts to override the Iterations client", async () => {
+  const requests: string[] = [];
+  const toolbar = createToolbar({
+    tools: [
+      {
+        tool: {
+          id: iterationsToolId,
+          label: "Iterations",
+        },
+      },
+    ],
   });
+  const client = {
+    list: async () => {
+      requests.push("list");
 
-  assert.deepStrictEqual(await client.list(), { iterations: [worktreeIteration] });
-  assert.deepStrictEqual(requests, ["http://belt.local/__toolbar/tools/iterations/"]);
+      return { iterations: [prototypeIteration] };
+    },
+  };
+
+  const html = renderToStaticMarkup(
+    createElement(toolbar.Provider, null, createElement(Iterations, { client })),
+  );
+
+  assert.match(html, /belt-iterations-toolbar-item/);
+  assert.deepStrictEqual(requests, []);
 });

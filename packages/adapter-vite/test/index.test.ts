@@ -76,17 +76,17 @@ const WorktreesIndexResponseSchema = Schema.Struct({
   worktrees: Schema.Array(Schema.Unknown),
 });
 
-class WorktreesTestApiGroup extends HttpApiGroup.make("worktrees-test").add(
+class WorktreesTestApiGroup extends HttpApiGroup.make("worktreesTest").add(
   HttpApiEndpoint.get("index", normalizeRoute("index"), {
     success: WorktreesIndexResponseSchema,
   }),
 ) {}
 
-class WorktreesTestApi extends HttpApi.make("worktrees-test-api").add(WorktreesTestApiGroup) {}
+class WorktreesTestApi extends HttpApi.make("worktreesTestApi").add(WorktreesTestApiGroup) {}
 
 const WorktreesTestApiHandlers = HttpApiBuilder.group(
   WorktreesTestApi,
-  "worktrees-test",
+  "worktreesTest",
   (handlers) => handlers.handle("index", () => Effect.succeed({ worktrees: [] })),
 );
 
