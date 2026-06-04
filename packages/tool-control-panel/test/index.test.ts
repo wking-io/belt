@@ -72,6 +72,19 @@ it("uses the Control Panel API route paths", async () => {
 
   await client.index();
   await client.selectFieldset("scene");
+  await client.selectBase("scene", {
+    snapshotId: "snapshot_1",
+    type: "snapshot",
+  });
+  await client.branchSnapshot("scene", "Draft", {
+    enabled: true,
+    title: "Preview",
+  });
+  await client.saveSnapshot("scene", {
+    title: "Saved",
+  });
+  await client.deleteSnapshot("scene", "snapshot_1");
+  await client.snapshots();
 
   assert.deepStrictEqual(requests, [
     {
@@ -82,6 +95,51 @@ it("uses the Control Panel API route paths", async () => {
       body: JSON.stringify({ fieldsetId: "scene" }),
       method: "POST",
       url: "http://belt.local/__toolbar/tools/control-panel/state/select-fieldset",
+    },
+    {
+      body: JSON.stringify({
+        base: {
+          snapshotId: "snapshot_1",
+          type: "snapshot",
+        },
+        fieldsetId: "scene",
+      }),
+      method: "POST",
+      url: "http://belt.local/__toolbar/tools/control-panel/state/select-base",
+    },
+    {
+      body: JSON.stringify({
+        fieldsetId: "scene",
+        name: "Draft",
+        values: {
+          enabled: true,
+          title: "Preview",
+        },
+      }),
+      method: "POST",
+      url: "http://belt.local/__toolbar/tools/control-panel/snapshots/branch",
+    },
+    {
+      body: JSON.stringify({
+        fieldsetId: "scene",
+        values: {
+          title: "Saved",
+        },
+      }),
+      method: "POST",
+      url: "http://belt.local/__toolbar/tools/control-panel/snapshots/save",
+    },
+    {
+      body: JSON.stringify({
+        fieldsetId: "scene",
+        snapshotId: "snapshot_1",
+      }),
+      method: "POST",
+      url: "http://belt.local/__toolbar/tools/control-panel/snapshots/delete",
+    },
+    {
+      method: "GET",
+      url: "http://belt.local/__toolbar/tools/control-panel/snapshots",
     },
   ]);
 });
