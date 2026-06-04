@@ -16,7 +16,8 @@
   "dependencies": {
     "@repo/control-panel-core": "workspace:*",
     "@repo/core": "workspace:*",
-    "@repo/renderer-react": "workspace:*"
+    "@repo/renderer-react": "workspace:*",
+    "effect": "4.0.0-beta.66"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

@@ -16,7 +16,8 @@
   "dependencies": {
     "@base-ui/react": "1.5.0",
     "@repo/core": "workspace:*",
-    "@repo/glyphs": "workspace:*"
+    "@repo/glyphs": "workspace:*",
+    "effect": "4.0.0-beta.66"
   },
   "devDependencies": {
     "@repo/control-panel-core": "workspace:*",

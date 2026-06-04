@@ -250,6 +250,9 @@ importers:
       '@repo/glyphs':
         specifier: workspace:*
         version: link:../glyphs
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
     devDependencies:
       '@repo/control-panel-core':
         specifier: workspace:*
@@ -322,6 +325,9 @@ importers:
       '@repo/renderer-react':
         specifier: workspace:*
         version: link:../renderer-react
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
     devDependencies:
       '@types/react':
         specifier: ^19.0.0
@@ -416,6 +422,9 @@ importers:
       '@repo/tool-iterations':
         specifier: workspace:*
         version: link:../tool-iterations
+      effect:
+        specifier: 4.0.0-beta.66
+        version: 4.0.0-beta.66
     devDependencies:
       '@types/react':
         specifier: ^19.0.0

@@ -14,15 +14,8 @@ export type {
   ControlPanelStateResponse,
 } from "./session/index.js";
 export type { ControlBase, ControlSnapshot } from "./state/index.js";
-
-export const controlPanelRoutePaths = {
-  index: "index",
-  state: "state",
-  selectFieldset: "state/select-fieldset",
-  selectBase: "state/select-base",
-  snapshots: "snapshots",
-  readSnapshot: "snapshots/read",
-  branchSnapshot: "snapshots/branch",
-  saveSnapshot: "snapshots/save",
-  deleteSnapshot: "snapshots/delete",
-} as const;
+export {
+  ControlPanelToolApi,
+  controlPanelRoutePaths,
+  type ControlPanelToolClientOptions,
+} from "./tool/api.js";

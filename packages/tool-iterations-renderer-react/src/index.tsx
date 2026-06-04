@@ -1,8 +1,21 @@
-import { Combobox, GhostButton, useToolRegistration } from "@repo/renderer-react";
-import type { Iteration, IterationsIndexResponse } from "@repo/tool-iterations";
+import { Effect } from "effect";
+import {
+  Combobox,
+  GhostButton,
+  createToolbarClient,
+  useToolbarClient,
+  useToolRegistration,
+  type ToolbarClient,
+} from "@repo/renderer-react";
+import {
+  IterationsToolApi,
+  iterationsToolId,
+  type Iteration,
+  type IterationsIndexResponse,
+} from "@repo/tool-iterations";
 import { useEffect, useMemo, useState, type ReactElement } from "react";
 
-export const iterationsToolId = "iterations";
+export { iterationsToolId } from "@repo/tool-iterations";
 
 export type IterationsClient = {
   readonly list: () => Promise<IterationsIndexResponse>;
@@ -10,7 +23,7 @@ export type IterationsClient = {
 
 export type IterationsClientOptions = {
   readonly baseUrl?: string | URL;
-  readonly fetch?: typeof fetch;
+  readonly toolbarClient?: ToolbarClient;
 };
 
 export type IterationsProps = {
@@ -21,7 +34,11 @@ export type IterationsProps = {
 
 export function Iterations(props: IterationsProps): ReactElement | null {
   const registration = useToolRegistration(iterationsToolId);
-  const client = useMemo(() => props.client ?? createIterationsClient(), [props.client]);
+  const toolbarClient = useToolbarClient();
+  const client = useMemo(
+    () => props.client ?? createIterationsClient({ toolbarClient }),
+    [props.client, toolbarClient],
+  );
   const [iterations, setIterations] = useState<readonly Iteration[]>(props.initialIterations ?? []);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
@@ -191,26 +208,16 @@ function getMetadataString(iteration: Iteration, key: string): string | undefine
 }
 
 export function createIterationsClient(options: IterationsClientOptions = {}): IterationsClient {
-  const fetchImplementation = options.fetch ?? globalThis.fetch;
-  const indexUrl = resolveIterationsIndexUrl(options.baseUrl);
+  const toolbarClient =
+    options.toolbarClient ??
+    createToolbarClient(options.baseUrl === undefined ? {} : { baseUrl: options.baseUrl });
 
   return {
-    list: async () => {
-      const response = await fetchImplementation(indexUrl);
-
-      if (!response.ok) {
-        throw new Error(`${response.status} ${response.statusText}`);
-      }
-
-      return (await response.json()) as IterationsIndexResponse;
-    },
+    list: () =>
+      toolbarClient.run((client) =>
+        Effect.flatMap(client.tool(IterationsToolApi, iterationsToolId), (iterationsClient) =>
+          iterationsClient.iterations.index(),
+        ),
+      ),
   };
-}
-
-function resolveIterationsIndexUrl(baseUrl: string | URL | undefined): string {
-  const routePath = "/__toolbar/tools/iterations/";
-
-  if (baseUrl === undefined) return routePath;
-
-  return new URL(routePath, baseUrl).href;
 }
