@@ -61,7 +61,15 @@ export type ToolbarToolIdentity<Config extends ToolbarConfig = ToolbarConfig> =
 export type ToolRegistrationByIdentity<
   Config extends ToolbarConfig,
   ToolId extends string,
-> = Extract<Config["tools"][number], { readonly tool: { readonly id: ToolId } }>;
+> = Config["tools"][number] extends infer Registration
+  ? Registration extends { readonly tool: { readonly id: infer RegisteredToolId extends string } }
+    ? ToolId extends RegisteredToolId
+      ? Registration
+      : RegisteredToolId extends ToolId
+        ? Registration
+        : never
+    : never
+  : never;
 
 export type ToolbarProviderProps<DrawerId extends string = string> = {
   readonly children?: ReactNode;
@@ -90,7 +98,7 @@ export type ToolbarDrawerController<DrawerId extends string = string> =
 
 export type ToolDrawerProps<DrawerId extends string = string> = Omit<
   ComponentProps<typeof BaseDrawer.Popup>,
-  "children"
+  "children" | "title"
 > &
   SurfaceProps & {
     readonly children?: ReactNode;
@@ -104,6 +112,8 @@ type ToolbarContextValue<Config extends ToolbarConfig> = {
   readonly drawer: ToolbarDrawerController<ToolbarToolIdentity<Config>>;
   readonly toolbar: ToolbarDefinition<Config>;
 };
+
+const ToolbarContext = createContext<ToolbarContextValue<ToolbarConfig> | undefined>(undefined);
 
 export type ReactToolbarDefinition<Config extends ToolbarConfig> = ToolbarDefinition<Config> & {
   readonly Drawer: <const DrawerId extends ToolbarToolIdentity<Config>>(
@@ -131,6 +141,35 @@ export function createToolbarRendererModel(source: ToolbarConfigSource): Toolbar
       label: tool.label,
     })),
   };
+}
+
+export function useToolbarDefinition(): ToolbarDefinition<ToolbarConfig> {
+  return useToolbarContext().toolbar;
+}
+
+export function useToolbarConfig(): ToolbarConfig {
+  return useToolbarDefinition().toolbarConfig;
+}
+
+export function useToolbarDrawer(): ToolbarDrawerController<string> {
+  return useToolbarContext().drawer;
+}
+
+export function useToolRegistration<const ToolId extends string>(
+  toolId: ToolId,
+): ToolRegistrationByIdentity<ToolbarConfig, ToolId> | undefined {
+  const config = useToolbarConfig();
+
+  return config.tools.find(
+    (registration): registration is ToolRegistrationByIdentity<ToolbarConfig, ToolId> =>
+      hasToolIdentity(registration, toolId),
+  );
+}
+
+export function ToolDrawer<const DrawerId extends string>(
+  props: ToolDrawerProps<DrawerId>,
+): ReactElement | null {
+  return renderToolDrawer(props, useToolbarDrawer());
 }
 
 export function createToolbarContext<const Config extends ToolbarConfig>(
@@ -174,9 +213,11 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
     );
 
     return (
-      <ToolbarDefinitionContext.Provider value={value}>
-        {props.children}
-      </ToolbarDefinitionContext.Provider>
+      <ToolbarContext.Provider value={value as ToolbarContextValue<ToolbarConfig>}>
+        <ToolbarDefinitionContext.Provider value={value}>
+          {props.children}
+        </ToolbarDefinitionContext.Provider>
+      </ToolbarContext.Provider>
     );
   };
 
@@ -215,71 +256,7 @@ export function createToolbarContext<const Config extends ToolbarConfig>(
 
   const Drawer = <const DrawerId extends ToolbarToolIdentity<Config>>(
     props: ToolDrawerProps<DrawerId>,
-  ): ReactElement | null => {
-    const {
-      children,
-      className,
-      closeLabel = "Close drawer",
-      drawerId,
-      title,
-      tone,
-      ...drawerProps
-    } = props;
-    const drawer = useBoundToolbarDrawer();
-
-    if (!drawer.isDrawerOpen(drawerId)) return null;
-
-    return (
-      <BaseDrawer.Root
-        modal={false}
-        onOpenChange={(open) => {
-          if (!open) {
-            drawer.closeDrawer();
-          }
-        }}
-        open
-      >
-        <BaseDrawer.Portal>
-          <BaseDrawer.Popup
-            {...drawerProps}
-            className={(state) =>
-              classNames(
-                "belt-tool-drawer",
-                typeof className === "function" ? className(state) : className,
-              )
-            }
-            data-drawer-id={drawerId}
-          >
-            <div
-              className={classNames(
-                "belt-tool-drawer__panel",
-                tone === undefined ? undefined : `belt-tool-drawer__panel--${tone}`,
-              )}
-            >
-              <div className="belt-tool-drawer__body">
-                <div className="belt-tool-drawer__header">
-                  {title === undefined ? null : (
-                    <BaseDrawer.Title className="belt-tool-drawer__title">{title}</BaseDrawer.Title>
-                  )}
-                  <BaseDrawer.Close
-                    aria-label={closeLabel}
-                    className="belt-button"
-                    data-radius="default"
-                    data-size="md"
-                    data-surface="solid"
-                    data-tone="neutral"
-                  >
-                    <Glyph name="close" />
-                  </BaseDrawer.Close>
-                </div>
-                {children}
-              </div>
-            </div>
-          </BaseDrawer.Popup>
-        </BaseDrawer.Portal>
-      </BaseDrawer.Root>
-    );
-  };
+  ): ReactElement | null => renderToolDrawer(props, useBoundToolbarDrawer());
 
   return Object.assign(toolbar, {
     Drawer,
@@ -296,6 +273,84 @@ function hasToolIdentity<Config extends ToolbarConfig, ToolId extends string>(
   toolId: ToolId,
 ): registration is ToolRegistrationByIdentity<Config, ToolId> {
   return registration.tool.id === toolId;
+}
+
+function useToolbarContext(): ToolbarContextValue<ToolbarConfig> {
+  const current = useContext(ToolbarContext);
+
+  if (current === undefined) {
+    throw new Error("Toolbar Provider is required before reading toolbar context.");
+  }
+
+  return current;
+}
+
+function renderToolDrawer<DrawerId extends string>(
+  props: ToolDrawerProps<DrawerId>,
+  drawer: ToolbarDrawerController<DrawerId>,
+): ReactElement | null {
+  const {
+    children,
+    className,
+    closeLabel = "Close drawer",
+    drawerId,
+    title,
+    tone,
+    ...drawerProps
+  } = props;
+
+  if (!drawer.isDrawerOpen(drawerId)) return null;
+
+  return (
+    <BaseDrawer.Root
+      modal={false}
+      onOpenChange={(open) => {
+        if (!open) {
+          drawer.closeDrawer();
+        }
+      }}
+      open
+    >
+      <BaseDrawer.Portal>
+        <BaseDrawer.Popup
+          {...drawerProps}
+          className={(state) =>
+            classNames(
+              "belt-tool-drawer",
+              typeof className === "function" ? className(state) : className,
+            )
+          }
+          data-drawer-id={drawerId}
+        >
+          <div
+            className={classNames(
+              "belt-tool-drawer__panel",
+              tone === undefined ? undefined : `belt-tool-drawer__panel--${tone}`,
+            )}
+          >
+            <div className="belt-tool-drawer__body">
+              <div className="belt-tool-drawer__header">
+                {title === undefined ? null : (
+                  <BaseDrawer.Title className="belt-tool-drawer__title">{title}</BaseDrawer.Title>
+                )}
+                <BaseDrawer.Close
+                  aria-label={closeLabel}
+                  className="belt-button"
+                  data-radius="default"
+                  data-size="md"
+                  data-surface="solid"
+                  data-tone="neutral"
+                >
+                  <Glyph name="close" />
+                </BaseDrawer.Close>
+              </div>
+              {children}
+            </div>
+          </div>
+        </BaseDrawer.Popup>
+      </BaseDrawer.Portal>
+    </BaseDrawer.Root>
+  );
 }
 
 export function reduceToolbarDrawerState<DrawerId extends string>(

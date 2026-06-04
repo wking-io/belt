@@ -2,22 +2,44 @@ import {
   defineTool,
   defineToolRegistration,
   type ToolDefinition,
+  type ToolHttpApi,
+  type ToolHttpApiLayer,
   type ToolRegistration,
+  type ToolRuntimeLayer,
 } from "@repo/core";
 import {
   Button,
   GhostButton,
   Panel,
+  ToolDrawer,
+  useToolbarDrawer,
+  useToolRegistration,
   type GhostButtonProps,
   type PanelProps,
 } from "@repo/renderer-react";
-import { useEffect, useState, type ReactElement } from "react";
+import {
+  Children,
+  Fragment,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 export const renderPerformanceToolId = "render-performance";
 
-export type RenderPerformanceToolDefinition = ToolDefinition;
+export type RenderPerformanceToolDefinition = ToolDefinition<
+  ToolHttpApi,
+  ToolHttpApiLayer,
+  ToolRuntimeLayer
+>;
+export type RenderPerformanceMetricId = "jank" | "inp" | "layoutShift";
+export type RenderPerformanceToolConfig = RenderPerformanceJankOptions;
+export type RenderPerformanceToolOptions = RenderPerformanceJankOptions;
 export type RenderPerformanceToolRegistration = ToolRegistration<
-  unknown,
+  RenderPerformanceToolConfig,
   RenderPerformanceToolDefinition
 >;
 
@@ -132,8 +154,35 @@ export type RenderPerformanceInpToolbarItemProps = RenderPerformanceJankOptions 
 export type RenderPerformanceLayoutShiftToolbarItemProps = RenderPerformanceJankOptions &
   Omit<GhostButtonProps, "children" | "icon" | "tone">;
 
+export type RenderPerformanceRootProps = {
+  readonly children?: ReactNode;
+};
+
+export type RenderPerformanceProps = RenderPerformanceRootProps;
+
+export type RenderPerformanceMetricProps = {
+  readonly className?: string;
+};
+
+export type RenderPerformanceComponent = {
+  (props: RenderPerformanceRootProps): ReactElement;
+  readonly Inp: (props: RenderPerformanceMetricProps) => ReactElement;
+  readonly Jank: (props: RenderPerformanceMetricProps) => ReactElement;
+  readonly LayoutShift: (props: RenderPerformanceMetricProps) => ReactElement;
+};
+
+type RenderPerformanceContextValue = {
+  readonly drawerOpen: boolean;
+  readonly onMetricClick: () => void;
+  readonly snapshot: RenderPerformanceSnapshot;
+};
+
 const renderPerformanceToolbarSampleSize = 10;
 const longFrameThresholdMs = 50;
+
+const RenderPerformanceContext = createContext<RenderPerformanceContextValue | undefined>(
+  undefined,
+);
 
 export const defaultJankThresholds: JankThresholds = {
   danger: 20,
@@ -158,13 +207,37 @@ const emptyLayoutShiftSession: LayoutShiftSessionSummary = {
   value: 0,
 };
 
-export function renderPerformanceTool(): RenderPerformanceToolRegistration {
+export function renderPerformanceTool(
+  options: RenderPerformanceToolOptions = {},
+): RenderPerformanceToolRegistration {
+  const config = normalizeRenderPerformanceToolConfig(options);
+
   return defineToolRegistration({
+    ...(Object.keys(config).length === 0 ? {} : { config }),
     tool: defineTool({
       id: renderPerformanceToolId,
       label: "Render Performance",
     }),
   });
+}
+
+export function normalizeRenderPerformanceToolConfig(
+  config: RenderPerformanceToolOptions | unknown,
+): RenderPerformanceToolConfig {
+  const options =
+    config !== null && typeof config === "object" ? (config as RenderPerformanceToolOptions) : {};
+
+  return {
+    ...(options.historySize !== undefined ? { historySize: options.historySize } : {}),
+    ...(options.observeLongAnimationFrames !== undefined
+      ? { observeLongAnimationFrames: options.observeLongAnimationFrames }
+      : {}),
+    ...(options.targetFrameRate !== undefined ? { targetFrameRate: options.targetFrameRate } : {}),
+    ...(options.thresholds !== undefined ? { thresholds: options.thresholds } : {}),
+    ...(options.updateIntervalMs !== undefined
+      ? { updateIntervalMs: options.updateIntervalMs }
+      : {}),
+  };
 }
 
 export function mountRenderPerformanceMeter(
@@ -384,6 +457,45 @@ export function useRenderPerformanceJank(
   return snapshot;
 }
 
+function RenderPerformanceRoot(props: RenderPerformanceRootProps): ReactElement {
+  const registration = useToolRegistration(renderPerformanceToolId);
+  const config = normalizeRenderPerformanceToolConfig(registration?.config);
+  const snapshot = useRenderPerformanceJank(config);
+  const drawer = useToolbarDrawer();
+
+  const value: RenderPerformanceContextValue = {
+    drawerOpen: drawer.isDrawerOpen(renderPerformanceToolId),
+    onMetricClick: () => {
+      if (drawer.isDrawerOpen(renderPerformanceToolId)) {
+        drawer.closeDrawer();
+      } else {
+        drawer.openDrawer(renderPerformanceToolId);
+      }
+    },
+    snapshot,
+  };
+
+  return (
+    <RenderPerformanceContext.Provider value={value}>
+      {Children.count(props.children) === 0 ? null : (
+        <div className="belt-render-performance-toolbar-item">{props.children}</div>
+      )}
+      <ToolDrawer
+        drawerId={renderPerformanceToolId}
+        title={<RenderPerformanceDrawerTitle snapshot={snapshot} />}
+      >
+        <RenderPerformanceDrawerContent snapshot={snapshot} />
+      </ToolDrawer>
+    </RenderPerformanceContext.Provider>
+  );
+}
+
+export const RenderPerformance = Object.assign(RenderPerformanceRoot, {
+  Inp: RenderPerformanceInpMetric,
+  Jank: RenderPerformanceJankMetric,
+  LayoutShift: RenderPerformanceLayoutShiftMetric,
+}) satisfies RenderPerformanceComponent;
+
 export function RenderPerformanceJankPanel(props: RenderPerformanceJankPanelProps): ReactElement {
   const { className, panelProps, showInduceJankButton = true, ...jankOptions } = props;
   const snapshot = useRenderPerformanceJank(jankOptions);
@@ -475,6 +587,76 @@ export function RenderPerformanceLayoutShiftToolbarItem(
   props: RenderPerformanceLayoutShiftToolbarItemProps,
 ): ReactElement {
   return <RenderPerformanceToolbarMetricItem {...props} metric="layout-shift" />;
+}
+
+function RenderPerformanceJankMetric(props: RenderPerformanceMetricProps): ReactElement {
+  return <RenderPerformanceToolbarMetricTrigger {...props} metric="jank" />;
+}
+
+function RenderPerformanceInpMetric(props: RenderPerformanceMetricProps): ReactElement {
+  return <RenderPerformanceToolbarMetricTrigger {...props} metric="inp" />;
+}
+
+function RenderPerformanceLayoutShiftMetric(props: RenderPerformanceMetricProps): ReactElement {
+  return <RenderPerformanceToolbarMetricTrigger {...props} metric="layoutShift" />;
+}
+
+function RenderPerformanceToolbarMetricTrigger(
+  props: RenderPerformanceMetricProps & {
+    readonly metric: RenderPerformanceMetricId;
+  },
+): ReactElement {
+  const context = useRenderPerformanceContext();
+  const current = context.snapshot.current;
+  const history = context.snapshot.history.slice(-renderPerformanceToolbarSampleSize);
+  const ariaLabel =
+    props.metric === "jank"
+      ? `Render performance, jank ${current === undefined ? "collecting" : formatJank(current.jank)}`
+      : props.metric === "inp"
+        ? `Render performance, INP ${
+            current === undefined ? "collecting" : formatMilliseconds(current.interactionLatencyMs)
+          }`
+        : `Render performance, layout shift ${formatLayoutShift(context.snapshot.layoutShiftSession.value)}`;
+
+  return (
+    <GhostButton
+      aria-expanded={context.drawerOpen}
+      aria-label={ariaLabel}
+      className={props.className}
+      onClick={context.onMetricClick}
+      radius="none"
+      size="compact"
+      tone="neutral"
+    >
+      {props.metric === "jank" ? (
+        <RenderPerformanceToolbarButtonChart current={current} history={history} size="compact" />
+      ) : props.metric === "inp" ? (
+        <RenderPerformanceInpToolbarButtonChart
+          current={current}
+          history={history}
+          size="compact"
+        />
+      ) : (
+        <RenderPerformanceLayoutShiftToolbarButtonChart
+          history={history}
+          layoutShiftSession={context.snapshot.layoutShiftSession}
+          size="compact"
+        />
+      )}
+    </GhostButton>
+  );
+}
+
+function useRenderPerformanceContext(): RenderPerformanceContextValue {
+  const context = useContext(RenderPerformanceContext);
+
+  if (context === undefined) {
+    throw new Error(
+      "RenderPerformance metric components must be rendered inside RenderPerformance.",
+    );
+  }
+
+  return context;
 }
 
 function RenderPerformanceToolbarMetricItem(
@@ -600,9 +782,6 @@ export function RenderPerformanceDrawer(props: {
   readonly onClose: () => void;
   readonly snapshot: RenderPerformanceSnapshot;
 }): ReactElement {
-  const current = props.snapshot.current;
-  const layoutShiftSession = props.snapshot.layoutShiftSession;
-
   return (
     <div
       aria-label="Render performance details"
@@ -612,79 +791,95 @@ export function RenderPerformanceDrawer(props: {
       <div className="belt-render-performance-drawer__panel">
         <div className="belt-render-performance-drawer__body">
           <div className="belt-render-performance-drawer__header">
-            <div className="belt-render-performance__metric-label-group">
-              <span className="belt-text" data-emphasis="strong" data-weight="semibold">
-                Render performance
-              </span>
-              <span className="belt-text" data-emphasis="subtle" data-size="xs">
-                {current === undefined
-                  ? "Collecting samples"
-                  : `${props.snapshot.history.length} samples`}
-              </span>
-            </div>
+            <RenderPerformanceDrawerTitle snapshot={props.snapshot} />
             <Button icon="close" onClick={props.onClose} title="Close" />
           </div>
-          <Panel elevation={1}>
-            <div className="belt-render-performance__panel-body">
-              <div className="belt-render-performance__metric-header">
-                <div className="belt-render-performance__metric-label-group">
-                  <span className="belt-text" data-emphasis="subtle" data-size="xs">
-                    Jank
-                  </span>
-                  <span
-                    className="belt-render-performance__metric-value belt-text"
-                    data-emphasis="strong"
-                  >
-                    {current === undefined ? "--%" : formatJank(current.jank)}
-                  </span>
-                </div>
-                <span className="belt-text" data-emphasis="subtle" data-size="xs">
-                  {current === undefined ? "Collecting" : `${current.fps.toFixed(0)} FPS`}
-                </span>
-              </div>
-              <RenderPerformanceJankFlamegraph history={props.snapshot.history} />
-              <div className="belt-render-performance__footer">
-                <span className="belt-text" data-emphasis="subtle" data-size="xs">
-                  {props.snapshot.history.length} samples over time
-                </span>
-                <Button onClick={() => blockMainThread(140)} tone="warning">
-                  Induce jank
-                </Button>
-              </div>
-            </div>
-          </Panel>
-          <div className="belt-render-performance__detail-grid">
-            <RenderPerformanceMetric
-              label="FPS"
-              value={current === undefined ? "--" : current.fps.toFixed(0)}
-            />
-            <RenderPerformanceMetric
-              label="Janky frames"
-              value={current === undefined ? "--" : String(current.jankFrameCount)}
-            />
-            <RenderPerformanceMetric
-              label="INP"
-              value={
-                current === undefined ? "--" : formatMilliseconds(current.interactionLatencyMs)
-              }
-            />
-            <RenderPerformanceMetric
-              label="CLS"
-              value={formatLayoutShift(layoutShiftSession.value)}
-            />
-            <RenderPerformanceMetric label="Shifts" value={String(layoutShiftSession.count)} />
-            <RenderPerformanceMetric
-              label="Frame budget"
-              value={current === undefined ? "--" : `${current.frameBudgetMs.toFixed(1)}ms`}
-            />
-            <RenderPerformanceMetric
-              label="Window"
-              value={current === undefined ? "--" : `${Math.round(current.durationMs)}ms`}
-            />
-          </div>
+          <RenderPerformanceDrawerContent snapshot={props.snapshot} />
         </div>
       </div>
     </div>
+  );
+}
+
+function RenderPerformanceDrawerTitle(props: {
+  readonly snapshot: RenderPerformanceSnapshot;
+}): ReactElement {
+  return (
+    <div className="belt-render-performance__metric-label-group">
+      <span className="belt-text" data-emphasis="strong" data-weight="semibold">
+        Render performance
+      </span>
+      <span className="belt-text" data-emphasis="subtle" data-size="xs">
+        {props.snapshot.current === undefined
+          ? "Collecting samples"
+          : `${props.snapshot.history.length} samples`}
+      </span>
+    </div>
+  );
+}
+
+function RenderPerformanceDrawerContent(props: {
+  readonly snapshot: RenderPerformanceSnapshot;
+}): ReactElement {
+  const current = props.snapshot.current;
+  const layoutShiftSession = props.snapshot.layoutShiftSession;
+
+  return (
+    <Fragment>
+      <Panel elevation={1}>
+        <div className="belt-render-performance__panel-body">
+          <div className="belt-render-performance__metric-header">
+            <div className="belt-render-performance__metric-label-group">
+              <span className="belt-text" data-emphasis="subtle" data-size="xs">
+                Jank
+              </span>
+              <span
+                className="belt-render-performance__metric-value belt-text"
+                data-emphasis="strong"
+              >
+                {current === undefined ? "--%" : formatJank(current.jank)}
+              </span>
+            </div>
+            <span className="belt-text" data-emphasis="subtle" data-size="xs">
+              {current === undefined ? "Collecting" : `${current.fps.toFixed(0)} FPS`}
+            </span>
+          </div>
+          <RenderPerformanceJankFlamegraph history={props.snapshot.history} />
+          <div className="belt-render-performance__footer">
+            <span className="belt-text" data-emphasis="subtle" data-size="xs">
+              {props.snapshot.history.length} samples over time
+            </span>
+            <Button onClick={() => blockMainThread(140)} tone="warning">
+              Induce jank
+            </Button>
+          </div>
+        </div>
+      </Panel>
+      <div className="belt-render-performance__detail-grid">
+        <RenderPerformanceMetric
+          label="FPS"
+          value={current === undefined ? "--" : current.fps.toFixed(0)}
+        />
+        <RenderPerformanceMetric
+          label="Janky frames"
+          value={current === undefined ? "--" : String(current.jankFrameCount)}
+        />
+        <RenderPerformanceMetric
+          label="INP"
+          value={current === undefined ? "--" : formatMilliseconds(current.interactionLatencyMs)}
+        />
+        <RenderPerformanceMetric label="CLS" value={formatLayoutShift(layoutShiftSession.value)} />
+        <RenderPerformanceMetric label="Shifts" value={String(layoutShiftSession.count)} />
+        <RenderPerformanceMetric
+          label="Frame budget"
+          value={current === undefined ? "--" : `${current.frameBudgetMs.toFixed(1)}ms`}
+        />
+        <RenderPerformanceMetric
+          label="Window"
+          value={current === undefined ? "--" : `${Math.round(current.durationMs)}ms`}
+        />
+      </div>
+    </Fragment>
   );
 }
 

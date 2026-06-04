@@ -18,10 +18,14 @@ import {
   Slider,
   StatusBanner,
   Switch,
+  ToolDrawer,
   Toolbar,
   createToolbar,
   glyphIds,
   reduceToolbarDrawerState,
+  useToolbarConfig,
+  useToolbarDrawer,
+  useToolRegistration,
   type GlyphName,
 } from "../src/index.tsx";
 
@@ -195,6 +199,35 @@ it("exposes active toolbar drawer state through the provider", () => {
 
   assert.match(html, />alpha</);
   assert.notMatch(html, /Beta drawer/);
+});
+
+it("exposes ambient toolbar context for ready-made tool components", () => {
+  const toolbar = createToolbar({
+    tools: [{ config: { enabled: true }, tool: { id: "alpha", label: "Alpha" } }],
+  });
+
+  function ToolProbe() {
+    const config = useToolbarConfig();
+    const drawer = useToolbarDrawer();
+    const registration = useToolRegistration("alpha");
+
+    return createElement(
+      "span",
+      null,
+      `${config.tools.length}:${registration?.tool.label}:${drawer.activeDrawerId}`,
+    );
+  }
+
+  const html = renderToStaticMarkup(
+    createElement(
+      toolbar.Provider,
+      { initialDrawerId: "alpha" },
+      createElement(ToolProbe),
+      createElement(ToolDrawer, { drawerId: "alpha", title: "Alpha" }, "Alpha drawer"),
+    ),
+  );
+
+  assert.match(html, />1:Alpha:alpha</);
 });
 
 it("lets React containers set radius while controls inherit it", () => {

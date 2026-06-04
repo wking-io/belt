@@ -1,4 +1,7 @@
 import { assert, it } from "@effect/vitest";
+import { createToolbar } from "@repo/renderer-react";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import {
   appendRenderPerformanceSample,
   calculateLayoutShiftSession,
@@ -7,6 +10,8 @@ import {
   getJankSeverity,
   getLayoutShiftSeverity,
   mountRenderPerformanceMeter,
+  normalizeRenderPerformanceToolConfig,
+  RenderPerformance,
   renderPerformanceTool,
   renderPerformanceToolId,
   type LongAnimationFrameSummary,
@@ -22,6 +27,59 @@ it("defines the Render Performance tool metadata", () => {
       label: "Render Performance",
     },
   });
+});
+
+it("normalizes configured Render Performance sampling options", () => {
+  const registration = renderPerformanceTool({
+    historySize: 20,
+    updateIntervalMs: 500,
+  });
+
+  assert.deepStrictEqual(registration.config, {
+    historySize: 20,
+    updateIntervalMs: 500,
+  });
+  assert.deepStrictEqual(normalizeRenderPerformanceToolConfig(undefined), {});
+});
+
+it("renders ready-made Render Performance toolbar metrics from component composition", () => {
+  const toolbar = createToolbar({
+    tools: [renderPerformanceTool()],
+  });
+  const html = renderToStaticMarkup(
+    createElement(
+      toolbar.Provider,
+      null,
+      createElement(
+        RenderPerformance,
+        null,
+        createElement(RenderPerformance.Jank),
+        createElement(RenderPerformance.LayoutShift),
+      ),
+    ),
+  );
+
+  assert.match(html, /belt-render-performance-toolbar-item/);
+  assert.match(html, /Render performance, jank collecting/);
+  assert.match(html, />Jank</);
+  assert.notMatch(html, /Render performance, INP/);
+  assert.notMatch(html, />INP</);
+  assert.match(html, /layout shift/);
+  assert.match(html, />CLS</);
+});
+
+it("renders no toolbar metric when ready-made Render Performance has no metric children", () => {
+  const toolbar = createToolbar({
+    tools: [renderPerformanceTool()],
+  });
+  const html = renderToStaticMarkup(
+    createElement(toolbar.Provider, null, createElement(RenderPerformance)),
+  );
+
+  assert.notMatch(html, /belt-render-performance-toolbar-item/);
+  assert.notMatch(html, />Jank</);
+  assert.notMatch(html, />INP</);
+  assert.notMatch(html, />CLS</);
 });
 
 it("exposes long animation frame summaries", () => {
